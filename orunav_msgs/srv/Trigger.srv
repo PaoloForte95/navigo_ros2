@@ -1,0 +1,4 @@
+#ID of robot to trigger the action
+int32 robotid
+---
+bool success   # indicate successful run of triggered service

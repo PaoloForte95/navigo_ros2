@@ -1,0 +1,5 @@
+<library path="orunav2_smac_planner_spline">
+	<class name="orunav2_smac_planner/SmacPlannerSpline" type="orunav2_smac_planner::SmacPlannerSpline" base_class_type="nav2_core::GlobalPlanner">
+	  <description>Spline SMAC Planner</description>
+	</class>
+</library>

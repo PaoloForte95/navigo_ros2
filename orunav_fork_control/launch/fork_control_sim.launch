@@ -1,0 +1,13 @@
+<launch>
+    <arg name="cmd_fork_topic" default="cmd_fork" />
+    <arg name="topic_prefix"      default=""/>
+
+    <node pkg="orunav_fork_control" type="fork_control_sim_node" name="fork_control" output="screen">
+	      <param name="visualize" value="true" />
+          <!-- Remapping didn't work with relative names -->
+          <remap from="cmd_fork" to ="$(arg cmd_fork_topic)"/>
+          <remap from="fork/command" to="control/fork/command"/>   
+          <remap from="fork/report" to ="control/fork/report"/>
+          <remap from="operation/report" to ="control/operation/report"/>
+    </node>
+</launch>
