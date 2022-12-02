@@ -1,5 +1,4 @@
-// Copyright (c) 2018 Intel Corporation
-// Copyright (c) 2020 Florian Gramss
+// Copyright (c) 2022 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,13 +29,13 @@ namespace orunav2_behavior_tree
 {
 
 /**
- * @enum nav2_behavior_tree::BtStatus
+ * @enum orunav2_behavior_tree::BtStatus
  * @brief An enum class representing BT execution status
  */
 enum class BtStatus { SUCCEEDED, FAILED, CANCELED };
 
 /**
- * @class nav2_behavior_tree::BehaviorTreeEngine
+ * @class orunav2_behavior_tree::BehaviorTreeEngine
  * @brief A class to create and handle behavior trees
  */
 class BehaviorTreeEngine
@@ -55,7 +54,7 @@ public:
    * @param onLoop Function to execute on each iteration of BT execution
    * @param cancelRequested Function to check if cancel was requested during BT execution
    * @param loopTimeout Time period for each iteration of BT execution
-   * @return nav2_behavior_tree::BtStatus Status of BT execution
+   * @return orunav2_behavior_tree::BtStatus Status of BT execution
    */
   BtStatus run(
     BT::Tree * tree,

@@ -46,7 +46,7 @@ public:
   BtActionNode(
     const std::string & xml_tag_name,
     const std::string & action_name,
-    const BT::NodeConfig & conf)
+    const BT::NodeConfiguration & conf)
   : BT::ActionNodeBase(xml_tag_name, conf), action_name_(action_name)
   {
     node_ = config().blackboard->template get<rclcpp::Node::SharedPtr>("node");
@@ -449,4 +449,3 @@ protected:
 }  // namespace orunav2_behavior_tree
 
 #endif  // ORUNAV2_BEHAVIOR_TREE__BT_ACTION_NODE_HPP_
-
