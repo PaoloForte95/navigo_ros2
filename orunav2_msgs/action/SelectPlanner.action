@@ -1,6 +1,0 @@
-#goal definition
-nav2_msgs/Costmap map
----
-#result definition
-string planner_id
----
