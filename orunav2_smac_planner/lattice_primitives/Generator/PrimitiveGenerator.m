@@ -22,14 +22,15 @@ import casadi.*
 % -------------------------------------------------------------------------
 % ========================== MACHINE PARAMETERS ============================
 % -------------------------------------------------------------------------
-lhd_width =                     2.320;
-lhd_length_back =               3.275;
-lhd_length_front =              3.275;
-lhd_length_back_from_axle =     1.855;
-lhd_length_front_from_axle =    1.855; 
-distance_between_axes =         2.840;
+lhd_width =                     2.490;
+lhd_length_back =               4.955;
+lhd_length_front =              3.615;
+lhd_length_back_from_axle =     3.8;
+lhd_length_front_from_axle =    1.2; 
+distance_between_axes =         4.175;
 max_steering_radians =          0.7;
-max_velocity =                  4;
+max_velocity_forward =          20;
+max_velocity_reverse =          8;
 max_steering_velocity =         1;
 max_acceleration =              1;
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,7 +43,7 @@ numberofangles =                8;
 steeringanglepartitions =       16;
 steeringanglecardinality =      3;
 distance =                      10;
-cell_size =                     0.2;
+cell_size =                     1.0;
 N =                             100;
 system_type =                   8; 
 plotting =                      0;
@@ -101,7 +102,7 @@ if exist(base_primitives_filename,'file') ~= 0
     load(base_primitives_filename);
 else
     %matlabpool open 8
-    %pool = parpool(8);
+    pool = parpool(8);
     
     % generate the base primitives for this model, that is, the ones in the first sector  [0  pi/4]
     start_x = 0;
@@ -169,6 +170,7 @@ pre_discarded_counter = 0;
                         
                         % goal orientation and steering
                         parfor goal_orient_ID = 1:numberofangles %parfor
+                        %for goal_orient_ID = 1:numberofangles %parfor
                             for goal_steer_ID = 1:steeringanglecardinality 
                                 
                                 real_goal_steer_ID = initial_steer_ID + goal_steer_ID - 1;
@@ -195,27 +197,12 @@ pre_discarded_counter = 0;
                                    
                                 
                                switch system_type
-                                   case 4
-                                    [intermcells_m, control, primitivecost] = OCP4t(N,distance_between_axes, ...
-                                                            [start_x, start_y, start_o, start_phi], ...
-                                                            [goal_x, goal_y, goal_o, goal_phi], ...
-                                                            max_steering_radians, max_velocity, max_steering_velocity, ...
-                                                            plot_flag, movie_flag);
-                                   case 5
-
-                                   [intermcells_m, control, primitivecost] = OCP5t(N,distance_between_axes, ...
-                                                        [start_x, start_y, start_o, start_phi], ...
-                                                        [goal_x, goal_y, goal_o,goal_phi], ...
-                                                        max_steering_radians, max_velocity, max_steering_velocity, ...
-                                                        max_acceleration, ...
-                                                        plot_flag, movie_flag);
-
                                    case 7
 
                                    [intermcells_m, control, primitivecost] = OCP7t(N,lhd_length_back_from_axle,lhd_length_front_from_axle, ...
                                                         [start_x, start_y, start_o, start_phi], ...
                                                         [goal_x, goal_y, goal_o,goal_phi], ...
-                                                        max_steering_radians, max_velocity, max_steering_velocity, ...
+                                                        max_steering_radians, max_velocity_forward, max_steering_velocity, ...
                                                         plot_flag, movie_flag);
 
                                    case 8
@@ -223,7 +210,7 @@ pre_discarded_counter = 0;
                                    [intermcells_m, control, primitivecost] = OCP8t(N,lhd_length_back_from_axle,lhd_length_front_from_axle, ...
                                                         [start_x, start_y, start_o, start_phi], ...
                                                         [goal_x, goal_y, goal_o,goal_phi], ...
-                                                        max_steering_radians, max_velocity, max_steering_velocity, ...
+                                                        max_steering_radians, max_velocity_forward,max_velocity_reverse, max_steering_velocity, ...
                                                         max_acceleration, ...
                                                         plot_flag, movie_flag);
 

@@ -1,6 +1,6 @@
 function [path, control, cost] = OCP8t(N, lhd_length_rear_from_axle, lhd_length_front_from_axle , ...
     start, goal, ...
-    max_steering_radians, max_velocity, max_steering_velocity, ...
+    max_steering_radians, max_velocity_forward, max_velocity_reverse, max_steering_velocity, ...
     max_acceleration, ...
     plot_flag, movie_flag)
 %% Optimimization-based two-point-value solver with 5WS kinematics ...
@@ -72,7 +72,7 @@ f = @(x,u) [
  
  % --- state constraints ---
  opti.subject_to( -max_steering_radians <= delta <= max_steering_radians);
- opti.subject_to( -max_velocity	<= v    <= max_velocity);
+ opti.subject_to( -max_velocity_reverse	<= v    <= max_velocity_forward);
  
 
  % --- control constraints ---
@@ -111,7 +111,7 @@ f = @(x,u) [
  %opti.subject_to(T/N >= 0.1) % The path should be drivable (avoid infisible control rate)
 
  % ---- initial values for solver ---
- opti.set_initial(T, norm(start(1:2)-goal(1:2))*10/max_velocity);
+ opti.set_initial(T, norm(start(1:2)-goal(1:2))*10/max_velocity_forward);
 
  opti.set_initial(x2, linspace(start(1),goal(1),(N+1)));
  opti.set_initial(y2, linspace(start(2),goal(2),(N+1)));
