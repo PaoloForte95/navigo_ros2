@@ -44,6 +44,7 @@ def generate_launch_description():
     use_composition = LaunchConfiguration('use_composition')
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
+    use_selector = LaunchConfiguration('use_selector')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
@@ -118,6 +119,11 @@ def generate_launch_description():
     declare_log_level_cmd = DeclareLaunchArgument(
         'log_level', default_value='info',
         description='log level')
+    
+    declare_use_selector_cmd = DeclareLaunchArgument(
+            'use_selector', 
+            default_value= 'False',
+            description='Use global planner selector if true')
 
     # Specify the actions
     bringup_cmd_group = GroupAction([
@@ -167,7 +173,7 @@ def generate_launch_description():
                               'controller_prefix': controller_prefix,
                               'use_respawn': use_respawn,
                               'container_name': 'nav2_container',
-                              
+                              'use_selector': use_selector              
                               }.items()),
     ])
 
@@ -190,6 +196,7 @@ def generate_launch_description():
     ld.add_action(declare_use_composition_cmd)
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
+    ld.add_action(declare_use_selector_cmd)
     # Add the actions to launch all of the navigation nodes
     ld.add_action(bringup_cmd_group)
 

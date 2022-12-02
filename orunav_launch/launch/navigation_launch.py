@@ -41,6 +41,7 @@ def generate_launch_description():
     log_level = LaunchConfiguration('log_level')
     controller_prefix = LaunchConfiguration('controller_prefix')
     default_nav_to_pose_bt_xml = LaunchConfiguration('default_nav_to_pose_bt_xml')
+    use_selector = LaunchConfiguration('use_selector')
 
     lifecycle_nodes = ['controller_server',
                        'smoother_server',
@@ -48,7 +49,8 @@ def generate_launch_description():
                        'behavior_server',
                        'bt_navigator',
                        'waypoint_follower',
-                       'velocity_smoother']
+                       'velocity_smoother',
+                       'global_planner_selector_server']
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -120,6 +122,11 @@ def generate_launch_description():
             'default_nav_to_pose_bt_xml', 
             default_value= os.path.join(bt_dir, 'behavior_trees', 'navigate_to_pose_w_replanning_and_recovery.xml'),
             description='Full path to the behavior tree xml file to use')
+
+    declare_use_selector_cmd = DeclareLaunchArgument(
+            'use_selector', 
+            default_value= 'False',
+            description='Use global planner selector if true')
 
     load_nodes = GroupAction(
         condition=IfCondition(PythonExpression(['not ', use_composition])),
@@ -203,6 +210,18 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': use_sim_time},
                             {'autostart': autostart},
                             {'node_names': lifecycle_nodes}]),
+
+            Node(
+                condition=IfCondition(use_selector),
+                package='orunav2_selector',
+                executable='global_planner_selector_server',
+                name='global_planner_selector_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings),
         ]
     )
 
@@ -260,6 +279,12 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': use_sim_time,
                              'autostart': autostart,
                              'node_names': lifecycle_nodes}]),
+            ComposableNode(
+                package='orunav2_selector',
+                plugin='orunav2_selector::PlannerSelectorServer',
+                name='global_planner_selector_server',
+                parameters=[configured_params],
+                remappings=remappings),
         ],
     )
 
@@ -280,6 +305,7 @@ def generate_launch_description():
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
     ld.add_action(declare_default_nav_to_pose_bt_xml_cmd)
+    ld.add_action(declare_use_selector_cmd)
     # Add the actions to launch all of the navigation nodes
     ld.add_action(load_nodes)
     ld.add_action(load_composable_nodes)
