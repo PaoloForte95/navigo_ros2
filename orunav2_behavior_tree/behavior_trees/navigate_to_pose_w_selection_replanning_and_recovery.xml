@@ -8,8 +8,10 @@
   <BehaviorTree ID="MainTree">
     <RecoveryNode number_of_retries="6" name="NavigateRecovery">
       <PipelineSequence name="NavigateWithReplanning">
-      <GlobalPlannerSelector default_planner="GridBased" scan_topic="/robot1/scan" selected_planner="{planner}"/>
-        <RateController hz="12.0">
+       <RateController hz="5.0">
+      <GlobalPlannerSelector selector_id="CostmapBased" goal="{goal}" selected_planner="{planner}"/>
+      </RateController>
+        <RateController hz="24.0">
           <RecoveryNode number_of_retries="1" name="ComputePathToPose">
             <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
             <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>

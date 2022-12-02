@@ -151,9 +151,12 @@
     </Action>
 
     <Action ID="GlobalPlannerSelector">
-            <input_port name="default_planner">Default planner of the planner selector</input_port>
-            <input_port name="scan_topic">The topic name of the sensor scan</input_port>
-            <output_port name="selected_planner">Name of the selected planner chosen according to the costmap information</output_port>
+        <input_port name="goal">Destination to plan to</input_port>
+        <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        <input_port name="selector_id">Mapped name to the planner plugin type to use</input_port>
+        <input_port name="service_name">Service name</input_port>
+        <input_port name="server_timeout">Server timeout</input_port>
+        <output_port name="selected_planner">Name of the selected planner chosen according to the costmap information</output_port>
     </Action>
     
     <Action ID="PlannerSelector">

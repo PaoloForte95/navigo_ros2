@@ -1,4 +1,4 @@
-// Copyright (c) 2021 Paolo Forte
+// Copyright (c) 2022 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,40 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ORUNAV2_BEHAVIOR_TREE__PLUGINS__ACTION__COMPUTE_PLAN_ACTION_HPP_
-#define ORUNAV2_BEHAVIOR_TREE__PLUGINS__ACTION__COMPUTE_PLAN_ACTION_HPP_
+#ifndef ORUNAV2_BEHAVIOR_TREE__PLUGINS__ACTION__SELECT_GLOBAL_PLANNER_ACTION_HPP_
+#define ORUNAV2_BEHAVIOR_TREE__PLUGINS__ACTION__SELECT_GLOBAL_PLANNER_ACTION_HPP_
 
 #include <string>
-#include <memory>
 
-
-#include "rclcpp/rclcpp.hpp"
-#include "orunav2_msgs/action/select_planner.hpp"
-#include "behaviortree_cpp_v3/action_node.h"
-#include "sensor_msgs/msg/laser_scan.hpp"
+#include "orunav2_msgs/action/global_planner_selector.hpp"
+#include "orunav2_behavior_tree/bt_action_node.hpp"
 
 namespace orunav2_behavior_tree
 {
 
 /**
- * @brief The PlannerSelector behavior is used to switch the planner
- * that will be used by the planner server. It uses sensors information 
- * to get the decision about what planner must be used. It is usually used before of
- * the ComputePathToPoseAction. The selected_planner output port is passed to planner_id
- * input port of the ComputePathToPoseAction
+ * @brief A orunav2_behavior_tree::BtActionNode class that wraps orunav2_msgs::action::GlobalPlannerSelector
  */
-class SelectPlannerAction : public BT::SyncActionNode
+class SelectGlobalPlannerAction : public BtActionNode<orunav2_msgs::action::GlobalPlannerSelector>
 {
 public:
   /**
-   * @brief A constructor for orunav2_behavior_tree::SelectPlanner
+   * @brief A constructor for orunav2_behavior_tree::SelectGlobalPlannerAction
    * @param xml_tag_name Name for the XML tag for this node
+   * @param action_name Action name this node creates a client for
    * @param conf BT node configuration
    */
-  SelectPlannerAction(
+  SelectGlobalPlannerAction(
     const std::string & xml_tag_name,
+    const std::string & action_name,
     const BT::NodeConfiguration & conf);
 
+  /**
+   * @brief Function to perform some user-defined operation on tick
+   */
+  void on_tick() override;
+
+  /**
+   * @brief Function to perform some user-defined operation upon successful completion of the action
+   */
+  BT::NodeStatus on_success() override;
+
+  /**
+   * @brief Function to perform some user-defined operation upon abortion of the action
+   */
+  BT::NodeStatus on_aborted() override;
+
+  /**
+   * @brief Function to perform some user-defined operation upon cancelation of the action
+   */
+  BT::NodeStatus on_cancelled() override;
+
+  /**
+   * \brief Override required by the a BT action. Cancel the action and set the path output
+   */
+  void halt() override;
 
   /**
    * @brief Creates list of BT ports
@@ -53,52 +71,19 @@ public:
    */
   static BT::PortsList providedPorts()
   {
-    return 
+    return providedBasicPorts(
       {
+        BT::OutputPort<std::string>("selected_planner", "Path planner selected by SelectGlobalPlanner node"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>("goal", "Destination to plan to"),
+        BT::InputPort<geometry_msgs::msg::PoseStamped>(
+          "start", "Start pose of the path if overriding current robot pose"),
         BT::InputPort<std::string>(
-        "default_planner",
-        "the default planner to use if there is not any external topic message received."),
-
-        BT::InputPort<std::string>(
-        "scan_topic",
-        "scan",
-        "the topic name of the sensor scan"),
-        
-        BT::OutputPort<std::string>("selected_planner", "The selected global path planner"),
-      };
+          "selector_id", "",
+          "Mapped name to the selector plugin type to use"),
+      });
   }
-
-
-  private:
-
-  /**
-   * @brief Function to perform some user-defined operation on tick
-   */
-  BT::NodeStatus tick() override;
-
-  /**
-   * @brief callback function for the global_planner_selector action
-   *
-   * @param msg the message with the local costamp of the robot
-   */
-  void callbackGlobalPlannerSelector(const sensor_msgs::msg::LaserScan::SharedPtr msg);
-
-
-  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr gloabal_planner_selector_sub_;
-
-  std::string last_selected_planner_;
-
-  rclcpp::Node::SharedPtr node_;
-  rclcpp::CallbackGroup::SharedPtr callback_group_;
-  rclcpp::executors::SingleThreadedExecutor callback_group_executor_;
-
-  std::string scan_topic_name_;
-
-  double min_distance = 2.0;
-
-  
 };
 
 }  // namespace orunav2_behavior_tree
 
-#endif  // ORUNAV2_BEHAVIOR_TREE__PLUGINS__ACTION__COMPUTE_PLAN_ACTION_HPP_
+#endif  // ORUNAV2_BEHAVIOR_TREE__PLUGINS__ACTION__SELECT_GLOBAL_PLANNER_ACTION_HPP_
