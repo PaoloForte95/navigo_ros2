@@ -1,4 +1,4 @@
-<library path="orunav2_selector">
+<library path="orunav2_selector_costmap">
 	<class name="orunav2_selector/CostmapSelector" type="orunav2_selector::CostmapSelector" base_class_type="orunav2_core::GlobalPlannerSelector">
 	  <description>A global planner selector based on costmap</description>
 	</class>

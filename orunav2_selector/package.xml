@@ -18,6 +18,7 @@
   <depend>nav2_costmap_2d</depend>
   <depend>pluginlib</depend>
   <depend>nav2_smac_planner</depend>
+  <depend>nav2_util</depend>
 
   
   <test_depend>ament_lint_auto</test_depend>
@@ -25,5 +26,6 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <orunav2_core plugin="${prefix}/costmap_selector.xml" />
   </export>
 </package>
