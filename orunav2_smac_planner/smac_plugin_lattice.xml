@@ -1,5 +1,5 @@
 <library path="orunav2_smac_planner_lattice">
-	<class name="orunav2_smac_planner/SmacPlannerLattice" type="orunav2_smac_planner::SmacPlannerLattice" base_class_type="nav2_core::GlobalPlanner">
+	<class name="orunav2_smac_planner/SmacPlannerLattice" type="orunav2_smac_planner::SmacPlannerLattice" base_class_type="orunav2_core::GlobalPlanner">
 	  <description>State Lattice SMAC planner</description>
 	</class>
 </library>

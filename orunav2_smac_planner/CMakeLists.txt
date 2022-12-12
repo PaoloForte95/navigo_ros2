@@ -16,7 +16,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(nav2_util REQUIRED)
-find_package(nav2_core REQUIRED)
+find_package(orunav2_core REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -77,7 +77,7 @@ set(dependencies
   tf2_ros
   nav2_costmap_2d
   nav2_smac_planner
-  nav2_core
+  orunav2_core
   pluginlib
   angles
   eigen3_cmake_module
@@ -92,25 +92,13 @@ set(dependencies
 # A* plugin
 add_library(${library_name}_astar SHARED
   src/planners/smac_planner_a_star.cpp
+  src/smoother.cpp
 )
 
 target_link_libraries(${library_name}_astar ${OMPL_LIBRARIES} ${OpenMP_LIBRARIES}   OpenMP::OpenMP_CXX)
 target_include_directories(${library_name}_astar PUBLIC ${Eigen3_INCLUDE_DIRS})
 
 ament_target_dependencies(${library_name}_astar
-  ${dependencies}
-)
-
-
-# Spline plugin
-add_library(${library_name}_spline SHARED
-  src/planners/smac_planner_spline.cpp
-)
-
-target_link_libraries(${library_name}_spline ${OMPL_LIBRARIES} ${OpenMP_LIBRARIES}  OpenMP::OpenMP_CXX)
-target_include_directories(${library_name}_spline PUBLIC ${Eigen3_INCLUDE_DIRS})
-
-ament_target_dependencies(${library_name}_spline
   ${dependencies}
 )
 
@@ -140,6 +128,7 @@ src/model/lhd_model.cpp
 src/model/unicycle_model.cpp
 src/model/vehicle_model.cpp
 src/planners/smac_planner_lattice.cpp
+src/smoother.cpp
 )
 
 target_link_libraries(${library_name}_lattice ${OMPL_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS})
@@ -150,11 +139,10 @@ ament_target_dependencies(${library_name}_lattice
 )
 
 
-pluginlib_export_plugin_description_file(nav2_core smac_plugin_astar.xml)
-pluginlib_export_plugin_description_file(nav2_core smac_plugin_spline.xml)
-pluginlib_export_plugin_description_file(nav2_core smac_plugin_lattice.xml)
+pluginlib_export_plugin_description_file(orunav2_core smac_plugin_astar.xml)
+pluginlib_export_plugin_description_file(orunav2_core smac_plugin_lattice.xml)
 
-install(TARGETS ${library_name}_astar ${library_name}_spline ${library_name}_lattice
+install(TARGETS ${library_name}_astar ${library_name}_lattice
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -182,6 +170,6 @@ endif()
 
 
 ament_export_include_directories(include)
-ament_export_libraries(${library_name}_astar ${library_name}_spline ${library_name}_lattice)
+ament_export_libraries(${library_name}_astar ${library_name}_lattice)
 ament_export_dependencies(${dependencies})
 ament_package()

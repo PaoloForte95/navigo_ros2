@@ -1,5 +1,5 @@
 <library path="orunav2_smac_planner_astar">
-	<class name="orunav2_smac_planner/SmacPlannerAStar" type="orunav2_smac_planner::SmacPlannerAStar" base_class_type="nav2_core::GlobalPlanner">
+	<class name="orunav2_smac_planner/SmacPlannerAStar" type="orunav2_smac_planner::SmacPlannerAStar" base_class_type="orunav2_core::GlobalPlanner">
 	  <description>A* SMAC Planner</description>
 	</class>
 </library>
