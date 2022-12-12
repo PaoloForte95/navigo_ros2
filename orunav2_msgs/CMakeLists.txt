@@ -8,7 +8,7 @@ endif()
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -24,16 +24,22 @@ find_package(geometry_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(action_msgs REQUIRED)
 
-
 rosidl_generate_interfaces(${PROJECT_NAME} 
    
   #Actions
    "action/GlobalPlannerSelector.action"
+   "action/FollowPath.action"
+   "action/ComputePathToPose.action"
+   "action/ComputePathThroughPoses.action"
+   "action/SmoothPath.action"
+   "action/NavigateToPose.action"
   #Messages
-
+    "msg/Path.msg"
+    "msg/PathPoint.msg"
   #Services
    "srv/IsPlannerValid.srv"
-  DEPENDENCIES builtin_interfaces std_msgs geometry_msgs action_msgs
+   "srv/IsPathValid.srv"
+  DEPENDENCIES builtin_interfaces std_msgs geometry_msgs action_msgs 
 )
 
 install(
