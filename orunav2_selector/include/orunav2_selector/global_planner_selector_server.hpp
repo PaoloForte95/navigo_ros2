@@ -176,12 +176,6 @@ protected:
   void computePlanner();
 
   /**
-   * @brief The action server callback which calls planner to get the path
-   * ComputePathThroughPoses
-   */
-  void computePlanThroughPoses();
-
-  /**
    * @brief The service callback to determine if the path is still valid
    * @param request to the service
    * @param response from the service
