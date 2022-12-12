@@ -128,7 +128,7 @@ void SmacPlannerAStar::configure(
   nav2_smac_planner::SmootherParams params;
   params.get(node, name);
   params.holonomic_ = true;  // So smoother will treat this as a grid search
-  _smoother = std::make_unique<nav2_smac_planner::Smoother>(params);
+  _smoother = std::make_unique<orunav2_smac_planner::Smoother>(params);
   _smoother->initialize(1e-50 /*No valid minimum turning radius for 2D*/);
 
   // Initialize costmap downsampler
@@ -190,14 +190,10 @@ void SmacPlannerAStar::cleanup()
   _raw_plan_publisher.reset();
 }
 
-nav_msgs::msg::Path SmacPlannerAStar::createPlan(
+nav_msgs::msg::Path SmacPlannerAStar::createUnsmoothedPlan(
   const geometry_msgs::msg::PoseStamped & start,
   const geometry_msgs::msg::PoseStamped & goal)
 {
-  std::lock_guard<std::mutex> lock_reinit(_mutex);
-  steady_clock::time_point a = steady_clock::now();
-
-  std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
 
   // Downsample costmap, if required
   nav2_costmap_2d::Costmap2D * costmap = _costmap;
@@ -280,7 +276,21 @@ nav_msgs::msg::Path SmacPlannerAStar::createPlan(
     pose.pose = nav2_smac_planner::getWorldCoords(path[i].x, path[i].y, costmap);
     plan.poses.push_back(pose);
   }
+  return plan;
+}
 
+
+
+nav_msgs::msg::Path SmacPlannerAStar::createPlan(
+  const geometry_msgs::msg::PoseStamped & start,
+  const geometry_msgs::msg::PoseStamped & goal)
+{
+  std::lock_guard<std::mutex> lock_reinit(_mutex);
+  steady_clock::time_point a = steady_clock::now();
+  std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
+  nav2_costmap_2d::Costmap2D * costmap = _costmap;
+ 
+ nav_msgs::msg::Path plan = createUnsmoothedPlan(start,goal);
   // Publish raw path for debug
   if (_raw_plan_publisher->get_subscription_count() > 0) {
     _raw_plan_publisher->publish(plan);
@@ -320,6 +330,70 @@ nav_msgs::msg::Path SmacPlannerAStar::createPlan(
     }
   } else if (plan_size > 0) {
     plan.poses.back().pose.orientation = goal.pose.orientation;
+  }
+
+  return plan;
+}
+
+
+orunav2_msgs::msg::Path SmacPlannerEclAStar::createPlan(
+  const geometry_msgs::msg::PoseStamped & start,
+  const geometry_msgs::msg::PoseStamped & goal)
+{
+  std::lock_guard<std::mutex> lock_reinit(_mutex);
+  steady_clock::time_point a = steady_clock::now();
+  std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
+  nav2_costmap_2d::Costmap2D * costmap = _costmap;
+ 
+ nav_msgs::msg::Path path = createUnsmoothedPlan(start,goal);
+  // Publish raw path for debug
+  if (_raw_plan_publisher->get_subscription_count() > 0) {
+    _raw_plan_publisher->publish(path);
+  }
+
+  // Find how much time we have left to do smoothing
+  steady_clock::time_point b = steady_clock::now();
+  duration<double> time_span = duration_cast<duration<double>>(b - a);
+  double time_remaining = _max_planning_time - static_cast<double>(time_span.count());
+
+#ifdef BENCHMARK_TESTING
+  std::cout << "It took " << time_span.count() * 1000 <<
+    " milliseconds with " << num_iterations << " iterations." << std::endl;
+#endif
+
+  // Smooth plan
+  _smoother->smooth(path, costmap, time_remaining);
+
+  // If use_final_approach_orientation=true, interpolate the last pose orientation from the
+  // previous pose to set the orientation to the 'final approach' orientation of the robot so
+  // it does not rotate.
+  // And deal with corner case of plan of length 1
+  // If use_final_approach_orientation=false (default), override last pose orientation to match goal
+  size_t plan_size = path.poses.size();
+  if (_use_final_approach_orientation) {
+    if (plan_size == 1) {
+      path.poses.back().pose.orientation = start.pose.orientation;
+    } else if (plan_size > 1) {
+      double dx, dy, theta;
+      auto last_pose = path.poses.back().pose.position;
+      auto approach_pose = path.poses[plan_size - 2].pose.position;
+      dx = last_pose.x - approach_pose.x;
+      dy = last_pose.y - approach_pose.y;
+      theta = atan2(dy, dx);
+      path.poses.back().pose.orientation =
+        nav2_util::geometry_utils::orientationAroundZAxis(theta);
+    }
+  } else if (plan_size > 0) {
+    path.poses.back().pose.orientation = goal.pose.orientation;
+  }
+
+  orunav2_msgs::msg::Path plan;
+  plan.header = path.header;
+  for (int i = 0; i < path.poses.size(); i++){
+        orunav2_msgs::msg::PathPoint last_pose;
+        last_pose.header = path.poses[i].header;
+        last_pose.pose = path.poses[i].pose;
+        plan.poses.push_back(last_pose);
   }
 
   return plan;
@@ -416,5 +490,5 @@ SmacPlannerAStar::dynamicParametersCallback(std::vector<rclcpp::Parameter> param
 }  // namespace orunav2_smac_planner
 
 #include "pluginlib/class_list_macros.hpp"
-PLUGINLIB_EXPORT_CLASS(orunav2_smac_planner::SmacPlannerAStar, nav2_core::GlobalPlanner)
+PLUGINLIB_EXPORT_CLASS(orunav2_smac_planner::SmacPlannerAStar, orunav2_core::GlobalPlanner)
 

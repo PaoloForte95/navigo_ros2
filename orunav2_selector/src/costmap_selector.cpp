@@ -75,8 +75,6 @@ void CostmapSelector::configure(
   node->get_parameter(name + ".distance_threshold", _distance_threshold);
 
 
-
-
   // Initialize costmap downsampler
   if (_downsample_costmap && _downsampling_factor > 1) {
     std::string topic_name = "downsampled_costmap";
@@ -159,23 +157,35 @@ std::string CostmapSelector::selectGlobalPlanner(
   // Corner case of start and goal beeing on the same cell
   if (mx_start == mx_goal && my_start == my_goal) {
     if (costmap->getCost(mx_start, my_start) == nav2_costmap_2d::LETHAL_OBSTACLE) {
-      RCLCPP_WARN(_logger, "It Is Fine Now. Why? Because I Am Here!");
+      RCLCPP_WARN(_logger, "Ouch!");
       return selected_planner;
     }
     return selected_planner;
   }
-  unsigned int dist;
-  dist = costmap->cellDistance(_distance_threshold);
-  RCLCPP_WARN_STREAM(_logger, "Distance cell: " << dist);
 
-
+  //Get the current robot position
+  double start_x = start.pose.position.x;
+  double start_y = start.pose.position.y;
+  RCLCPP_INFO(_logger, "Robot current position: (%f, %f)", start_x, start_y);
+  //Get Nearest obstacle distance
+  unsigned int ox_start, oy_start;
+  ox_start = costmap->cellDistance(_distance_threshold+start_x);
+  oy_start = costmap->cellDistance(_distance_threshold+start_y);
+  costmap->worldToMap(start.pose.position.x, start.pose.position.y, ox_start, oy_start);
+  double cost_dist = costmap->getCost(ox_start,oy_start);
+  if (cost_dist == nav2_costmap_2d::LETHAL_OBSTACLE){
+    selected_planner = "GridBased";
+  }
+  else{
+    selected_planner = "LatticeBased";
+  }
 
 #ifdef BENCHMARK_TESTING
   std::cout << "It took " << time_span.count() * 1000 <<
     " milliseconds with " << num_iterations << " iterations." << std::endl;
 #endif
 
-
+  RCLCPP_INFO(_logger, "Setting  global planner: %s ", selected_planner.c_str());
   return selected_planner;
 }
 
