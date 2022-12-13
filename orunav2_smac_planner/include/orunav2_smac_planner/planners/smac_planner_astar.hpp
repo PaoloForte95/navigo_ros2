@@ -22,9 +22,11 @@
 
 #include "nav2_smac_planner/a_star.hpp"
 #include "orunav2_smac_planner/smoother.hpp"
+#include "nav2_smac_planner/smoother.hpp"
 #include "nav2_smac_planner/utils.hpp"
 #include "nav2_smac_planner/costmap_downsampler.hpp"
 #include "nav_msgs/msg/occupancy_grid.hpp"
+#include "nav2_core/global_planner.hpp"
 #include "orunav2_core/global_planner.hpp"
 #include "nav_msgs/msg/path.hpp"
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
@@ -38,7 +40,7 @@
 namespace orunav2_smac_planner
 {
 
-class SmacPlannerAStar : public orunav2_core::GlobalPlanner
+class SmacPlannerAStar : public nav2_core::GlobalPlanner
 {
 public:
   /**
@@ -91,16 +93,6 @@ public:
 protected:
 
   /**
-   * @brief Creating a unsmoothed plan from start and goal poses
-   * @param start Start pose
-   * @param goal Goal pose
-   * @return nav2_msgs::Path of the generated path
-   */
-  nav_msgs::msg::Path createUnsmoothedPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal);
-
-  /**
    * @brief Callback executed when a parameter change is detected
    * @param event ParameterEvent message
    */
@@ -109,7 +101,7 @@ protected:
 
   std::unique_ptr<nav2_smac_planner::AStarAlgorithm<nav2_smac_planner::Node2D>> _a_star;
   nav2_smac_planner::GridCollisionChecker _collision_checker;
-  std::unique_ptr<orunav2_smac_planner::Smoother> _smoother;
+  std::unique_ptr<nav2_smac_planner::Smoother> _smoother;
   nav2_costmap_2d::Costmap2D * _costmap;
   std::unique_ptr<nav2_smac_planner::CostmapDownsampler> _costmap_downsampler;
   rclcpp::Clock::SharedPtr _clock;
@@ -134,7 +126,7 @@ protected:
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr _dyn_params_handler;
 };
 
-class SmacPlannerEclAStar : public orunav2_core::GlobalEclPlanner
+class SmacPlannerEclAStar : public orunav2_core::GlobalPlanner
 {
 public:
   /**

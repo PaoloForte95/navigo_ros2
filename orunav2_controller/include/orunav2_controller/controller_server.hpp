@@ -27,8 +27,7 @@
 #include "nav2_core/goal_checker.hpp"
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
 #include "tf2_ros/transform_listener.h"
-#include "nav2_msgs/action/follow_path.hpp"
-#include "nav2_msgs/action/follow_path.hpp"
+#include "orunav2_msgs/action/follow_path.hpp"
 #include "nav2_msgs/msg/speed_limit.hpp"
 #include "nav_2d_utils/odom_subscriber.hpp"
 #include "nav2_util/lifecycle_node.hpp"
@@ -36,7 +35,6 @@
 #include "nav2_util/robot_utils.hpp"
 #include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
-#include "nav_msgs/msg/path.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 
 namespace orunav2_controller
@@ -110,7 +108,7 @@ protected:
    */
   nav2_util::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
 
-  using Action = nav2_msgs::action::FollowPath;
+  using Action = orunav2_msgs::action::FollowPath;
   using ActionServer = nav2_util::SimpleActionServer<Action>;
 
   // Our action server implements the FollowPath action
@@ -149,7 +147,7 @@ protected:
    * @brief Assigns path to controller
    * @param path Path received from action server
    */
-  void setPlannerPath(const nav_msgs::msg::Path & path);
+  void setPlannerPath(const orunav2_msgs::msg::Path & path);
 
   /**
    * @brief Calculates velocity and publishes to "cmd_vel" topic
@@ -260,13 +258,13 @@ protected:
   double failure_tolerance_;
 
   // Whether we've published the single controller warning yet
-  geometry_msgs::msg::PoseStamped end_pose_;
+  orunav2_msgs::msg::PathPoint end_pose_;
 
   // Last time the controller generated a valid command
   rclcpp::Time last_valid_cmd_time_;
 
   // Current path container
-  nav_msgs::msg::Path current_path_;
+  orunav2_msgs::msg::Path current_path_;
 
 
 private:

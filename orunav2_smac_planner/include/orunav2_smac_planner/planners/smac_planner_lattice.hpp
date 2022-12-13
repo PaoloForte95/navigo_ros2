@@ -25,6 +25,8 @@
 #include "nav2_smac_planner/a_star.hpp"
 #include "nav2_smac_planner/utils.hpp"
 #include "orunav2_smac_planner/smoother.hpp"
+#include "nav2_smac_planner/smoother.hpp"
+#include "nav2_core/global_planner.hpp"
 #include "orunav2_core/global_planner.hpp"
 #include "nav2_util/lifecycle_node.hpp"
 #include "nav2_util/node_utils.hpp"
@@ -49,7 +51,7 @@
 namespace orunav2_smac_planner
 {
 
-class SmacPlannerLattice : public orunav2_core::GlobalPlanner
+class SmacPlannerLattice : public nav2_core::GlobalPlanner
 {
 public:
   /**
@@ -103,17 +105,6 @@ public:
 protected:
    
   /**
-   * @brief Creating a unsmoothed plan from start and goal poses
-   * @param start Start pose
-   * @param goal Goal pose
-   * @return nav2_msgs::Path of the generated path
-   */
-  nav_msgs::msg::Path createUnsmoothedPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal);
-
-
-  /**
    * @brief Callback executed when a paramter change is detected
    * @param parameters list of changed parameters
    */
@@ -122,7 +113,7 @@ protected:
 
   std::unique_ptr<nav2_smac_planner::AStarAlgorithm<nav2_smac_planner::NodeLattice>> _a_star;
   orunav2_smac_planner::CollisionDetector _collision_checker;
-  std::unique_ptr<orunav2_smac_planner::Smoother> _smoother;
+  std::unique_ptr<nav2_smac_planner::Smoother> _smoother;
   rclcpp::Clock::SharedPtr _clock;
   rclcpp::Logger _logger{rclcpp::get_logger("SmacPlannerLattice")};
   nav2_costmap_2d::Costmap2D * _costmap;
@@ -150,7 +141,7 @@ protected:
 };
 
 
-class SmacPlannerLatticeEcl : public orunav2_core::GlobalEclPlanner
+class SmacPlannerLatticeEcl : public orunav2_core::GlobalPlanner
 {
 public:
   /**

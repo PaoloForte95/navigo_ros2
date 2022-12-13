@@ -26,7 +26,6 @@
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "pluginlib/class_loader.hpp"
 #include "orunav2_msgs/msg/path.hpp"
-#include "nav_msgs/msg/path.hpp"
 
 
 namespace orunav2_core
@@ -45,54 +44,6 @@ public:
    * @brief Virtual destructor
    */
   virtual ~Smoother() {}
-
-  virtual void configure(
-    const rclcpp_lifecycle::LifecycleNode::WeakPtr &,
-    std::string name, std::shared_ptr<tf2_ros::Buffer>,
-    std::shared_ptr<nav2_costmap_2d::CostmapSubscriber>,
-    std::shared_ptr<nav2_costmap_2d::FootprintSubscriber>) = 0;
-
-  /**
-   * @brief Method to cleanup resources.
-   */
-  virtual void cleanup() = 0;
-
-  /**
-   * @brief Method to activate smoother and any threads involved in execution.
-   */
-  virtual void activate() = 0;
-
-  /**
-   * @brief Method to deactivate smoother and any threads involved in execution.
-   */
-  virtual void deactivate() = 0;
-
-  /**
-   * @brief Method to smooth given path
-   *
-   * @param path In-out path to be smoothed
-   * @param max_time Maximum duration smoothing should take
-   * @return If smoothing was completed (true) or interrupted by time limit (false)
-   */
-  virtual bool smooth(
-    nav_msgs::msg::Path & path,
-    const rclcpp::Duration & max_time) = 0;
-
-};
-
-/**
- * @class EclSmoother
- * @brief smoother interface that acts as a virtual base class for all smoother plugins
- */
-class EclSmoother
-{
-public:
-  using Ptr = std::shared_ptr<orunav2_core::EclSmoother>;
-
-  /**
-   * @brief Virtual destructor
-   */
-  virtual ~EclSmoother() {}
 
   virtual void configure(
     const rclcpp_lifecycle::LifecycleNode::WeakPtr &,

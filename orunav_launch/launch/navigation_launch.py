@@ -132,7 +132,7 @@ def generate_launch_description():
         condition=IfCondition(PythonExpression(['not ', use_composition])),
         actions=[
             Node(
-                package='orunav2_controller',
+                package='nav2_controller',
                 executable='controller_server',
                 output='screen',
                 respawn=use_respawn,
@@ -141,7 +141,7 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings + [('cmd_vel', 'cmd_vel_nav')]),
             Node(
-                package='orunav2_smoother',
+                package='nav2_smoother',
                 executable='smoother_server',
                 name='smoother_server',
                 output='screen',
@@ -151,7 +151,7 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings),
             Node(
-                package='orunav2_planner',
+                package='nav2_planner',
                 executable='planner_server',
                 name='planner_server',
                 output='screen',
@@ -230,20 +230,20 @@ def generate_launch_description():
         target_container=container_name,
         composable_node_descriptions=[
             ComposableNode(
-                package='orunav2_controller',
-                plugin='orunav2_controller::ControllerServer',
+                package='nav2_controller',
+                plugin='nav2_controller::ControllerServer',
                 name='controller_server',
                 parameters=[configured_params],
                 remappings=remappings + [('cmd_vel', 'cmd_vel_nav')]),
             ComposableNode(
-                package='orunav2_smoother',
-                plugin='orunav2_smoother::SmootherServer',
+                package='nav2_smoother',
+                plugin='nav2_smoother::SmootherServer',
                 name='smoother_server',
                 parameters=[configured_params],
                 remappings=remappings),
             ComposableNode(
-                package='orunav2_planner',
-                plugin='orunav2_planner::PlannerServer',
+                package='nav2_planner',
+                plugin='nav2_planner::PlannerServer',
                 name='planner_server',
                 parameters=[configured_params],
                 remappings=remappings),

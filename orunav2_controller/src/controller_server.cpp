@@ -422,7 +422,7 @@ void ControllerServer::computeControl()
   action_server_->succeeded_current();
 }
 
-void ControllerServer::setPlannerPath(const nav_msgs::msg::Path & path)
+void ControllerServer::setPlannerPath(const orunav2_msgs::msg::Path & path)
 {
   RCLCPP_DEBUG(
     get_logger(),
@@ -493,13 +493,13 @@ void ControllerServer::computeAndPublishVelocity()
 
   // Find the closest pose to current pose on global path
 
-  nav_msgs::msg::Path & current_path = current_path_;
+  orunav2_msgs::msg::Path & current_path = current_path_;
   auto find_closest_pose_idx =
     [&pose, &current_path]() {
       size_t closest_pose_idx = 0;
       double curr_min_dist = std::numeric_limits<double>::max();
       for (size_t curr_idx = 0; curr_idx < current_path.poses.size(); ++curr_idx) {
-        double curr_dist = nav2_util::geometry_utils::euclidean_distance(
+        double curr_dist = orunav2_util::geometry_utils::euclidean_distance(
           pose, current_path.poses[curr_idx]);
         if (curr_dist < curr_min_dist) {
           curr_min_dist = curr_dist;
@@ -510,7 +510,7 @@ void ControllerServer::computeAndPublishVelocity()
     };
 
   feedback->distance_to_goal =
-    nav2_util::geometry_utils::calculate_path_length(current_path_, find_closest_pose_idx());
+    orunav2_util::geometry_utils::calculate_path_length(current_path_, find_closest_pose_idx());
   action_server_->publish_feedback(feedback);
 
   RCLCPP_DEBUG(get_logger(), "Publishing velocity at time %.2f", now().seconds());

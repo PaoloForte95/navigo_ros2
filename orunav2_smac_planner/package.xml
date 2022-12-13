@@ -22,6 +22,7 @@
   <depend>nav2_smac_planner</depend>
   <depend>tf2_ros</depend>
   <depend>nav2_costmap_2d</depend>
+  <depend>nav2_core</depend>
   <depend>orunav2_core</depend>
   <depend>pluginlib</depend>
   <depend>eigen3_cmake_module</depend>
@@ -42,7 +43,7 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <orunav2_core plugin="${prefix}/smac_plugin_astar.xml" />
-    <orunav2_core plugin="${prefix}/smac_plugin_lattice.xml" />
+    <nav2_core plugin="${prefix}/smac_plugin_astar.xml" />
+    <nav2_core plugin="${prefix}/smac_plugin_lattice.xml" />
   </export>
 </package>

@@ -190,7 +190,7 @@ void SmacPlannerLattice::configure(
   if (smooth_path) {
     nav2_smac_planner::SmootherParams params;
     params.get(node, name);
-    _smoother = std::make_unique<orunav2_smac_planner::Smoother>(params);
+    _smoother = std::make_unique<nav2_smac_planner::Smoother>(params);
     _smoother->initialize(_metadata.min_turning_radius);
   }
 
@@ -234,10 +234,15 @@ void SmacPlannerLattice::cleanup()
   _raw_plan_publisher.reset();
 }
 
-nav_msgs::msg::Path SmacPlannerLattice::createUnsmoothedPlan(
+nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   const geometry_msgs::msg::PoseStamped & start,
   const geometry_msgs::msg::PoseStamped & goal)
 {
+  std::lock_guard<std::mutex> lock_reinit(_mutex);
+  steady_clock::time_point a = steady_clock::now();
+
+  std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
+
   //Information about start and goal
   double steering_start = 0.0;
   double steering_goal = 0.0;
@@ -407,21 +412,6 @@ nav_msgs::msg::Path SmacPlannerLattice::createUnsmoothedPlan(
     plan.poses.push_back(pose);
   }
   */
- return plan;
-}
-
-
-
-nav_msgs::msg::Path SmacPlannerLattice::createPlan(
-  const geometry_msgs::msg::PoseStamped & start,
-  const geometry_msgs::msg::PoseStamped & goal)
-{
-  std::lock_guard<std::mutex> lock_reinit(_mutex);
-  steady_clock::time_point a = steady_clock::now();
-
-  std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
-
-  nav_msgs::msg::Path plan = createUnsmoothedPlan(start,goal);
 
   // Publish raw path for debug
   if (_raw_plan_publisher->get_subscription_count() > 0) {
@@ -453,65 +443,6 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
 
 return plan;
 }
-
-
-orunav2_msgs::msg::Path SmacPlannerLatticeEcl::createPlan(
-  const geometry_msgs::msg::PoseStamped & start,
-  const geometry_msgs::msg::PoseStamped & goal)
-{
-  std::lock_guard<std::mutex> lock_reinit(_mutex);
-  steady_clock::time_point a = steady_clock::now();
-
-  std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
-
-  nav_msgs::msg::Path path = createUnsmoothedPlan(start,goal);
-
-  // Publish raw path for debug
-  if (_raw_plan_publisher->get_subscription_count() > 0) {
-    _raw_plan_publisher->publish(path);
-  }
-
-
-  
-  // Find how much time we have left to do smoothing
-  steady_clock::time_point b = steady_clock::now();
-  duration<double> time_span = duration_cast<duration<double>>(b - a);
-  double time_remaining = _max_planning_time - static_cast<double>(time_span.count());
-
-#ifdef BENCHMARK_TESTING
-  std::cout << "It took " << time_span.count() * 1000 <<
-    " milliseconds with " << num_iterations << " iterations." << std::endl;
-#endif
-
-  // Smooth plan
-  //if (_smoother && num_iterations > 1) {
-  if (_smoother ) {
-    _smoother->smooth(path, _costmap, time_remaining);
-  }
-
-#ifdef BENCHMARK_TESTING
-  steady_clock::time_point c = steady_clock::now();
-  duration<double> time_span2 = duration_cast<duration<double>>(c - b);
-  std::cout << "It took " << time_span2.count() * 1000 <<
-    " milliseconds to smooth path." << std::endl;
-#endif
-
-  orunav2_msgs::msg::Path plan;
-  plan.header = path.header;
-  for (int i = 0; i < path.poses.size(); i++){
-        orunav2_msgs::msg::PathPoint last_pose;
-        last_pose.header = path.poses[i].header;
-        last_pose.pose = path.poses[i].pose;
-        plan.poses.push_back(last_pose);
-    }
-
-return plan;
-}
-
-
-
-
-
 
 rcl_interfaces::msg::SetParametersResult
 SmacPlannerLattice::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)
@@ -635,7 +566,7 @@ SmacPlannerLattice::dynamicParametersCallback(std::vector<rclcpp::Parameter> par
       auto node = _node.lock();
       nav2_smac_planner::SmootherParams params;
       params.get(node, _name);
-      _smoother = std::make_unique<orunav2_smac_planner::Smoother>(params);
+      _smoother = std::make_unique<nav2_smac_planner::Smoother>(params);
       _smoother->initialize(_metadata.min_turning_radius);
 
     }
@@ -663,5 +594,5 @@ SmacPlannerLattice::dynamicParametersCallback(std::vector<rclcpp::Parameter> par
 
 #include "pluginlib/class_list_macros.hpp"
 
-PLUGINLIB_EXPORT_CLASS(orunav2_smac_planner::SmacPlannerLattice, orunav2_core::GlobalPlanner)
+PLUGINLIB_EXPORT_CLASS(orunav2_smac_planner::SmacPlannerLattice, nav2_core::GlobalPlanner)
 

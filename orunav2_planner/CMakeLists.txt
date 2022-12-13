@@ -30,7 +30,7 @@ include_directories(
   include
 )
 
-set(executable_name planner_server)
+set(executable_name ecl_planner_server)
 
 
 set(library_name ${executable_name}_core)

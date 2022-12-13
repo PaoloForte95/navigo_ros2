@@ -17,6 +17,7 @@ find_package(std_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(orunav2_core REQUIRED)
+find_package(nav2_core REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -78,6 +79,7 @@ set(dependencies
   nav2_costmap_2d
   nav2_smac_planner
   orunav2_core
+  nav2_core
   pluginlib
   angles
   eigen3_cmake_module
@@ -139,8 +141,8 @@ ament_target_dependencies(${library_name}_lattice
 )
 
 
-pluginlib_export_plugin_description_file(orunav2_core smac_plugin_astar.xml)
-pluginlib_export_plugin_description_file(orunav2_core smac_plugin_lattice.xml)
+pluginlib_export_plugin_description_file(nav2_core smac_plugin_astar.xml)
+pluginlib_export_plugin_description_file(nav2_core smac_plugin_lattice.xml)
 
 install(TARGETS ${library_name}_astar ${library_name}_lattice
   ARCHIVE DESTINATION lib

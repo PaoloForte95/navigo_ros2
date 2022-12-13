@@ -31,7 +31,7 @@ include_directories(
   include
 )
 
-set(executable_name smoother_server)
+set(executable_name ecl_smoother_server)
 set(library_name ${executable_name}_core)
 
 set(dependencies

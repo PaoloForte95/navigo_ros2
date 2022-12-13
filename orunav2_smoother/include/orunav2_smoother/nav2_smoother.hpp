@@ -38,7 +38,7 @@ namespace orunav2_smoother
 {
 
 /**
- * @class orunav2_smoother::SmootherServer
+ * @class orunav2_smoother::SmootherEclServer
  * @brief This class hosts variety of plugins of different algorithms to
  * smooth or refine a path from the exposed SmoothPath action server.
  */
@@ -56,132 +56,6 @@ public:
    * @brief Destructor for orunav2_smoother::SmootherServer
    */
   ~SmootherServer();
-
-protected:
-  /**
-   * @brief Configures smoother parameters and member variables
-   *
-   * Configures smoother plugin and costmap; Initialize odom subscriber,
-   * velocity publisher and smooth path action server.
-   * @param state LifeCycle Node's state
-   * @return Success or Failure
-   * @throw pluginlib::PluginlibException When failed to initialize smoother
-   * plugin
-   */
-  nav2_util::CallbackReturn on_configure(const rclcpp_lifecycle::State & state) override;
-
-  /**
-   * @brief Loads smoother plugins from parameter file
-   * @return bool if successfully loaded the plugins
-   */
-  bool loadSmootherPlugins();
-
-  /**
-   * @brief Activates member variables
-   *
-   * Activates smoother, costmap, velocity publisher and smooth path action
-   * server
-   * @param state LifeCycle Node's state
-   * @return Success or Failure
-   */
-  nav2_util::CallbackReturn on_activate(const rclcpp_lifecycle::State & state) override;
-
-  /**
-   * @brief Deactivates member variables
-   *
-   * Deactivates smooth path action server, smoother, costmap and velocity
-   * publisher. Before calling deactivate state, velocity is being set to zero.
-   * @param state LifeCycle Node's state
-   * @return Success or Failure
-   */
-  nav2_util::CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state) override;
-
-  /**
-   * @brief Calls clean up states and resets member variables.
-   *
-   * Smoother and costmap clean up state is called, and resets rest of the
-   * variables
-   * @param state LifeCycle Node's state
-   * @return Success or Failure
-   */
-  nav2_util::CallbackReturn on_cleanup(const rclcpp_lifecycle::State & state) override;
-
-  /**
-   * @brief Called when in Shutdown state
-   * @param state LifeCycle Node's state
-   * @return Success or Failure
-   */
-  nav2_util::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
-
-  using Action = nav2_msgs::action::SmoothPath;
-  using ActionServer = nav2_util::SimpleActionServer<Action>;
-
-  /**
-   * @brief SmoothPath action server callback. Handles action server updates and
-   * spins server until goal is reached
-   *
-   * Provides global path to smoother received from action client. Local
-   * section of the path is optimized using smoother.
-   * @throw nav2_core::PlannerException
-   */
-  void smoothPlan();
-
-  /**
-   * @brief Find the valid smoother ID name for the given request
-   *
-   * @param c_name The requested smoother name
-   * @param name Reference to the name to use for control if any valid available
-   * @return bool Whether it found a valid smoother to use
-   */
-  bool findSmootherId(const std::string & c_name, std::string & name);
-
-  // Our action server implements the SmoothPath action
-  std::unique_ptr<ActionServer> action_server_;
-
-  // Transforms
-  std::shared_ptr<tf2_ros::Buffer> tf_;
-  std::shared_ptr<tf2_ros::TransformListener> transform_listener_;
-
-  // Publishers and subscribers
-  rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr plan_publisher_;
-
-  // Smoother Plugins
-  pluginlib::ClassLoader<orunav2_core::Smoother> lp_loader_;
-  SmootherMap smoothers_;
-  std::vector<std::string> default_ids_;
-  std::vector<std::string> default_types_;
-  std::vector<std::string> smoother_ids_;
-  std::vector<std::string> smoother_types_;
-  std::string smoother_ids_concat_, current_smoother_;
-
-  // Utilities
-  std::shared_ptr<nav2_costmap_2d::CostmapSubscriber> costmap_sub_;
-  std::shared_ptr<nav2_costmap_2d::FootprintSubscriber> footprint_sub_;
-  std::shared_ptr<nav2_costmap_2d::CostmapTopicCollisionChecker> collision_checker_;
-
-  rclcpp::Clock steady_clock_;
-};
-
-
-/**
- * @class orunav2_smoother::SmootherEclServer
- * @brief This class hosts variety of plugins of different algorithms to
- * smooth or refine a path from the exposed SmoothPath action server.
- */
-class SmootherEclServer : public nav2_util::LifecycleNode
-{
-public:
-  using SmootherMap = std::unordered_map<std::string, orunav2_core::EclSmoother::Ptr>;
-
-  /**
-   * @brief A constructor for orunav2_smoother::SmootherEclServer
-   * @param options Additional options to control creation of the node.
-   */
-  explicit SmootherEclServer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
-  /**
-   * @brief Destructor for orunav2_smoother::SmootherEclServer
-   */
-  ~SmootherEclServer();
 
 protected:
   /**
