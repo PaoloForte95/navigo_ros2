@@ -63,21 +63,8 @@ ament_target_dependencies(${library_name}
 )
 
 
-add_library(orunav2_compute_path_to_pose_action_bt_node SHARED plugins/action/compute_path_to_pose_action.cpp)
-list(APPEND plugin_libs orunav2_compute_path_to_pose_action_bt_node)
-
-add_library(orunav2_compute_path_through_poses_action_bt_node SHARED plugins/action/compute_path_through_poses_action.cpp)
-list(APPEND plugin_libs orunav2_compute_path_through_poses_action_bt_node)
-
 add_library(orunav2_global_planner_selector_action_bt_node SHARED plugins/action/global_planner_selector_node.cpp)
 list(APPEND plugin_libs orunav2_global_planner_selector_action_bt_node)
-
-add_library(orunav2_follow_path_action_bt_node SHARED plugins/action/follow_path_action.cpp)
-list(APPEND plugin_libs orunav2_follow_path_action_bt_node)
-
-add_library(orunav2_navigate_to_pose_action_bt_node SHARED plugins/action/navigate_to_pose_action.cpp)
-list(APPEND plugin_libs orunav2_navigate_to_pose_action_bt_node)
-
 
 foreach(bt_plugin ${plugin_libs})
   ament_target_dependencies(${bt_plugin} ${dependencies})
