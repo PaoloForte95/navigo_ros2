@@ -22,6 +22,11 @@ find_package(nav_2d_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(orunav2_msgs REQUIRED)
 find_package(orunav2_core REQUIRED)
+find_package(ecceleron_conversions REQUIRED)
+find_package(ecceleron REQUIRED COMPONENTS ecceleron::eclbas_external
+                                           ecceleron::eclbas_common
+                                           ecceleron::eclnav_mpc
+)
 
 
 include_directories(
@@ -55,7 +60,14 @@ set(dependencies
   pluginlib
   orunav2_msgs
   orunav2_core
+  ecceleron_conversions
 )
+
+
+add_library(simple_goal_checker SHARED plugins/simple_goal_checker.cpp)
+ament_target_dependencies(simple_goal_checker ${dependencies})
+
+target_link_libraries(simple_goal_checker eclnav_mpc)
 
 ament_target_dependencies(${library_name}
   ${dependencies}
@@ -82,7 +94,7 @@ target_link_libraries(${executable_name} ${library_name})
 
 rclcpp_components_register_nodes(${library_name} "orunav2_controller::ControllerServer")
 
-install(TARGETS ${library_name}
+install(TARGETS simple_goal_checker ${library_name}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -97,8 +109,10 @@ install(DIRECTORY include/
 )
 
 ament_export_include_directories(include)
-ament_export_libraries(${library_name})
+ament_export_libraries(${library_name}
+simple_goal_checker)
 ament_export_dependencies(${dependencies})
+pluginlib_export_plugin_description_file(nav2_core plugins.xml)
 
 
 
