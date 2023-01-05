@@ -220,8 +220,6 @@
     </Condition>
 
     <Condition ID="GoalUpdated"/>
-    
-    <Condition ID="GlobalPlannerUpdated"/>
 
     <Condition ID="GlobalUpdatedGoal"/>
 
@@ -254,15 +252,9 @@
       <input_port name="path"> Path to validate </input_port>
       <input_port name="server_timeout"> Server timeout </input_port>
     </Condition>
-    
-     <Condition ID="IsActionDump"/>
-     
-     <Condition ID="IsActionLoad"/>
-     
-     <Condition ID="IsActionMove"/>
-     
-     <Condition ID="IsRobotNeeded"/>
 
+    <Condition ID="UpdatedPlanner"/>
+  
     <!-- ############################### CONTROL NODES ################################ -->
     <Control ID="PipelineSequence"/>
 
