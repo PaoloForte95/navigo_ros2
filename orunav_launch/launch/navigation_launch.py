@@ -58,7 +58,8 @@ def generate_launch_description():
     # https://github.com/ros/robot_state_publisher/pull/30
     # TODO(orduno) Substitute with `PushNodeRemapping`
     #              https://github.com/ros2/launch_ros/issues/56
-    cmd_vel_string = [controller_prefix, 'cmd_vel']
+    #cmd_vel_string = [controller_prefix, 'cmd_vel']
+    cmd_vel_string = "cmd_vel_to_machine"
     
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static'),
