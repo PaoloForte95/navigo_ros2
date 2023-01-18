@@ -59,9 +59,6 @@ void CostmapSelector::configure(
 
   // General planner params
   nav2_util::declare_parameter_if_not_declared(
-    node, name + ".tolerance", rclcpp::ParameterValue(0.125));
-  _tolerance = static_cast<float>(node->get_parameter(name + ".tolerance").as_double());
-  nav2_util::declare_parameter_if_not_declared(
     node, name + ".downsample_costmap", rclcpp::ParameterValue(false));
   node->get_parameter(name + ".downsample_costmap", _downsample_costmap);
   nav2_util::declare_parameter_if_not_declared(
@@ -86,8 +83,8 @@ void CostmapSelector::configure(
 
   RCLCPP_INFO(
     _logger, "Configured plugin %s of type CostmapSelector with "
-    "tolerance %.2f, and %s.",
-    _name.c_str(), _tolerance,
+    "distance_threshold %.2f, and %s.",
+    _name.c_str(),_distance_threshold,
     _allow_unknown ? "allowing unknown traversal" : "not allowing unknown traversal");
 }
 
@@ -167,13 +164,34 @@ std::string CostmapSelector::selectGlobalPlanner(
   double start_x = start.pose.position.x;
   double start_y = start.pose.position.y;
   RCLCPP_INFO(_logger, "Robot current position: (%f, %f)", start_x, start_y);
-  //Get Nearest obstacle distance
-  unsigned int ox_start, oy_start;
-  ox_start = costmap->cellDistance(_distance_threshold+start_x);
-  oy_start = costmap->cellDistance(_distance_threshold+start_y);
-  costmap->worldToMap(start.pose.position.x, start.pose.position.y, ox_start, oy_start);
-  double cost_dist = costmap->getCost(ox_start,oy_start);
-  if (cost_dist == nav2_costmap_2d::LETHAL_OBSTACLE){
+  //Get distance to nearest obstacle
+  double min_dist;
+  unsigned int rb_start_x, rb_start_y, rb_end_x, rb_end_y;
+  //Get the start index position
+  costmap->worldToMap(start.pose.position.x, start.pose.position.y, rb_start_x, rb_start_y);
+  //Get the cell at max distance
+  double end_x = start.pose.position.x+_distance_threshold;
+  double end_y = start.pose.position.y+_distance_threshold;
+  costmap->worldToMap(end_x, end_y, rb_end_x, rb_end_y);
+  bool obstacle_is_near = false;
+  double obs_x, obs_y;
+  for (std::size_t j=rb_start_y; j < rb_end_y; j++) {
+      for (std::size_t i=rb_start_x; i < rb_end_x; i++) {
+          double cost_dist = costmap->getCost(i,j);
+          if (cost_dist >= nav2_costmap_2d::LETHAL_OBSTACLE){
+            obstacle_is_near = true;
+            costmap->mapToWorld(i,j,obs_x,obs_y);
+            double dist = sqrt(pow((obs_x-start_x ),2)+ pow((obs_y-start_y ),2));
+            RCLCPP_INFO(_logger, "Distance to first obstacle: %f", dist);
+            break;
+            
+          }
+      }
+      if(obstacle_is_near){
+          break;
+      }
+  }
+  if (obstacle_is_near){
     selected_planner = "GridBased";
   }
   else{
@@ -202,8 +220,8 @@ CostmapSelector::dynamicParametersCallback(std::vector<rclcpp::Parameter> parame
     const auto & name = parameter.get_name();
 
     if (type == ParameterType::PARAMETER_DOUBLE) {
-      if (name == _name + ".tolerance") {
-        _tolerance = static_cast<float>(parameter.as_double());
+      if (name == _name + ".distance_threshold") {
+        _distance_threshold = static_cast<float>(parameter.as_double());
       } 
     } else if (type == ParameterType::PARAMETER_BOOL) {
       if (name == _name + ".downsample_costmap") {

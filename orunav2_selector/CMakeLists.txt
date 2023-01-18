@@ -27,12 +27,16 @@ include_directories(
   include
 )
 
-set(executable_name global_planner_selector_server)
-set(library_name orunav2_selector)
-set(library_name_server ${executable_name}_core)
+set(executable_name selector_server)
+
+add_executable(${executable_name}
+  src/main.cpp
+)
+
+set(library_name ${executable_name}_core)
 
 
-set(dependencies_server
+set(dependencies
   rclcpp
   rclcpp_action
   rclcpp_lifecycle
@@ -47,67 +51,50 @@ set(dependencies_server
   pluginlib
   orunav2_core
   orunav2_msgs
-)
-
-#SELECTORS
-set(dependencies
-  rclcpp
-  rclcpp_action
-  rclcpp_lifecycle
-  orunav2_core
-  orunav2_msgs
-  geometry_msgs
-  builtin_interfaces
-  tf2_ros
-  nav2_costmap_2d
-  pluginlib
   nav2_smac_planner
 )
 
+
 #Selector server
 ############
-add_library(${library_name_server} SHARED
+add_library(${library_name} SHARED
   src/global_planner_selector_server.cpp
 )
 
-ament_target_dependencies(${library_name_server}
-  ${dependencies_server}
+ament_target_dependencies(${library_name}
+  ${dependencies}
 )
 
-add_executable(${executable_name}
-  src/main.cpp
-)
 
-target_link_libraries(${executable_name} ${library_name_server})
-
-ament_target_dependencies(${executable_name}
-  ${dependencies_server}
-)
-
-rclcpp_components_register_nodes(${library_name_server} "orunav2_selector::PlannerSelectorServer")
 ##############################
 
 
 # Costmap Selector
-add_library(${library_name}_costmap SHARED
+add_library(costmap_selector SHARED
   src/costmap_selector.cpp
 
 )
 
-ament_target_dependencies(${library_name}_costmap
+ament_target_dependencies(costmap_selector
   ${dependencies}
 )
 
 
 
-pluginlib_export_plugin_description_file(orunav2_core costmap_selector.xml)
+
+ament_target_dependencies(${executable_name}
+  ${dependencies_server}
+)
+target_link_libraries(${executable_name} ${library_name})
 
 
+
+rclcpp_components_register_nodes(${library_name} "orunav2_selector::PlannerSelectorServer")
 ##############
 # Install 
 #############
 #Server
-install(TARGETS ${library_name_server}
+install(TARGETS ${library_name} costmap_selector
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -116,12 +103,7 @@ install(TARGETS ${library_name_server}
 install(TARGETS ${executable_name}
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
-#Selectors
-install(TARGETS ${library_name}_costmap
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
-)
+
 
 install(DIRECTORY include/
   DESTINATION include/
@@ -142,11 +124,10 @@ endif()
 
 
 ament_export_include_directories(include)
-#Server
-ament_export_libraries(${library_name_server})
-ament_export_dependencies(${dependencies_server})
-#Selectors
-ament_export_libraries(${library_name}_costmap)
+ament_export_libraries(costmap_selector
+${library_name})
 ament_export_dependencies(${dependencies})
+
+pluginlib_export_plugin_description_file(orunav2_core costmap_selector.xml)
 
 ament_package()

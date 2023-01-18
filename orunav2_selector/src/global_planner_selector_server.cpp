@@ -41,22 +41,14 @@ namespace orunav2_selector
 PlannerSelectorServer::PlannerSelectorServer(const rclcpp::NodeOptions & options)
 : nav2_util::LifecycleNode("global_planner_selector_server", "", options),
   gp_loader_("orunav2_core", "orunav2_core::GlobalPlannerSelector"),
-  default_ids_{"CostmapBased"},
-  default_types_{"orunav2_selector/CostmapSelector"},
-  costmap_(nullptr)
+  default_ids_{"CostmapBased22"},
+  default_types_{"orunav2_selector::CostmapSelector"}
 {
-  RCLCPP_INFO(get_logger(), "Creating");
+  RCLCPP_INFO(get_logger(), "Creating selector server");
 
+  declare_parameter("selector_frequency", 20.0);
   // Declare this node's parameters
   declare_parameter("selector_plugins", default_ids_);
-
-  get_parameter("selector_plugins", selector_ids_);
-  if (selector_ids_ == default_ids_) {
-    for (size_t i = 0; i < default_ids_.size(); ++i) {
-      declare_parameter(default_ids_[i] + ".plugin", default_types_[i]);
-    }
-  }
-
   // Setup the local costmap
   costmap_ros_ = std::make_shared<nav2_costmap_2d::Costmap2DROS>(
     "local_costmap", std::string{get_namespace()}, "local_costmap");
@@ -74,8 +66,24 @@ PlannerSelectorServer::~PlannerSelectorServer()
 nav2_util::CallbackReturn
 PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
 {
-  RCLCPP_INFO(get_logger(), "Configuring");
+  auto node = shared_from_this();
+  RCLCPP_INFO(get_logger(), "Configuring selector interface");
 
+
+  get_parameter("selector_plugins", selector_ids_);
+  if (selector_ids_ == default_ids_) {
+    for (size_t i = 0; i < default_ids_.size(); ++i) {
+      nav2_util::declare_parameter_if_not_declared(
+        node, default_ids_[i] + ".plugin",
+        rclcpp::ParameterValue(default_ids_[i]));
+    }
+  }
+  selector_types_.resize(selector_ids_.size());
+
+  get_parameter("selector_frequency", selector_frequency_);
+  RCLCPP_INFO(get_logger(), "Selector frequency set to %.4fHz", selector_frequency_);
+
+  
   costmap_ros_->configure();
   costmap_ = costmap_ros_->getCostmap();
 
@@ -87,7 +95,6 @@ PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
 
   selector_types_.resize(selector_ids_.size());
 
-  auto node = shared_from_this();
 
   for (size_t i = 0; i != selector_ids_.size(); i++) {
     try {
@@ -96,7 +103,7 @@ PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
       orunav2_core::GlobalPlannerSelector::Ptr planner_selector =
         gp_loader_.createUniqueInstance(selector_types_[i]);
       RCLCPP_INFO(
-        get_logger(), "Created global planner plugin %s of type %s",
+        get_logger(), "Created global planner selector plugin %s of type %s",
         selector_ids_[i].c_str(), selector_types_[i].c_str());
       planner_selector->configure(node, selector_ids_[i], tf_, costmap_ros_);
       selectors_.insert({selector_ids_[i], planner_selector});
@@ -114,7 +121,7 @@ PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
 
   RCLCPP_INFO(
     get_logger(),
-    "Planner Server has %s planners available.", selector_ids_concat_.c_str());
+    "Global Planner Selector Server has %s planners available.", selector_ids_concat_.c_str());
 
  
   // Initialize pubs & subs
