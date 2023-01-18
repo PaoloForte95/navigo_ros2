@@ -44,7 +44,7 @@ ControllerServer::ControllerServer(const rclcpp::NodeOptions & options)
   default_goal_checker_ids_{"goal_checker"},
   default_goal_checker_types_{"nav2_controller::SimpleGoalChecker"},
   lp_loader_("orunav2_core", "orunav2_core::Controller"),
-  default_ids_{"FollowPath"},
+  default_ids_{"FollowPath", "FollowSpline"},
   default_types_{"dwb_core::DWBLocalPlanner"}
 {
   RCLCPP_INFO(get_logger(), "Creating controller server");
