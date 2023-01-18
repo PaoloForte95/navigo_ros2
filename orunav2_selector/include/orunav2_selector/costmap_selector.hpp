@@ -92,7 +92,6 @@ protected:
 
   nav2_costmap_2d::Costmap2D * _costmap;
   std::unique_ptr<nav2_smac_planner::CostmapDownsampler> _costmap_downsampler;
-  float _tolerance;
   int _downsampling_factor;
   bool _downsample_costmap;
   bool _allow_unknown;

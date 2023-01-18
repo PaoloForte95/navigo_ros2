@@ -226,6 +226,8 @@ protected:
 
   // Service to deterime if the path is valid
   rclcpp::Service<orunav2_msgs::srv::IsPlannerValid>::SharedPtr is_planner_valid_service_;
+
+  double selector_frequency_;
 };
 
 }  // namespace orunav2_selector
