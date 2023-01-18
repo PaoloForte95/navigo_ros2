@@ -30,7 +30,7 @@ def generate_launch_description():
     wheel_loader_launch_dir = get_package_share_directory('wheel_loader_launch')
     wheel_loader_gazebo_dir = get_package_share_directory('wheel_loader_gazebo')
     description_dir = get_package_share_directory('wheel_loader_description')
-    maps_dir = get_package_share_directory('orunav_maps')
+    maps_dir = get_package_share_directory('orunav2_maps')
     worlds_dir = get_package_share_directory('gazebo_worlds_oru')
   
     # Create the launch configuration variables
