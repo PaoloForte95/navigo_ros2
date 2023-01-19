@@ -62,6 +62,9 @@ ControllerServer::ControllerServer(const rclcpp::NodeOptions & options)
 
   declare_parameter("failure_tolerance", rclcpp::ParameterValue(0.0));
 
+  declare_parameter("use_odom_topic_for_pose_estimate", rclcpp::ParameterValue(false));
+  declare_parameter("odom_topic", rclcpp::ParameterValue("odom"));
+
   // The costmap node is used in the implementation of the controller
   costmap_ros_ = std::make_shared<nav2_costmap_2d::Costmap2DROS>(
     "local_costmap", std::string{get_namespace()}, "local_costmap");
@@ -123,6 +126,9 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   std::string speed_limit_topic;
   get_parameter("speed_limit_topic", speed_limit_topic);
   get_parameter("failure_tolerance", failure_tolerance_);
+
+  get_parameter("use_odom_topic_for_pose_estimate", use_odom_topic_for_pose_estimate_);
+  get_parameter("odom_topic", odom_topic_);
 
   costmap_ros_->configure();
 
@@ -210,7 +216,8 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   speed_limit_sub_ = create_subscription<nav2_msgs::msg::SpeedLimit>(
     speed_limit_topic, rclcpp::QoS(10),
     std::bind(&ControllerServer::speedLimitCallback, this, std::placeholders::_1));
-
+  
+  pose_est_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry::SharedPtr>(odom_topic_, 1, std::bind(&ControllerServer::poseEstOdomCB, this, std::placeholders::_1));
   return nav2_util::CallbackReturn::SUCCESS;
 }
 
@@ -597,9 +604,18 @@ bool ControllerServer::isGoalReached()
 bool ControllerServer::getRobotPose(geometry_msgs::msg::PoseStamped & pose)
 {
   geometry_msgs::msg::PoseStamped current_pose;
-  if (!costmap_ros_->getRobotPose(current_pose)) {
-    return false;
-  }
+ 
+  if (use_odom_topic_for_pose_estimate_) {
+      nav_msgs::msg::Odometry odom_robot_pose;
+      //odom_helper_.getOdom(odom_robot_pose);  // "odom_helper" rather weird class that only copies over the velocities.
+      current_pose.header = last_pose_est_odom_.header;
+      current_pose.pose = last_pose_est_odom_.pose.pose;
+    }
+    else {
+       if (!costmap_ros_->getRobotPose(current_pose)) {
+        return false;
+    }
+  } 
   pose.header = current_pose.header;
   pose.pose = current_pose.pose;
   return true;
@@ -612,6 +628,12 @@ void ControllerServer::speedLimitCallback(const nav2_msgs::msg::SpeedLimit::Shar
     it->second->setSpeedLimit(msg->speed_limit, msg->percentage);
   }
 }
+
+void ControllerServer::poseEstOdomCB(const nav_msgs::msg::Odometry::SharedPtr &msg)
+  {
+    last_pose_est_odom_ = *msg;
+  }
+
 
 rcl_interfaces::msg::SetParametersResult
 ControllerServer::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)

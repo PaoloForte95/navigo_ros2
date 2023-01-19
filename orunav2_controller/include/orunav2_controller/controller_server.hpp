@@ -204,6 +204,8 @@ protected:
     return twist_thresh;
   }
 
+  void poseEstOdomCB(const nav_msgs::msg::Odometry::SharedPtr &msg);
+
   /**
    * @brief Callback executed when a parameter change is detected
    * @param event ParameterEvent message
@@ -223,6 +225,7 @@ protected:
   std::unique_ptr<nav_2d_utils::OdomSubscriber> odom_sub_;
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher_;
   rclcpp::Subscription<nav2_msgs::msg::SpeedLimit>::SharedPtr speed_limit_sub_;
+  std::shared_ptr<rclcpp::Subscription<nav_msgs::msg::Odometry::SharedPtr>> pose_est_odom_sub_; // Instead of going through the cost map to get the robot pose, this can be used directly.
 
   // Progress Checker Plugin
   pluginlib::ClassLoader<nav2_core::ProgressChecker> progress_checker_loader_;
@@ -249,13 +252,15 @@ protected:
   std::vector<std::string> controller_ids_;
   std::vector<std::string> controller_types_;
   std::string controller_ids_concat_, current_controller_;
+  std::string odom_topic_;
 
   double controller_frequency_;
   double min_x_velocity_threshold_;
   double min_y_velocity_threshold_;
   double min_theta_velocity_threshold_;
-
   double failure_tolerance_;
+
+  bool use_odom_topic_for_pose_estimate_;      //! Use the odom_topic to get the pose estimate (instead of using the pose obtained from the cost map)
 
   // Whether we've published the single controller warning yet
   orunav2_msgs::msg::PathPoint end_pose_;
@@ -266,6 +271,8 @@ protected:
   // Current path container
   orunav2_msgs::msg::Path current_path_;
 
+  //Last post estimated from odometry
+  nav_msgs::msg:: Odometry last_pose_est_odom_;
 
 private:
   /**
