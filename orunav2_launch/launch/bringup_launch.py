@@ -28,7 +28,7 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     # Get the launch directory
    
-    launch_dir = get_package_share_directory('orunav_launch')
+    launch_dir = get_package_share_directory('orunav2_launch')
 
     # Create the launch configuration variables
     namespace = LaunchConfiguration('namespace')
