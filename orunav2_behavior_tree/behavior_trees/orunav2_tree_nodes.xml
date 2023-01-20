@@ -253,7 +253,14 @@
       <input_port name="server_timeout"> Server timeout </input_port>
     </Condition>
 
+    <Condition ID="IsPathComputedCondition">
+    </Condition>
+
     <Condition ID="UpdatedPlanner"/>
+
+     <Condition ID="IsPlannerEqualCondition">
+      <input_port name="planner_to_check"> Planner to check </input_port>
+    </Condition>
   
     <!-- ############################### CONTROL NODES ################################ -->
     <Control ID="PipelineSequence"/>

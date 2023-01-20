@@ -70,6 +70,12 @@ list(APPEND plugin_libs orunav2_global_planner_selector_action_bt_node)
 add_library(orunav2_planner_updated_condition_bt_node SHARED plugins/condition/planner_updated_condition.cpp)
 list(APPEND plugin_libs orunav2_planner_updated_condition_bt_node)
 
+add_library(orunav2_is_planner_equal_condition_bt_node SHARED plugins/condition/is_planner_equal_condition.cpp)
+list(APPEND plugin_libs orunav2_is_planner_equal_condition_bt_node)
+
+add_library(orunav2_is_path_computed_condition_bt_node SHARED plugins/condition/is_path_computed_condition.cpp)
+list(APPEND plugin_libs orunav2_is_path_computed_condition_bt_node)
+
 foreach(bt_plugin ${plugin_libs})
   ament_target_dependencies(${bt_plugin} ${dependencies})
   target_compile_definitions(${bt_plugin} PRIVATE BT_PLUGIN_EXPORT)

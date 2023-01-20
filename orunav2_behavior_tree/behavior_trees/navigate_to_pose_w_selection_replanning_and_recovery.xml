@@ -8,17 +8,26 @@
   <BehaviorTree ID="MainTree">
     <RecoveryNode number_of_retries="6" name="NavigateRecovery">
       <PipelineSequence name="NavigateWithReplanning">
-       <RateController hz="1.0">
+       <RateController hz="3.0">
       <GlobalPlannerSelector selector_id="CostmapBased" goal="{goal}" selected_planner="{planner}"/>
       </RateController>
-        <RateController hz="1.0">
+      <RateController hz="1.0">
+      <Fallback name="Fallback">
+        <Sequence name="CheckLatticePlanner">
+         <IsPlannerEqualCondition planner_to_check="LatticeBased" />
+        <IsPathValid path="{path}"/>
+         <Inverter>
+            <GlobalUpdatedGoal/>
+          </Inverter>
+         </Sequence>
           <RecoveryNode number_of_retries="1" name="ComputePathToPose">
             <ComputePathToPose goal="{goal}" path="{path}" planner_id="{planner}"/>
             <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
           </RecoveryNode>
-        </RateController>
-        <RecoveryNode number_of_retries="1" name="FollowPath">
-          <FollowPath path="{path}" controller_id="FollowPath"/>
+       </Fallback> 
+       </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowSpline">
+          <FollowPath path="{path}" controller_id="FollowSpline"/>
           <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
         </RecoveryNode>
       </PipelineSequence>
