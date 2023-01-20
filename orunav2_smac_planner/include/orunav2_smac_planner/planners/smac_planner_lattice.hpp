@@ -111,13 +111,10 @@ protected:
   rcl_interfaces::msg::SetParametersResult
   dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters);
 
-  std::unique_ptr<nav2_smac_planner::AStarAlgorithm<nav2_smac_planner::NodeLattice>> _a_star;
-  orunav2_smac_planner::CollisionDetector _collision_checker;
   std::unique_ptr<nav2_smac_planner::Smoother> _smoother;
   rclcpp::Clock::SharedPtr _clock;
   rclcpp::Logger _logger{rclcpp::get_logger("SmacPlannerLattice")};
   nav2_costmap_2d::Costmap2D * _costmap;
-  std::shared_ptr<nav2_costmap_2d::Costmap2DROS> _costmap_ros;
   orunav2_smac_planner::MotionModel _motion_model;
   nav2_smac_planner::LatticeMetadata _metadata;
   std::string _global_frame, _name;
@@ -125,6 +122,7 @@ protected:
   bool _allow_unknown;
   int _max_iterations;
   int _max_on_approach_iterations;
+  bool _use_final_approach_orientation;
   float _tolerance;
   rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr _raw_plan_publisher;
   double _max_planning_time;
@@ -212,13 +210,10 @@ protected:
   rcl_interfaces::msg::SetParametersResult
   dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters);
 
-  std::unique_ptr<nav2_smac_planner::AStarAlgorithm<nav2_smac_planner::NodeLattice>> _a_star;
-  orunav2_smac_planner::CollisionDetector _collision_checker;
   std::unique_ptr<orunav2_smac_planner::Smoother> _smoother;
   rclcpp::Clock::SharedPtr _clock;
   rclcpp::Logger _logger{rclcpp::get_logger("SmacPlannerLattice")};
   nav2_costmap_2d::Costmap2D * _costmap;
-  std::shared_ptr<nav2_costmap_2d::Costmap2DROS> _costmap_ros;
   orunav2_smac_planner::MotionModel _motion_model;
   nav2_smac_planner::LatticeMetadata _metadata;
   std::string _global_frame, _name;
@@ -226,6 +221,7 @@ protected:
   bool _allow_unknown;
   int _max_iterations;
   int _max_on_approach_iterations;
+  bool _use_final_approach_orientation;
   float _tolerance;
   rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr _raw_plan_publisher;
   double _max_planning_time;
