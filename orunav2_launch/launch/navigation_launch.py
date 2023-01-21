@@ -50,7 +50,7 @@ def generate_launch_description():
                        'bt_navigator',
                        'waypoint_follower',
                        'velocity_smoother',
-                       'global_planner_selector_server']
+                       'selector_server']
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -217,8 +217,8 @@ def generate_launch_description():
             Node(
                 condition=IfCondition(use_selector),
                 package='orunav2_selector',
-                executable='global_planner_selector_server',
-                name='global_planner_selector_server',
+                executable='selector_server',
+                name='selector_server',
                 output='screen',
                 respawn=use_respawn,
                 respawn_delay=2.0,
@@ -285,7 +285,7 @@ def generate_launch_description():
             ComposableNode(
                 package='orunav2_selector',
                 plugin='orunav2_selector::PlannerSelectorServer',
-                name='global_planner_selector_server',
+                name='selector_server',
                 parameters=[configured_params],
                 remappings=remappings),
         ],

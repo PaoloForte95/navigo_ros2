@@ -39,7 +39,7 @@ namespace orunav2_selector
 {
 
 PlannerSelectorServer::PlannerSelectorServer(const rclcpp::NodeOptions & options)
-: nav2_util::LifecycleNode("global_planner_selector_server", "", options),
+: nav2_util::LifecycleNode("selector_server", "", options),
   gp_loader_("orunav2_core", "orunav2_core::GlobalPlannerSelector"),
   default_ids_{"CostmapBased22"},
   default_types_{"orunav2_selector::CostmapSelector"}

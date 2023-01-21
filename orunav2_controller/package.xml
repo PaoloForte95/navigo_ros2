@@ -22,6 +22,7 @@
   <depend>orunav2_core</depend>
   <depend>orunav2_msgs</depend>
   <depend>pluginlib</depend>
+  <depend>ecceleron_conversions</depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
