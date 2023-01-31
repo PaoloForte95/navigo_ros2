@@ -1,5 +1,5 @@
 # xcf files
-.xcf
+*.xcf
 
 # Workspace settings
 /.vscode
