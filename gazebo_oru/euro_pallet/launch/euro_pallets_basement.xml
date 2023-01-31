@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find gazebo_worlds_oru)/launch/basement_world_paused.launch"/>
+  <include file="$(find orunav2_maps)/launch/basement_world_paused.launch"/>
 
   <!-- pallet 1 -->
   <group ns="pallet1">
