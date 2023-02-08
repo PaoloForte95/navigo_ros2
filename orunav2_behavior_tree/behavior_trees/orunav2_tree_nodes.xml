@@ -258,7 +258,7 @@
 
     <Condition ID="UpdatedPlanner"/>
 
-     <Condition ID="IsPlannerEqualCondition">
+     <Condition ID="IsPlannerEqual">
       <input_port name="planner_to_check"> Planner to check </input_port>
     </Condition>
   

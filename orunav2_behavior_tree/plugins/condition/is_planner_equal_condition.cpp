@@ -51,5 +51,5 @@ BT::NodeStatus IsPlannerEqualCondition::tick()
 #include "behaviortree_cpp_v3/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
-  factory.registerNodeType<orunav2_behavior_tree::IsPlannerEqualCondition>("IsPlannerEqualCondition");
+  factory.registerNodeType<orunav2_behavior_tree::IsPlannerEqualCondition>("IsPlannerEqual");
 }

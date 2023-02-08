@@ -14,7 +14,7 @@
       <RateController hz="1.0">
       <Fallback name="Fallback">
         <Sequence name="CheckLatticePlanner">
-         <IsPlannerEqualCondition planner_to_check="LatticeBased" />
+         <IsPlannerEqual planner_to_check="LatticeBased" />
         <IsPathValid path="{path}"/>
          <Inverter>
             <GlobalUpdatedGoal/>
