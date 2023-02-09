@@ -124,7 +124,7 @@ void SmacPlannerLattice::configure(
   node->get_parameter(name + ".save_paths", _save_paths);
 
   nav2_util::declare_parameter_if_not_declared(
-    node, name + ".max_planning_time", rclcpp::ParameterValue(20.0));
+    node, name + ".max_planning_time", rclcpp::ParameterValue(10.0));
   node->get_parameter(name + ".max_planning_time", _max_planning_time);
 
   _search_info.minimum_turning_radius =

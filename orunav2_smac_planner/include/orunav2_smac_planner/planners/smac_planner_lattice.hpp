@@ -27,7 +27,6 @@
 #include "orunav2_smac_planner/smoother.hpp"
 #include "nav2_smac_planner/smoother.hpp"
 #include "nav2_core/global_planner.hpp"
-#include "orunav2_core/global_planner.hpp"
 #include "nav2_util/lifecycle_node.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
@@ -137,106 +136,6 @@ protected:
   // Dynamic parameters handler
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr _dyn_params_handler;
 };
-
-
-class SmacPlannerLatticeEcl : public orunav2_core::GlobalPlanner
-{
-public:
-  /**
-   * @brief constructor
-   */
-  SmacPlannerLatticeEcl();
-
-  /**
-   * @brief destructor
-   */
-  ~SmacPlannerLatticeEcl();
-
-  /**
-   * @brief Configuring plugin
-   * @param parent Lifecycle node pointer
-   * @param name Name of plugin map
-   * @param tf Shared ptr of TF2 buffer
-   * @param costmap_ros Costmap2DROS object
-   */
-  void configure(
-    const rclcpp_lifecycle::LifecycleNode::WeakPtr & parent,
-    std::string name, std::shared_ptr<tf2_ros::Buffer> tf,
-    std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros) override;
-
-  /**
-   * @brief Cleanup lifecycle node
-   */
-  void cleanup() override;
-
-  /**
-   * @brief Activate lifecycle node
-   */
-  void activate() override;
-
-  /**
-   * @brief Deactivate lifecycle node
-   */
-  void deactivate() override;
-
-  /**
-   * @brief Creating a plan from start and goal poses
-   * @param start Start pose
-   * @param goal Goal pose
-   * @return nav2_msgs::Path of the generated path
-   */
-  orunav2_msgs::msg::Path createPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal) override;
-
-
-protected:
-   
-  /**
-   * @brief Creating a unsmoothed plan from start and goal poses
-   * @param start Start pose
-   * @param goal Goal pose
-   * @return nav2_msgs::Path of the generated path
-   */
-  nav_msgs::msg::Path createUnsmoothedPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal);
-
-
-  /**
-   * @brief Callback executed when a paramter change is detected
-   * @param parameters list of changed parameters
-   */
-  rcl_interfaces::msg::SetParametersResult
-  dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters);
-
-  std::unique_ptr<orunav2_smac_planner::Smoother> _smoother;
-  rclcpp::Clock::SharedPtr _clock;
-  rclcpp::Logger _logger{rclcpp::get_logger("SmacPlannerLattice")};
-  nav2_costmap_2d::Costmap2D * _costmap;
-  orunav2_smac_planner::MotionModel _motion_model;
-  nav2_smac_planner::LatticeMetadata _metadata;
-  std::string _global_frame, _name;
-  orunav2_smac_planner::SearchInfo _search_info;
-  bool _allow_unknown;
-  int _max_iterations;
-  int _max_on_approach_iterations;
-  bool _use_final_approach_orientation;
-  float _tolerance;
-  rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr _raw_plan_publisher;
-  double _max_planning_time;
-  double _lookup_table_size;
-  std::mutex _mutex;
-  rclcpp_lifecycle::LifecycleNode::WeakPtr _node;
-  orunav2_smac_planner::LHDModel* _model;
-  orunav2_smac_planner::PathFinder* _path_finder;
-  std::string model;
-  bool _save_paths;
-  double _min_incr_path_dist;
-  // Dynamic parameters handler
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr _dyn_params_handler;
-};
-
 
 
 

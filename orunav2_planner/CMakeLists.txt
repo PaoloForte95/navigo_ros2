@@ -17,20 +17,18 @@ find_package(visualization_msgs REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(orunav2_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(orunav2_core REQUIRED)
 
 
 include_directories(
   include
 )
 
-set(executable_name ecl_planner_server)
+set(executable_name planner_server)
 
 
 set(library_name ${executable_name}_core)
@@ -46,13 +44,11 @@ set(dependencies
   nav2_util
   nav2_msgs
   nav_msgs
-  orunav2_msgs
   geometry_msgs
   builtin_interfaces
   tf2_ros
   nav2_costmap_2d
   pluginlib
-  orunav2_core
 )
 
 

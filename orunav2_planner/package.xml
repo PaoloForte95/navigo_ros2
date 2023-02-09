@@ -15,7 +15,6 @@
   <depend>visualization_msgs</depend>
   <depend>nav2_util</depend>
   <depend>nav2_msgs</depend>
-  <depend>orunav2_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>builtin_interfaces</depend>
@@ -23,7 +22,7 @@
   <depend>tf2_ros</depend>
   <depend>nav2_costmap_2d</depend>
   <depend>pluginlib</depend>
-  <depend>orunav2_core</depend>
+  <depend>nav2_core</depend>
 
 
   <test_depend>ament_lint_auto</test_depend>

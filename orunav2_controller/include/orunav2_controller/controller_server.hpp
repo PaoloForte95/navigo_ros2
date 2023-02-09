@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Paolo Forte
+// Copyright (c) 2023 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@
 #include <vector>
 #include <mutex>
 
-#include "orunav2_core/controller.hpp"
+#include "nav2_core/controller.hpp"
 #include "nav2_core/progress_checker.hpp"
 #include "nav2_core/goal_checker.hpp"
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
 #include "tf2_ros/transform_listener.h"
-#include "orunav2_msgs/action/follow_path.hpp"
+#include "nav2_msgs/action/follow_path.hpp"
 #include "nav2_msgs/msg/speed_limit.hpp"
 #include "nav_2d_utils/odom_subscriber.hpp"
 #include "nav2_util/lifecycle_node.hpp"
@@ -35,7 +35,6 @@
 #include "nav2_util/robot_utils.hpp"
 #include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
 
 namespace orunav2_controller
 {
@@ -49,7 +48,7 @@ class ProgressChecker;
 class ControllerServer : public nav2_util::LifecycleNode
 {
 public:
-  using ControllerMap = std::unordered_map<std::string, orunav2_core::Controller::Ptr>;
+  using ControllerMap = std::unordered_map<std::string, nav2_core::Controller::Ptr>;
   using GoalCheckerMap = std::unordered_map<std::string, nav2_core::GoalChecker::Ptr>;
 
   /**
@@ -108,7 +107,7 @@ protected:
    */
   nav2_util::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
 
-  using Action = orunav2_msgs::action::FollowPath;
+  using Action = nav2_msgs::action::FollowPath;
   using ActionServer = nav2_util::SimpleActionServer<Action>;
 
   // Our action server implements the FollowPath action
@@ -147,8 +146,7 @@ protected:
    * @brief Assigns path to controller
    * @param path Path received from action server
    */
-  void setPlannerPath(const orunav2_msgs::msg::Path & path);
-
+  void setPlannerPath(const nav_msgs::msg::Path & path);
   /**
    * @brief Calculates velocity and publishes to "cmd_vel" topic
    */
@@ -204,8 +202,6 @@ protected:
     return twist_thresh;
   }
 
-  void poseEstOdomCB(const nav_msgs::msg::Odometry::SharedPtr &msg);
-
   /**
    * @brief Callback executed when a parameter change is detected
    * @param event ParameterEvent message
@@ -225,7 +221,6 @@ protected:
   std::unique_ptr<nav_2d_utils::OdomSubscriber> odom_sub_;
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher_;
   rclcpp::Subscription<nav2_msgs::msg::SpeedLimit>::SharedPtr speed_limit_sub_;
-  std::shared_ptr<rclcpp::Subscription<nav_msgs::msg::Odometry::SharedPtr>> pose_est_odom_sub_; // Instead of going through the cost map to get the robot pose, this can be used directly.
 
   // Progress Checker Plugin
   pluginlib::ClassLoader<nav2_core::ProgressChecker> progress_checker_loader_;
@@ -245,34 +240,29 @@ protected:
   std::string goal_checker_ids_concat_, current_goal_checker_;
 
   // Controller Plugins
-  pluginlib::ClassLoader<orunav2_core::Controller> lp_loader_;
+  pluginlib::ClassLoader<nav2_core::Controller> lp_loader_;
   ControllerMap controllers_;
   std::vector<std::string> default_ids_;
   std::vector<std::string> default_types_;
   std::vector<std::string> controller_ids_;
   std::vector<std::string> controller_types_;
   std::string controller_ids_concat_, current_controller_;
-  std::string odom_topic_;
 
   double controller_frequency_;
   double min_x_velocity_threshold_;
   double min_y_velocity_threshold_;
   double min_theta_velocity_threshold_;
+
   double failure_tolerance_;
 
-  bool use_odom_topic_for_pose_estimate_;      //! Use the odom_topic to get the pose estimate (instead of using the pose obtained from the cost map)
-
   // Whether we've published the single controller warning yet
-  orunav2_msgs::msg::PathPoint end_pose_;
+  geometry_msgs::msg::PoseStamped end_pose_;
 
   // Last time the controller generated a valid command
   rclcpp::Time last_valid_cmd_time_;
 
   // Current path container
-  orunav2_msgs::msg::Path current_path_;
-
-  //Last post estimated from odometry
-  nav_msgs::msg:: Odometry last_pose_est_odom_;
+  nav_msgs::msg::Path current_path_;
 
 private:
   /**

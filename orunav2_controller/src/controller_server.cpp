@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Paolo Forte
+// Copyright (c) 2023 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@
 #include "nav_2d_utils/tf_help.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_util/geometry_utils.hpp"
-#include "orunav2_util/geometry_utils.hpp"
-#include "nav2_util/geometry_utils.hpp"
 #include "orunav2_controller/controller_server.hpp"
 
 using namespace std::chrono_literals;
@@ -43,8 +41,8 @@ ControllerServer::ControllerServer(const rclcpp::NodeOptions & options)
   goal_checker_loader_("nav2_core", "nav2_core::GoalChecker"),
   default_goal_checker_ids_{"goal_checker"},
   default_goal_checker_types_{"nav2_controller::SimpleGoalChecker"},
-  lp_loader_("orunav2_core", "orunav2_core::Controller"),
-  default_ids_{"FollowPath", "FollowSpline"},
+  lp_loader_("nav2_core", "nav2_core::Controller"),
+  default_ids_{"FollowPath"},
   default_types_{"dwb_core::DWBLocalPlanner"}
 {
   RCLCPP_INFO(get_logger(), "Creating controller server");
@@ -61,9 +59,6 @@ ControllerServer::ControllerServer(const rclcpp::NodeOptions & options)
   declare_parameter("speed_limit_topic", rclcpp::ParameterValue("speed_limit"));
 
   declare_parameter("failure_tolerance", rclcpp::ParameterValue(0.0));
-
-  declare_parameter("use_odom_topic_for_pose_estimate", rclcpp::ParameterValue(false));
-  declare_parameter("odom_topic", rclcpp::ParameterValue("odom"));
 
   // The costmap node is used in the implementation of the controller
   costmap_ros_ = std::make_shared<nav2_costmap_2d::Costmap2DROS>(
@@ -127,9 +122,6 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   get_parameter("speed_limit_topic", speed_limit_topic);
   get_parameter("failure_tolerance", failure_tolerance_);
 
-  get_parameter("use_odom_topic_for_pose_estimate", use_odom_topic_for_pose_estimate_);
-  get_parameter("odom_topic", odom_topic_);
-
   costmap_ros_->configure();
 
   try {
@@ -175,7 +167,7 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   for (size_t i = 0; i != controller_ids_.size(); i++) {
     try {
       controller_types_[i] = nav2_util::get_plugin_type_param(node, controller_ids_[i]);
-      orunav2_core::Controller::Ptr controller =
+      nav2_core::Controller::Ptr controller =
         lp_loader_.createUniqueInstance(controller_types_[i]);
       RCLCPP_INFO(
         get_logger(), "Created controller : %s of type %s",
@@ -216,8 +208,7 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   speed_limit_sub_ = create_subscription<nav2_msgs::msg::SpeedLimit>(
     speed_limit_topic, rclcpp::QoS(10),
     std::bind(&ControllerServer::speedLimitCallback, this, std::placeholders::_1));
-  
-  pose_est_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry::SharedPtr>(odom_topic_, 1, std::bind(&ControllerServer::poseEstOdomCB, this, std::placeholders::_1));
+
   return nav2_util::CallbackReturn::SUCCESS;
 }
 
@@ -429,7 +420,7 @@ void ControllerServer::computeControl()
   action_server_->succeeded_current();
 }
 
-void ControllerServer::setPlannerPath(const orunav2_msgs::msg::Path & path)
+void ControllerServer::setPlannerPath(const nav_msgs::msg::Path & path)
 {
   RCLCPP_DEBUG(
     get_logger(),
@@ -453,7 +444,6 @@ void ControllerServer::setPlannerPath(const orunav2_msgs::msg::Path & path)
 void ControllerServer::computeAndPublishVelocity()
 {
   geometry_msgs::msg::PoseStamped pose;
-
 
   if (!getRobotPose(pose)) {
     throw nav2_core::PlannerException("Failed to obtain robot pose");
@@ -499,14 +489,13 @@ void ControllerServer::computeAndPublishVelocity()
   feedback->speed = std::hypot(cmd_vel_2d.twist.linear.x, cmd_vel_2d.twist.linear.y);
 
   // Find the closest pose to current pose on global path
-
-  orunav2_msgs::msg::Path & current_path = current_path_;
+  nav_msgs::msg::Path & current_path = current_path_;
   auto find_closest_pose_idx =
     [&pose, &current_path]() {
       size_t closest_pose_idx = 0;
       double curr_min_dist = std::numeric_limits<double>::max();
       for (size_t curr_idx = 0; curr_idx < current_path.poses.size(); ++curr_idx) {
-        double curr_dist = orunav2_util::geometry_utils::euclidean_distance(
+        double curr_dist = nav2_util::geometry_utils::euclidean_distance(
           pose, current_path.poses[curr_idx]);
         if (curr_dist < curr_min_dist) {
           curr_min_dist = curr_dist;
@@ -517,7 +506,7 @@ void ControllerServer::computeAndPublishVelocity()
     };
 
   feedback->distance_to_goal =
-    orunav2_util::geometry_utils::calculate_path_length(current_path_, find_closest_pose_idx());
+    nav2_util::geometry_utils::calculate_path_length(current_path_, find_closest_pose_idx());
   action_server_->publish_feedback(feedback);
 
   RCLCPP_DEBUG(get_logger(), "Publishing velocity at time %.2f", now().seconds());
@@ -588,13 +577,9 @@ bool ControllerServer::isGoalReached()
 
   geometry_msgs::msg::PoseStamped transformed_end_pose;
   rclcpp::Duration tolerance(rclcpp::Duration::from_seconds(costmap_ros_->getTransformTolerance()));
-
-  geometry_msgs::msg::PoseStamped end_pose_stamped;
-  end_pose_stamped.header = end_pose_.header;
-  end_pose_stamped.pose = end_pose_.pose;
   nav_2d_utils::transformPose(
     costmap_ros_->getTfBuffer(), costmap_ros_->getGlobalFrameID(),
-    end_pose_stamped, transformed_end_pose, tolerance);
+    end_pose_, transformed_end_pose, tolerance);
 
   return goal_checkers_[current_goal_checker_]->isGoalReached(
     pose.pose, transformed_end_pose.pose,
@@ -604,20 +589,10 @@ bool ControllerServer::isGoalReached()
 bool ControllerServer::getRobotPose(geometry_msgs::msg::PoseStamped & pose)
 {
   geometry_msgs::msg::PoseStamped current_pose;
- 
-  if (use_odom_topic_for_pose_estimate_) {
-      nav_msgs::msg::Odometry odom_robot_pose;
-      //odom_helper_.getOdom(odom_robot_pose);  // "odom_helper" rather weird class that only copies over the velocities.
-      current_pose.header = last_pose_est_odom_.header;
-      current_pose.pose = last_pose_est_odom_.pose.pose;
-    }
-    else {
-       if (!costmap_ros_->getRobotPose(current_pose)) {
-        return false;
-    }
-  } 
-  pose.header = current_pose.header;
-  pose.pose = current_pose.pose;
+  if (!costmap_ros_->getRobotPose(current_pose)) {
+    return false;
+  }
+  pose = current_pose;
   return true;
 }
 
@@ -628,12 +603,6 @@ void ControllerServer::speedLimitCallback(const nav2_msgs::msg::SpeedLimit::Shar
     it->second->setSpeedLimit(msg->speed_limit, msg->percentage);
   }
 }
-
-void ControllerServer::poseEstOdomCB(const nav_msgs::msg::Odometry::SharedPtr &msg)
-  {
-    last_pose_est_odom_ = *msg;
-  }
-
 
 rcl_interfaces::msg::SetParametersResult
 ControllerServer::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)
@@ -681,7 +650,7 @@ ControllerServer::dynamicParametersCallback(std::vector<rclcpp::Parameter> param
   return result;
 }
 
-}  // namespace orunav2_controller
+}  // namespace nav2_controller
 
 #include "rclcpp_components/register_node_macro.hpp"
 

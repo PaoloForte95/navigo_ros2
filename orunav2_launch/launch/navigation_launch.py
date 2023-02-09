@@ -133,7 +133,7 @@ def generate_launch_description():
         condition=IfCondition(PythonExpression(['not ', use_composition])),
         actions=[
             Node(
-                package='nav2_controller',
+                package='orunav2_controller',
                 executable='controller_server',
                 output='screen',
                 respawn=use_respawn,
@@ -152,7 +152,7 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings),
             Node(
-                package='nav2_planner',
+                package='orunav2_planner',
                 executable='planner_server',
                 name='planner_server',
                 output='screen',
@@ -211,7 +211,7 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': use_sim_time},
                             {'autostart': autostart},
                             {'node_names': lifecycle_nodes},
-                            {'bond_timeout': 4.0}
+                            {'bond_timeout': 25.0}
                             ]),
 
             Node(

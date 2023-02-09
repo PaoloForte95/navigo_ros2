@@ -34,12 +34,7 @@
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
 #include "pluginlib/class_loader.hpp"
 #include "pluginlib/class_list_macros.hpp"
-#include "orunav2_core/global_planner.hpp"
-#include "orunav2_msgs/action/compute_path_to_pose.hpp"
-#include "orunav2_msgs/action/compute_path_through_poses.hpp"
-#include "orunav2_msgs/srv/is_path_valid.hpp"
-#include "orunav2_msgs/msg/path.hpp"
-
+#include "nav2_core/global_planner.hpp"
 #include "nav2_msgs/action/compute_path_to_pose.hpp"
 #include "nav2_msgs/action/compute_path_through_poses.hpp"
 #include "nav2_msgs/srv/is_path_valid.hpp"
@@ -67,7 +62,7 @@ public:
    */
   ~PlannerServer();
 
-  using PlannerMap = std::unordered_map<std::string, orunav2_core::GlobalPlanner::Ptr>;
+  using PlannerMap = std::unordered_map<std::string, nav2_core::GlobalPlanner::Ptr>;
 
   /**
    * @brief Method to get plan from the desired plugin
@@ -75,7 +70,7 @@ public:
    * @param goal goal request
    * @return Path
    */
-  orunav2_msgs::msg::Path getPlan(
+  nav_msgs::msg::Path getPlan(
     const geometry_msgs::msg::PoseStamped & start,
     const geometry_msgs::msg::PoseStamped & goal,
     const std::string & planner_id);
@@ -112,8 +107,8 @@ protected:
    */
   nav2_util::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
 
-  using ActionToPose = orunav2_msgs::action::ComputePathToPose;
-  using ActionThroughPoses = orunav2_msgs::action::ComputePathThroughPoses;
+  using ActionToPose = nav2_msgs::action::ComputePathToPose;
+  using ActionThroughPoses = nav2_msgs::action::ComputePathThroughPoses;
   using ActionServerToPose = nav2_util::SimpleActionServer<ActionToPose>;
   using ActionServerThroughPoses = nav2_util::SimpleActionServer<ActionThroughPoses>;
 
@@ -189,7 +184,7 @@ protected:
   bool validatePath(
     std::unique_ptr<nav2_util::SimpleActionServer<T>> & action_server,
     const geometry_msgs::msg::PoseStamped & curr_goal,
-    const orunav2_msgs::msg::Path & path,
+    const nav_msgs::msg::Path & path,
     const std::string & planner_id);
 
   // Our action server implements the ComputePathToPose action
@@ -214,14 +209,14 @@ protected:
    * @param response from the service
    */
   void isPathValid(
-    const std::shared_ptr<orunav2_msgs::srv::IsPathValid::Request> request,
-    std::shared_ptr<orunav2_msgs::srv::IsPathValid::Response> response);
+    const std::shared_ptr<nav2_msgs::srv::IsPathValid::Request> request,
+    std::shared_ptr<nav2_msgs::srv::IsPathValid::Response> response);
 
   /**
    * @brief Publish a path for visualization purposes
    * @param path Reference to Global Path
    */
-  void publishPlan(const orunav2_msgs::msg::Path & path);
+  void publishPlan(const nav_msgs::msg::Path & path);
 
   /**
    * @brief Callback executed when a parameter change is detected
@@ -236,7 +231,7 @@ protected:
 
   // Planner
   PlannerMap planners_;
-  pluginlib::ClassLoader<orunav2_core::GlobalPlanner> gp_loader_;
+  pluginlib::ClassLoader<nav2_core::GlobalPlanner> gp_loader_;
   std::vector<std::string> default_ids_;
   std::vector<std::string> default_types_;
   std::vector<std::string> planner_ids_;
@@ -256,10 +251,10 @@ protected:
   nav2_costmap_2d::Costmap2D * costmap_;
 
   // Publishers for the path
-  rclcpp_lifecycle::LifecyclePublisher<orunav2_msgs::msg::Path>::SharedPtr plan_publisher_;
+  rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr plan_publisher_;
 
   // Service to deterime if the path is valid
-  rclcpp::Service<orunav2_msgs::srv::IsPathValid>::SharedPtr is_path_valid_service_;
+  rclcpp::Service<nav2_msgs::srv::IsPathValid>::SharedPtr is_path_valid_service_;
 };
 
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Paolo Forte
+// Copyright (c) 2023 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ namespace orunav2_planner
 
 PlannerServer::PlannerServer(const rclcpp::NodeOptions & options)
 : nav2_util::LifecycleNode("planner_server", "", options),
-  gp_loader_("orunav2_core", "orunav2_core::GlobalPlanner"),
+  gp_loader_("nav2_core", "nav2_core::GlobalPlanner"),
   default_ids_{"GridBased"},
   default_types_{"nav2_navfn_planner/NavfnPlanner"},
   costmap_(nullptr)
@@ -94,7 +94,7 @@ PlannerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
     try {
       planner_types_[i] = nav2_util::get_plugin_type_param(
         node, planner_ids_[i]);
-      orunav2_core::GlobalPlanner::Ptr planner =
+      nav2_core::GlobalPlanner::Ptr planner =
         gp_loader_.createUniqueInstance(planner_types_[i]);
       RCLCPP_INFO(
         get_logger(), "Created global planner plugin %s of type %s",
@@ -130,7 +130,7 @@ PlannerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   }
 
   // Initialize pubs & subs
-  plan_publisher_ = create_publisher<orunav2_msgs::msg::Path>("plan", 1);
+  plan_publisher_ = create_publisher<nav_msgs::msg::Path>("plan", 1);
 
   // Create the action servers for path planning to a pose and through poses
   action_server_pose_ = std::make_unique<ActionServerToPose>(
@@ -169,7 +169,7 @@ PlannerServer::on_activate(const rclcpp_lifecycle::State & /*state*/)
 
   auto node = shared_from_this();
 
-  is_path_valid_service_ = node->create_service<orunav2_msgs::srv::IsPathValid>(
+  is_path_valid_service_ = node->create_service<nav2_msgs::srv::IsPathValid>(
     "is_path_valid",
     std::bind(
       &PlannerServer::isPathValid, this,
@@ -317,7 +317,7 @@ template<typename T>
 bool PlannerServer::validatePath(
   std::unique_ptr<nav2_util::SimpleActionServer<T>> & action_server,
   const geometry_msgs::msg::PoseStamped & goal,
-  const orunav2_msgs::msg::Path & path,
+  const nav_msgs::msg::Path & path,
   const std::string & planner_id)
 {
   if (path.poses.size() == 0) {
@@ -348,7 +348,7 @@ PlannerServer::computePlanThroughPoses()
   // Initialize the ComputePathToPose goal and result
   auto goal = action_server_poses_->get_current_goal();
   auto result = std::make_shared<ActionThroughPoses::Result>();
-  orunav2_msgs::msg::Path concat_path;
+  nav_msgs::msg::Path concat_path;
 
   try {
     if (isServerInactive(action_server_poses_) || isCancelRequested(action_server_poses_)) {
@@ -390,7 +390,7 @@ PlannerServer::computePlanThroughPoses()
       }
 
       // Get plan from start -> goal
-      orunav2_msgs::msg::Path curr_path = getPlan(curr_start, curr_goal, goal->planner_id);
+      nav_msgs::msg::Path curr_path = getPlan(curr_start, curr_goal, goal->planner_id);
 
       // check path for validity
       if (!validatePath(action_server_poses_, curr_goal, curr_path, goal->planner_id)) {
@@ -489,7 +489,7 @@ PlannerServer::computePlan()
   }
 }
 
-orunav2_msgs::msg::Path
+nav_msgs::msg::Path
 PlannerServer::getPlan(
   const geometry_msgs::msg::PoseStamped & start,
   const geometry_msgs::msg::PoseStamped & goal,
@@ -501,6 +501,7 @@ PlannerServer::getPlan(
     goal.pose.position.x, goal.pose.position.y);
 
   if (planners_.find(planner_id) != planners_.end()) {
+
     return planners_[planner_id]->createPlan(start, goal);
   } else {
     if (planners_.size() == 1 && planner_id.empty()) {
@@ -517,21 +518,21 @@ PlannerServer::getPlan(
     }
   }
 
-  return orunav2_msgs::msg::Path();
+  return nav_msgs::msg::Path();
 }
 
 void
-PlannerServer::publishPlan(const orunav2_msgs::msg::Path & path)
+PlannerServer::publishPlan(const nav_msgs::msg::Path & path)
 {
-  auto msg = std::make_unique<orunav2_msgs::msg::Path>(path);
+  auto msg = std::make_unique<nav_msgs::msg::Path>(path);
   if (plan_publisher_->is_activated() && plan_publisher_->get_subscription_count() > 0) {
     plan_publisher_->publish(std::move(msg));
   }
 }
 
 void PlannerServer::isPathValid(
-  const std::shared_ptr<orunav2_msgs::srv::IsPathValid::Request> request,
-  std::shared_ptr<orunav2_msgs::srv::IsPathValid::Response> response)
+  const std::shared_ptr<nav2_msgs::srv::IsPathValid::Request> request,
+  std::shared_ptr<nav2_msgs::srv::IsPathValid::Response> response)
 {
   response->is_valid = true;
 
