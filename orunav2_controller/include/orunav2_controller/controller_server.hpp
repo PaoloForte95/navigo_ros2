@@ -221,6 +221,7 @@ protected:
   std::unique_ptr<nav_2d_utils::OdomSubscriber> odom_sub_;
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::Twist>::SharedPtr vel_publisher_;
   rclcpp::Subscription<nav2_msgs::msg::SpeedLimit>::SharedPtr speed_limit_sub_;
+  std::shared_ptr<rclcpp::Subscription<nav_msgs::msg::Odometry>> pose_est_odom_sub_;
 
   // Progress Checker Plugin
   pluginlib::ClassLoader<nav2_core::ProgressChecker> progress_checker_loader_;
@@ -264,12 +265,22 @@ protected:
   // Current path container
   nav_msgs::msg::Path current_path_;
 
+  bool use_odom_topic_for_pose_estimate; //! Use the odom_topic to get the pose estimate (instead of using the pose obtained from the cost map)
+  nav_msgs::msg::Odometry last_pose_est_odom_;
+
 private:
   /**
     * @brief Callback for speed limiting messages
     * @param msg Shared pointer to nav2_msgs::msg::SpeedLimit
     */
   void speedLimitCallback(const nav2_msgs::msg::SpeedLimit::SharedPtr msg);
+
+  /**
+    * @brief Callback for odometry pose
+    * @param msg Shared pointer to nav_msgs::msg::Odometry
+    */
+
+  void poseEstOdomCB(const nav_msgs::msg::Odometry::SharedPtr msg);
 };
 
 }  // namespace orunav2_controller

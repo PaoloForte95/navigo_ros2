@@ -59,6 +59,8 @@ ControllerServer::ControllerServer(const rclcpp::NodeOptions & options)
   declare_parameter("speed_limit_topic", rclcpp::ParameterValue("speed_limit"));
 
   declare_parameter("failure_tolerance", rclcpp::ParameterValue(0.0));
+  declare_parameter("odom_topic", rclcpp::ParameterValue("odom"));
+  declare_parameter("use_odom_topic_for_pose_estimate", rclcpp::ParameterValue(false));
 
   // The costmap node is used in the implementation of the controller
   costmap_ros_ = std::make_shared<nav2_costmap_2d::Costmap2DROS>(
@@ -118,9 +120,11 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   get_parameter("min_theta_velocity_threshold", min_theta_velocity_threshold_);
   RCLCPP_INFO(get_logger(), "Controller frequency set to %.4fHz", controller_frequency_);
 
-  std::string speed_limit_topic;
+  std::string speed_limit_topic, odom_topic_;
   get_parameter("speed_limit_topic", speed_limit_topic);
   get_parameter("failure_tolerance", failure_tolerance_);
+  get_parameter<std::string>("odom_topic", odom_topic_);
+  get_parameter<bool>("use_odom_topic_for_pose_estimate", use_odom_topic_for_pose_estimate);
 
   costmap_ros_->configure();
 
@@ -208,7 +212,9 @@ ControllerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   speed_limit_sub_ = create_subscription<nav2_msgs::msg::SpeedLimit>(
     speed_limit_topic, rclcpp::QoS(10),
     std::bind(&ControllerServer::speedLimitCallback, this, std::placeholders::_1));
-
+  if(use_odom_topic_for_pose_estimate){
+    pose_est_odom_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(odom_topic_, 1, std::bind(&ControllerServer::poseEstOdomCB, this, std::placeholders::_1));
+  }
   return nav2_util::CallbackReturn::SUCCESS;
 }
 
@@ -445,10 +451,17 @@ void ControllerServer::computeAndPublishVelocity()
 {
   geometry_msgs::msg::PoseStamped pose;
 
-  if (!getRobotPose(pose)) {
-    throw nav2_core::PlannerException("Failed to obtain robot pose");
+   if (use_odom_topic_for_pose_estimate) {
+      nav_msgs::msg::Odometry odom_robot_pose;
+      //odom_helper_.getOdom(odom_robot_pose);  // "odom_helper" rather weird class that only copies over the velocities.
+      pose.header = last_pose_est_odom_.header;
+      pose.pose = last_pose_est_odom_.pose.pose;
+    }
+    else {
+        if (!getRobotPose(pose)) {
+        throw nav2_core::PlannerException("Failed to obtain robot pose");
   }
-
+    } 
   if (!progress_checker_->check(pose)) {
     throw nav2_core::PlannerException("Failed to make progress");
   }
@@ -603,6 +616,11 @@ void ControllerServer::speedLimitCallback(const nav2_msgs::msg::SpeedLimit::Shar
     it->second->setSpeedLimit(msg->speed_limit, msg->percentage);
   }
 }
+
+void ControllerServer::poseEstOdomCB(const nav_msgs::msg::Odometry::SharedPtr msg)
+  {
+    last_pose_est_odom_ = *msg;
+  }
 
 rcl_interfaces::msg::SetParametersResult
 ControllerServer::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)
