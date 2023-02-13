@@ -459,7 +459,7 @@ PlannerServer::computePlan()
     if (!transformPosesToGlobalFrame(action_server_pose_, start, goal_pose)) {
       return;
     }
-
+    RCLCPP_INFO(get_logger(), " Computing the plan with planning algorithm %s", goal->planner_id.c_str());
     result->path = getPlan(start, goal_pose, goal->planner_id);
 
     if (!validatePath(action_server_pose_, goal_pose, result->path, goal->planner_id)) {
