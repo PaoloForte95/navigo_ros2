@@ -26,12 +26,15 @@ SelectGlobalPlannerAction::SelectGlobalPlannerAction(
   const BT::NodeConfiguration & conf)
 : BtActionNode<orunav2_msgs::action::GlobalPlannerSelector>(xml_tag_name, action_name, conf)
 {
+
+  
 }
 
 void SelectGlobalPlannerAction::on_tick()
 {
   getInput("goal", goal_.goal);
   getInput("selector_id", goal_.selector_id);
+  getInput("planner_ids", goal_.planner_ids);
   if (getInput("start", goal_.start)) {
     goal_.use_start = true;
   }

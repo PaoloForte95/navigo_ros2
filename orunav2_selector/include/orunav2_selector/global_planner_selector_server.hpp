@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Paolo Forte
+// Copyright (c) 2023 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ public:
   std::string getPlanner(
     const geometry_msgs::msg::PoseStamped & start,
     const geometry_msgs::msg::PoseStamped & goal,
-    const std::string & selector_id);
+    const std::string & selector_id,
+    const std::vector<std::string> & planner_ids);
 
 protected:
   /**
@@ -213,8 +214,6 @@ protected:
   // Clock
   rclcpp::Clock steady_clock_{RCL_STEADY_TIME};
 
-  // TF buffer
-  std::shared_ptr<tf2_ros::Buffer> tf_;
 
   // Global Costmap
   std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros_;

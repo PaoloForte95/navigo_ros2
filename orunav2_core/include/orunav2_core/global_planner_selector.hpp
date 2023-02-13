@@ -75,7 +75,8 @@ public:
    */
   virtual std::string selectGlobalPlanner(
     const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal) = 0;
+    const geometry_msgs::msg::PoseStamped & goal,
+    const std::vector<std::string> & planner_ids) = 0;
 };
 
 }  // namespace orunav2_core
