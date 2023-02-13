@@ -18,11 +18,15 @@
 #include <limits>
 #include <algorithm>
 
+#include "geometry_msgs/msg/point.hpp"
+#include "geometry_msgs/msg/point_stamped.hpp"
+
 #include "orunav2_selector/costmap_selector.hpp"
 #include "nav2_util/geometry_utils.hpp"
+#include "nav2_costmap_2d/footprint.hpp"
 
 // #define BENCHMARK_TESTING
-
+using nav2_costmap_2d::makeFootprintFromString;
 namespace orunav2_selector
 {
 using namespace std::chrono;  // NOLINT
@@ -60,17 +64,39 @@ void CostmapSelector::configure(
   // General planner params
   nav2_util::declare_parameter_if_not_declared(
     node, name + ".downsample_costmap", rclcpp::ParameterValue(false));
-  node->get_parameter(name + ".downsample_costmap", _downsample_costmap);
+  node->get_parameter<bool>(name + ".downsample_costmap", _downsample_costmap);
   nav2_util::declare_parameter_if_not_declared(
     node, name + ".downsampling_factor", rclcpp::ParameterValue(1));
-  node->get_parameter(name + ".downsampling_factor", _downsampling_factor);
+  node->get_parameter<int>(name + ".downsampling_factor", _downsampling_factor);
   nav2_util::declare_parameter_if_not_declared(
     node, name + ".allow_unknown", rclcpp::ParameterValue(true));
-  node->get_parameter(name + ".allow_unknown", _allow_unknown);
+  node->get_parameter<bool>(name + ".allow_unknown", _allow_unknown);
   nav2_util::declare_parameter_if_not_declared(
     node, name + ".distance_threshold", rclcpp::ParameterValue(3.0));
-  node->get_parameter(name + ".distance_threshold", _distance_threshold);
+  node->get_parameter<double>(name + ".distance_threshold", _distance_threshold);
+  nav2_util::declare_parameter_if_not_declared(
+      node, name + ".points", rclcpp::ParameterValue(std::string("[]")));
+  node->get_parameter<std::string>(name + ".points", _points);
+  nav2_util::declare_parameter_if_not_declared(
+      node, name + ".max_points", rclcpp::ParameterValue(3));
+  _max_points = node->get_parameter(name + ".max_points").as_int();
+  nav2_util::declare_parameter_if_not_declared(
+        node, name + ".polygon_pub_topic", rclcpp::ParameterValue("polygon_en"));
+  polygon_pub_topic = node->get_parameter(name + ".polygon_pub_topic").as_string();
+  nav2_util::declare_parameter_if_not_declared(
+    node, name + ".base_frame_id", rclcpp::ParameterValue("base_link"));
+  _base_frame_id = node->get_parameter(name + ".base_frame_id").as_string();
+  nav2_util::declare_parameter_if_not_declared(
+    node, name + ".odom_frame_id", rclcpp::ParameterValue("world"));
+  _odom_frame_id = node->get_parameter(name + ".odom_frame_id").as_string();
 
+  nav2_costmap_2d::makeFootprintFromString(_points,_poly_points);
+  // Check for points format correctness
+  if (_poly_points.size() <= 3 || _poly_points.size() % 2 != 0) {
+    RCLCPP_ERROR(
+      _logger,
+      "Polygon has incorrect points description");
+  }
 
   // Initialize costmap downsampler
   if (_downsample_costmap && _downsampling_factor > 1) {
@@ -80,6 +106,34 @@ void CostmapSelector::configure(
       node, _global_frame, topic_name, _costmap, _downsampling_factor);
   }
 
+  polygon_pub_ = node->create_publisher<geometry_msgs::msg::PolygonStamped>(polygon_pub_topic, rclcpp::SystemDefaultsQoS());
+
+  nav2_util::declare_parameter_if_not_declared(node, name + ".observation_sources", rclcpp::PARAMETER_STRING_ARRAY);
+  std::vector<std::string> source_names = node->get_parameter(name + ".observation_sources").as_string_array();
+  tf2::Duration transform_tolerance = tf2::durationFromSec(0.5);
+  rclcpp::Duration source_timeout = rclcpp::Duration::from_seconds(6.0);
+  for (std::string source_name : source_names) {
+    nav2_util::declare_parameter_if_not_declared(node, name + "." + source_name + ".type",rclcpp::ParameterValue(""));  // Laser scanner by default
+    const std::string source_type = node->get_parameter(name + "." + source_name + ".type").as_string();
+    RCLCPP_ERROR(node->get_logger(),"Adding source of type: %s", source_type.c_str());
+    
+    if (source_type == "scan") {
+      std::shared_ptr<orunav2_selector::Scan> s = std::make_shared<orunav2_selector::Scan>(node, name + "." + source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
+      s->configure();
+      _sources.push_back(s);
+
+    } else if (source_type == "pointcloud") {
+      std::shared_ptr<nav2_collision_monitor::PointCloud> p = std::make_shared<nav2_collision_monitor::PointCloud>(node, source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
+      p->configure();
+      _sources.push_back(p);
+    } else if (source_type == "range") {
+      std::shared_ptr<nav2_collision_monitor::Range> r = std::make_shared<nav2_collision_monitor::Range>(node, source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
+      r->configure();
+      _sources.push_back(r);
+    } else {  // Error if something else
+      RCLCPP_ERROR(node->get_logger(),"[%s]: Unknown source type: %s", source_name.c_str(), source_type.c_str());
+    }
+  }
 
   RCLCPP_INFO(
     _logger, "Configured plugin %s of type CostmapSelector with "
@@ -87,6 +141,7 @@ void CostmapSelector::configure(
     _name.c_str(),_distance_threshold,
     _allow_unknown ? "allowing unknown traversal" : "not allowing unknown traversal");
 }
+
 
 void CostmapSelector::activate()
 {
@@ -96,6 +151,7 @@ void CostmapSelector::activate()
   if (_costmap_downsampler) {
     _costmap_downsampler->on_activate();
   }
+  polygon_pub_->on_activate();
   auto node = _node.lock();
   // Add callback for dynamic parameters
   _dyn_params_handler = node->add_on_set_parameters_callback(
@@ -110,6 +166,7 @@ void CostmapSelector::deactivate()
   if (_costmap_downsampler) {
     _costmap_downsampler->on_deactivate();
   }
+  polygon_pub_->on_deactivate();
   _dyn_params_handler.reset();
 }
 
@@ -122,11 +179,13 @@ void CostmapSelector::cleanup()
     _costmap_downsampler->on_cleanup();
     _costmap_downsampler.reset();
   }
+  polygon_pub_.reset();
 }
 
 std::string CostmapSelector::selectGlobalPlanner(
   const geometry_msgs::msg::PoseStamped & start,
-  const geometry_msgs::msg::PoseStamped & goal)
+  const geometry_msgs::msg::PoseStamped & goal,
+  const std::vector<std::string> & planner_ids)
 {
   std::lock_guard<std::mutex> lock_reinit(_mutex);
 
@@ -164,38 +223,48 @@ std::string CostmapSelector::selectGlobalPlanner(
   double start_x = start.pose.position.x;
   double start_y = start.pose.position.y;
   RCLCPP_INFO(_logger, "Robot current position: (%f, %f)", start_x, start_y);
-  //Get distance to nearest obstacle
-  double min_dist;
-  unsigned int rb_start_x, rb_start_y, rb_end_x, rb_end_y;
-  //Get the start index position
-  costmap->worldToMap(start.pose.position.x, start.pose.position.y, rb_start_x, rb_start_y);
-  //Get the cell at max distance
-  double end_x = start.pose.position.x+_distance_threshold;
-  double end_y = start.pose.position.y+_distance_threshold;
-  costmap->worldToMap(end_x, end_y, rb_end_x, rb_end_y);
-  bool obstacle_is_near = false;
-  double obs_x, obs_y;
-  for (std::size_t j=rb_start_y; j < rb_end_y; j++) {
-      for (std::size_t i=rb_start_x; i < rb_end_x; i++) {
-          double cost_dist = costmap->getCost(i,j);
-          if (cost_dist >= nav2_costmap_2d::LETHAL_OBSTACLE){
-            obstacle_is_near = true;
-            costmap->mapToWorld(i,j,obs_x,obs_y);
-            double dist = sqrt(pow((obs_x-start_x ),2)+ pow((obs_y-start_y ),2));
-            RCLCPP_INFO(_logger, "Distance to first obstacle: %f", dist);
-            break;
-            
-          }
-      }
-      if(obstacle_is_near){
-          break;
-      }
+
+  // Fill collision_points array from different data sources
+  auto node = _node.lock();
+  rclcpp::Time curr_time =  node->get_clock()->now();
+  std::vector<nav2_collision_monitor::Point> collision_points;
+  std::vector<geometry_msgs::msg::Point> collision_points_g;
+  for (std::shared_ptr<nav2_collision_monitor::Source> source : _sources) {
+    source->getData(curr_time, collision_points);
   }
-  if (obstacle_is_near){
+  for(nav2_collision_monitor::Point point : collision_points){
+    geometry_msgs::msg::Point p;
+    p.x = point.x;
+    p.y = point.y;
+    collision_points_g.push_back(p);
+  }
+  RCLCPP_INFO(_logger, "Size:: %d", collision_points_g.size());
+  std::vector<int> insidePoints = getPointsInside(collision_points_g);
+  RCLCPP_INFO(_logger, "Point inside left polygon: %d and right polygon: %d", insidePoints[0], insidePoints[1]);
+  if (insidePoints[0] > _max_points && insidePoints[1] > _max_points ){
+    RCLCPP_INFO(_logger, "Obstacles on both sides! Entering a corridor!");
     selected_planner = "GridBased";
   }
-  else{
+  else if (insidePoints[0] > _max_points){
+    RCLCPP_INFO(_logger, "Obstacles on left side!");
     selected_planner = "LatticeBased";
+  
+  }
+  else if(insidePoints[1] > _max_points){
+    RCLCPP_INFO(_logger, "Obstacles on right side!");
+    selected_planner = "LatticeBased";
+  }
+  else {
+    RCLCPP_INFO(_logger, " No obstacles detected in the polygons. Open space ");
+    selected_planner = "LatticeBased";
+  }
+
+  //After selected the planner let's check if it failed before to compute the path
+  auto itr = std::find(planner_ids.begin(), planner_ids.end(), selected_planner);
+  if (itr == planner_ids.end() || planner_ids.empty()){
+     std::string default_planner = "GridBased";
+     RCLCPP_INFO(_logger, "Selected planning algorithm %s failed to compute a plan before. Changing to %s ", selected_planner.c_str(), default_planner.c_str() );
+     selected_planner = default_planner;
   }
 
 #ifdef BENCHMARK_TESTING
@@ -203,7 +272,8 @@ std::string CostmapSelector::selectGlobalPlanner(
     " milliseconds with " << num_iterations << " iterations." << std::endl;
 #endif
 
-  RCLCPP_INFO(_logger, "Setting  global planner: %s ", selected_planner.c_str());
+  RCLCPP_INFO(_logger, "Setting  global planner to: %s ", selected_planner.c_str());
+  publishPolygon();
   return selected_planner;
 }
 
@@ -256,6 +326,93 @@ CostmapSelector::dynamicParametersCallback(std::vector<rclcpp::Parameter> parame
   result.successful = true;
   return result;
 }
+
+void CostmapSelector::publishPolygon() const {
+  geometry_msgs::msg::Polygon polygon_;
+   auto node = _node.lock();
+
+  for (const geometry_msgs::msg::Point & p : _poly_points) {
+    geometry_msgs::msg::Point32 p_s;
+    p_s.x = p.x;
+    p_s.y = p.y;
+    // p_s.z will remain 0.0
+    polygon_.points.push_back(p_s);
+  }
+  std::unique_ptr<geometry_msgs::msg::PolygonStamped> poly_s = std::make_unique<geometry_msgs::msg::PolygonStamped>();
+ 
+  poly_s->header.stamp =  node->get_clock()->now();
+  poly_s->header.frame_id = _base_frame_id;
+  poly_s->polygon = polygon_;
+  polygon_pub_->publish(std::move(poly_s));
+}
+
+
+std::vector<int> CostmapSelector::getPointsInside(const std::vector<geometry_msgs::msg::Point> & points) const
+{
+  int num_l = 0, num_r = 0;
+  std::vector<int> nums;
+  std::vector<geometry_msgs::msg::Point> _poly_left_points,_poly_right_points;
+  geometry_msgs::msg::Point middle1, middle2;
+  middle1.y = (_poly_points[1].y + _poly_points[0].y)/2;
+  middle1.x = _poly_points[0].x;
+  middle2.y = (_poly_points[2].y + _poly_points[3].y)/2;
+  middle2.x = _poly_points[3].x;
+  //Add th point to left and right polygon
+  _poly_left_points.push_back(middle1);
+  _poly_left_points.push_back(_poly_points[1]);
+  _poly_left_points.push_back(_poly_points[2]);
+  _poly_left_points.push_back(middle2);
+
+  _poly_right_points.push_back(_poly_points[0]);
+  _poly_right_points.push_back(middle1);
+  _poly_right_points.push_back(middle2);
+  _poly_right_points.push_back(_poly_points[3]);
+  for (const geometry_msgs::msg::Point & point : points) {
+    if (isPointInside(point, _poly_left_points )) {
+      num_l++;
+    }
+    if (isPointInside(point, _poly_right_points )) {
+      num_r++;
+    }
+  }
+  nums.push_back(num_l);
+  nums.push_back(num_r);
+  return nums;
+}
+
+
+inline bool CostmapSelector::isPointInside(const geometry_msgs::msg::Point & point, std::vector<geometry_msgs::msg::Point> poly_points ) const
+{
+  // Adaptation of Shimrat, Moshe. "Algorithm 112: position of point relative to polygon."
+  // Communications of the ACM 5.8 (1962): 434.
+  // Implementation of ray crossings algorithm for point in polygon task solving.
+  // Y coordinate is fixed. Moving the ray on X+ axis starting from given point.
+  // Odd number of intersections with polygon boundaries means the point is inside polygon.
+  const int poly_size = poly_points.size();
+  int i, j;  // Polygon vertex iterators
+  bool res = false;  // Final result, initialized with already inverted value
+
+  // Starting from the edge where the last point of polygon is connected to the first
+  i = poly_size - 1;
+  for (j = 0; j < poly_size; j++) {
+    // Checking the edge only if given point is between edge boundaries by Y coordinates.
+    // One of the condition should contain equality in order to exclude the edges
+    // parallel to X+ ray.
+    if ((point.y <= poly_points[i].y) == (point.y > poly_points[j].y)) {
+      // Calculating the intersection coordinate of X+ ray
+      const double x_inter = poly_points[i].x +
+        (point.y - poly_points[i].y) * (poly_points[j].x - poly_points[i].x) /
+        (poly_points[j].y - poly_points[i].y);
+      // If intersection with checked edge is greater than point.x coordinate, inverting the result
+      if (x_inter > point.x) {
+        res = !res;
+      }
+    }
+    i = j;
+  }
+  return res;
+}
+
 
 }  // namespace orunav2_selector
 

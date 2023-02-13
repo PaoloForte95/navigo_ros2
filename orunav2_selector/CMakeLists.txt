@@ -20,6 +20,7 @@ find_package(pluginlib REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_smac_planner REQUIRED)
 find_package(nav2_util REQUIRED)
+find_package(nav2_collision_monitor REQUIRED)
 
 
 
@@ -52,6 +53,7 @@ set(dependencies
   orunav2_core
   orunav2_msgs
   nav2_smac_planner
+  nav2_collision_monitor
 )
 
 
@@ -72,7 +74,7 @@ ament_target_dependencies(${library_name}
 # Costmap Selector
 add_library(costmap_selector SHARED
   src/costmap_selector.cpp
-
+  src/sensors/scan.cpp
 )
 
 ament_target_dependencies(costmap_selector
@@ -107,6 +109,11 @@ install(TARGETS ${executable_name}
 
 install(DIRECTORY include/
   DESTINATION include/
+)
+
+install(DIRECTORY
+  params
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 if(BUILD_TESTING)

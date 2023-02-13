@@ -91,8 +91,6 @@ PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
     get_logger(), "Costmap size: %d,%d",
     costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY());
 
-  tf_ = costmap_ros_->getTfBuffer();
-
   selector_types_.resize(selector_ids_.size());
 
 
@@ -105,7 +103,7 @@ PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
       RCLCPP_INFO(
         get_logger(), "Created global planner selector plugin %s of type %s",
         selector_ids_[i].c_str(), selector_types_[i].c_str());
-      planner_selector->configure(node, selector_ids_[i], tf_, costmap_ros_);
+      planner_selector->configure(node, selector_ids_[i], costmap_ros_->getTfBuffer(), costmap_ros_);
       selectors_.insert({selector_ids_[i], planner_selector});
     } catch (const pluginlib::PluginlibException & ex) {
       RCLCPP_FATAL(
@@ -200,7 +198,6 @@ PlannerSelectorServer::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
 
   action_server_select_.reset();
   planner_publisher_.reset();
-  tf_.reset();
   costmap_ros_->cleanup();
 
   PlannerMap::iterator it;
@@ -329,8 +326,9 @@ PlannerSelectorServer::computePlanner()
     if (!transformPosesToGlobalFrame(action_server_select_, start, goal_pose)) {
       return;
     }
+    RCLCPP_WARN( get_logger(), "Size Planners : %d ", goal->planner_ids.size());
 
-    result->planner_id = getPlanner(start, goal_pose, goal->selector_id);
+    result->planner_id = getPlanner(start, goal_pose, goal->selector_id,  goal->planner_ids);
     auto message = std_msgs::msg::String();
     message.data = result->planner_id;
     // Publish the plan for visualization purposes
@@ -350,7 +348,8 @@ std::string
 PlannerSelectorServer::getPlanner(
   const geometry_msgs::msg::PoseStamped & start,
   const geometry_msgs::msg::PoseStamped & goal,
-  const std::string & selector_id)
+  const std::string & selector_id,
+  const std::vector<std::string> & planner_ids)
 {
   RCLCPP_DEBUG(
     get_logger(), "Attempting to a select a planner to go from (%.2f, %.2f) to "
@@ -358,14 +357,14 @@ PlannerSelectorServer::getPlanner(
     goal.pose.position.x, goal.pose.position.y);
 
   if (selectors_.find(selector_id) != selectors_.end()) {
-    return selectors_[selector_id]->selectGlobalPlanner(start, goal);
+    return selectors_[selector_id]->selectGlobalPlanner(start, goal, planner_ids);
   } else {
     if (selectors_.size() == 1 && selector_id.empty()) {
       RCLCPP_WARN_ONCE(
         get_logger(), "No planners specified in action call. "
         "Server will use only plugin %s in server."
         " This warning will appear once.", selector_ids_concat_.c_str());
-      return selectors_[selectors_.begin()->first]->selectGlobalPlanner(start, goal);
+      return selectors_[selectors_.begin()->first]->selectGlobalPlanner(start, goal, planner_ids);
     } else {
       RCLCPP_ERROR(
         get_logger(), "planner %s is not a valid planner. "
