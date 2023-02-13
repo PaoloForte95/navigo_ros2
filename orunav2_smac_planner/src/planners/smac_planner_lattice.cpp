@@ -432,7 +432,7 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
 
   // Smooth plan
   //if (_smoother && num_iterations > 1) {
-  if (_smoother ) {
+  if (_smoother &&  solution_found ) {
     _smoother->smooth(plan, _costmap, time_remaining);
   }
 // If use_final_approach_orientation=true, interpolate the last pose orientation from the
@@ -441,7 +441,7 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   // And deal with corner case of plan of length 1
   // If use_final_approach_orientation=false (default), override last pose orientation to match goal
   size_t plan_size = plan.poses.size();
-  if (_use_final_approach_orientation) {
+  if (_use_final_approach_orientation && solution_found) {
     if (plan_size == 1) {
       plan.poses.back().pose.orientation = start.pose.orientation;
     } else if (plan_size > 1) {
