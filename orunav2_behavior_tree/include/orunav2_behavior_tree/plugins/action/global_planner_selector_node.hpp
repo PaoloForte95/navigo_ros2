@@ -29,6 +29,9 @@ namespace orunav2_behavior_tree
 class SelectGlobalPlannerAction : public BtActionNode<orunav2_msgs::action::GlobalPlannerSelector>
 {
 public:
+
+  typedef std::vector<std::string> Planners;
+
   /**
    * @brief A constructor for orunav2_behavior_tree::SelectGlobalPlannerAction
    * @param xml_tag_name Name for the XML tag for this node
@@ -80,6 +83,7 @@ public:
         BT::InputPort<std::string>(
           "selector_id", "",
           "Mapped name to the selector plugin type to use"),
+        BT::InputPort<Planners>("planner_ids", "The list of planners to select from"),
       });
   }
 };

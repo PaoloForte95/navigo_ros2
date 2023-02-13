@@ -6,10 +6,17 @@
 -->
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
+  <Sequence>
+   <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
     <RecoveryNode number_of_retries="6" name="NavigateRecovery">
       <PipelineSequence name="NavigateWithReplanning">
+      <DistanceToWaypointsController  waypoints="[[6.83, 30.4],[-24.8, 28.3], [-25.5, 97.1], [77.5, 75.7], [159.0, 45.7]]" distance='3.0'>
+      <Sequence name="RestoringPlanners">
+       <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
+      </Sequence>
+      </DistanceToWaypointsController>
        <RateController hz="3.0">
-      <GlobalPlannerSelector selector_id="CostmapBased" goal="{goal}" selected_planner="{planner}"/>
+      <GlobalPlannerSelector selector_id="CostmapBased" goal="{goal}" selected_planner="{planner}" planner_ids="{planner_ids}"/>
       </RateController>
       <RateController hz="1.0">
       <Fallback name="Fallback">
@@ -22,7 +29,11 @@
          </Sequence>
           <RecoveryNode number_of_retries="1" name="ComputePathToPose">
             <ComputePathToPose goal="{goal}" path="{path}" planner_id="{planner}"/>
-            <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+            <Sequence name="RemovePlannerAndClearingAction">
+              <RemoveUnfeasiblePlanner name="RemovePlannerAction " planner_ids="{planner_ids}" planner_id="{planner}"/>
+              <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+              <Wait wait_duration="2"/>
+            </Sequence>
           </RecoveryNode>
        </Fallback> 
        </RateController>
@@ -44,5 +55,6 @@
         </RoundRobin>
       </ReactiveFallback>
     </RecoveryNode>
+  </Sequence> 
   </BehaviorTree>
 </root>

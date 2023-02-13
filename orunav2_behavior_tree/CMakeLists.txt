@@ -31,7 +31,10 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(behaviortree_cpp_v3 REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(orunav2_msgs REQUIRED)
+find_package(nav2_costmap_2d REQUIRED)
+
 
 include_directories(
   include
@@ -44,6 +47,7 @@ set(dependencies
   rclcpp_action
   rclcpp_lifecycle
   geometry_msgs
+  nav2_msgs
   orunav2_msgs
   behaviortree_cpp_v3
   tf2
@@ -52,6 +56,7 @@ set(dependencies
   std_msgs
   std_srvs
   nav2_util
+  nav2_costmap_2d
 )
 
 add_library(${library_name} SHARED
@@ -62,10 +67,14 @@ ament_target_dependencies(${library_name}
   ${dependencies}
 )
 
+add_library(orunav2_remove_unfeasible_planner_action_bt_node SHARED plugins/action/remove_unfeasible_planner_action.cpp)
+list(APPEND plugin_libs orunav2_remove_unfeasible_planner_action_bt_node)
+
+add_library(orunav2_add_planners_action_bt_node SHARED plugins/action/add_planners_action.cpp)
+list(APPEND plugin_libs orunav2_add_planners_action_bt_node)
 
 add_library(orunav2_global_planner_selector_action_bt_node SHARED plugins/action/global_planner_selector_node.cpp)
 list(APPEND plugin_libs orunav2_global_planner_selector_action_bt_node)
-
 
 add_library(orunav2_planner_updated_condition_bt_node SHARED plugins/condition/planner_updated_condition.cpp)
 list(APPEND plugin_libs orunav2_planner_updated_condition_bt_node)
@@ -75,6 +84,9 @@ list(APPEND plugin_libs orunav2_is_planner_equal_condition_bt_node)
 
 add_library(orunav2_is_path_computed_condition_bt_node SHARED plugins/condition/is_path_computed_condition.cpp)
 list(APPEND plugin_libs orunav2_is_path_computed_condition_bt_node)
+
+add_library(orunav2_distance_waypoints_controller_bt_node SHARED plugins/decorator/distance_to_waypoints_controller.cpp)
+list(APPEND plugin_libs orunav2_distance_waypoints_controller_bt_node)
 
 foreach(bt_plugin ${plugin_libs})
   ament_target_dependencies(${bt_plugin} ${dependencies})

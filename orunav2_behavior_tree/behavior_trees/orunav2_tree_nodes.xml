@@ -150,15 +150,6 @@
       <output_port name="output_path">Truncated path to utilize</output_port>
     </Action>
 
-    <Action ID="GlobalPlannerSelector">
-        <input_port name="goal">Destination to plan to</input_port>
-        <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
-        <input_port name="selector_id">Mapped name to the planner plugin type to use</input_port>
-        <input_port name="service_name">Service name</input_port>
-        <input_port name="server_timeout">Server timeout</input_port>
-        <output_port name="selected_planner">Name of the selected planner chosen according to the costmap information</output_port>
-    </Action>
-    
     <Action ID="PlannerSelector">
         <input_port name="topic_name">Name of the topic to receive planner selection commands</input_port>
         <input_port name="default_planner">Default planner of the planner selector</input_port>
@@ -196,15 +187,27 @@
       <input_port name="server_name">Service name</input_port>
       <input_port name="server_timeout">Server timeout</input_port>
     </Action>
-    
-    <Action ID="Load">
-            <input_port default="{pose}" name="location">The loading location</input_port>
-    </Action>
-    
-    <Action ID="Unload">
-            <input_port default="{pose}" name="location">The dumping location</input_port>
+
+     <Action ID="GlobalPlannerSelector">
+        <input_port name="goal">Destination to plan to</input_port>
+        <input_port name="start">Start pose of the path if overriding current robot pose</input_port>
+        <input_port name="selector_id">Mapped name to the planner plugin type to use</input_port>
+        <input_port name="service_name">Service name</input_port>
+        <input_port name="server_timeout">Server timeout</input_port>
+        <input_port name="planner_ids">A vector of planners to select from</input_port>
+        <output_port name="selected_planner">Name of the selected planner chosen according to the costmap information</output_port>
     </Action>
 
+    <Action ID="RemoveUnfeasiblePlanner">
+      <input_port name="planner_id">The planner to remove</input_port>
+      <output_port name="planner_ids">A vector of planners with planner_id removed</output_port>
+    </Action>
+    
+    <Action ID="AddPlanners">
+      <input_port name="input_planners">A list of planners to add</input_port>
+      <output_port name="output_planners">Set of planners after added any passed</output_port>
+    </Action>
+    
     <!-- ############################### CONDITION NODES ############################## -->
     <Condition ID="GoalReached">
         <input_port name="goal">Destination</input_port>
@@ -305,6 +308,13 @@
     </Decorator>
 
     <Decorator ID="GoalUpdatedController">
+    </Decorator>
+
+     <Decorator ID="DistanceToWaypointsController">
+      <input_port name="distance">Distance</input_port>
+      <input_port name="waypoints">Set of waypoints</input_port>
+      <input_port name="global_frame">Reference frame</input_port>
+      <input_port name="robot_base_frame">Robot base frame</input_port>
     </Decorator>
 
   </TreeNodesModel>
