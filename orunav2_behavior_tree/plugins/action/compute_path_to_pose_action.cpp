@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Paolo Forte
+// Copyright (c) 2023 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ ComputePathToPoseAction::ComputePathToPoseAction(
   const std::string & xml_tag_name,
   const std::string & action_name,
   const BT::NodeConfiguration & conf)
-: BtActionNode<orunav2_msgs::action::ComputePathToPose>(xml_tag_name, action_name, conf)
+: BtActionNode<nav2_msgs::action::ComputePathToPose>(xml_tag_name, action_name, conf)
 {
 }
 
@@ -45,26 +45,26 @@ BT::NodeStatus ComputePathToPoseAction::on_success()
 
 BT::NodeStatus ComputePathToPoseAction::on_aborted()
 {
-  orunav2_msgs::msg::Path empty_path;
+  nav_msgs::msg::Path empty_path;
   setOutput("path", empty_path);
   return BT::NodeStatus::FAILURE;
 }
 
 BT::NodeStatus ComputePathToPoseAction::on_cancelled()
 {
-  orunav2_msgs::msg::Path empty_path;
+  nav_msgs::msg::Path empty_path;
   setOutput("path", empty_path);
   return BT::NodeStatus::SUCCESS;
 }
 
 void ComputePathToPoseAction::halt()
 {
-  orunav2_msgs::msg::Path empty_path;
+  nav_msgs::msg::Path empty_path;
   setOutput("path", empty_path);
   BtActionNode::halt();
 }
 
-}  // namespace nav2_behavior_tree
+}  // namespace orunav2_behavior_tree
 
 #include "behaviortree_cpp_v3/bt_factory.h"
 BT_REGISTER_NODES(factory)

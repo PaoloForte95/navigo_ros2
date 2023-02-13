@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Paolo Forte
+// Copyright (c) 2023 Paolo Forte
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "orunav2_msgs/action/compute_path_through_poses.hpp"
-#include "orunav2_msgs/msg/path.h"
+#include "nav2_msgs/action/compute_path_through_poses.hpp"
+#include "nav_msgs/msg/path.h"
 #include "orunav2_behavior_tree/bt_action_node.hpp"
 
 namespace orunav2_behavior_tree
@@ -30,7 +30,7 @@ namespace orunav2_behavior_tree
  * @brief A orunav2_behavior_tree::BtActionNode class that wraps nav2_msgs::action::ComputePathThroughPoses
  */
 class ComputePathThroughPosesAction
-  : public BtActionNode<orunav2_msgs::action::ComputePathThroughPoses>
+  : public BtActionNode<nav2_msgs::action::ComputePathThroughPoses>
 {
 public:
   /**
@@ -72,7 +72,7 @@ public:
   {
     return providedBasicPorts(
       {
-        BT::OutputPort<orunav2_msgs::msg::Path>("path", "Path created by ComputePathThroughPoses node"),
+        BT::OutputPort<nav_msgs::msg::Path>("path", "Path created by ComputePathThroughPoses node"),
         BT::InputPort<std::vector<geometry_msgs::msg::PoseStamped>>(
           "goals",
           "Destinations to plan through"),
