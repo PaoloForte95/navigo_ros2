@@ -15,7 +15,7 @@
 #include <vector>
 #include <string>
 
-#include "orunav2_behavior_tree/plugins/condition/planner_updated_condition.hpp"
+#include "orunav2_behavior_tree/plugins/condition/is_planner_updated_condition.hpp"
 
 namespace orunav2_behavior_tree
 {
@@ -23,28 +23,21 @@ namespace orunav2_behavior_tree
 PlannerUpdatedCondition::PlannerUpdatedCondition(
   const std::string & condition_name,
   const BT::NodeConfiguration & conf)
-: BT::ConditionNode(condition_name, conf),
-  first_time(true)
+: BT::ConditionNode(condition_name, conf)
 {
   node_ = config().blackboard->get<rclcpp::Node::SharedPtr>("node");
+  previous_planner_ = "";
 }
 
 BT::NodeStatus PlannerUpdatedCondition::tick()
 {
-  if (first_time) {
-    first_time = false;
-    config().blackboard->get<std::string>("planner", planner_);
-    std::cout << "Setting first planner:" << planner_ << std::endl;
-    return BT::NodeStatus::SUCCESS;
-  }
 
   std::string current_planner;
-  config().blackboard->get<std::string>("planner", current_planner);
+  getInput("planner", current_planner);
   
-  std::cout << "Current global planner: "<< current_planner << " first planner: " << planner_ << std::endl;
-  if (planner_ != current_planner ) {
-    std::cout << "Changed planner from: "<< planner_ << " to: " << current_planner << std::endl;
-    planner_ = current_planner;
+  if (previous_planner_ != current_planner ) {
+    RCLCPP_INFO(node_->get_logger(), "Changed planner from %s to %s", previous_planner_.c_str(), current_planner.c_str());
+    previous_planner_ = current_planner;
     return BT::NodeStatus::SUCCESS;
   }
   
@@ -57,5 +50,5 @@ BT::NodeStatus PlannerUpdatedCondition::tick()
 #include "behaviortree_cpp_v3/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
-  factory.registerNodeType<orunav2_behavior_tree::PlannerUpdatedCondition>("UpdatedPlanner");
+  factory.registerNodeType<orunav2_behavior_tree::PlannerUpdatedCondition>("IsPlannerUpdated");
 }

@@ -259,7 +259,10 @@
     <Condition ID="IsPathComputedCondition">
     </Condition>
 
-    <Condition ID="UpdatedPlanner"/>
+    <Condition ID="IsPlannerUpdated">
+      <input_port name="planner"> Planner to check </input_port>
+    </Condition>
+
 
      <Condition ID="IsPlannerEqual">
       <input_port name="planner_to_check"> Planner to check </input_port>

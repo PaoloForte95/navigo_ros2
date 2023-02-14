@@ -28,7 +28,7 @@ namespace orunav2_behavior_tree
 {
 /**
  * @brief A BT::ConditionNode that returns SUCCESS when planner is
- * not updated on the blackboard and FAILURE otherwise
+ * updated on the blackboard and FAILURE otherwise
  */
 class PlannerUpdatedCondition : public BT::ConditionNode
 {
@@ -57,13 +57,16 @@ public:
    */
   static BT::PortsList providedPorts()
   {
-    return {};
+    return {
+       BT::InputPort<std::string>("planner", "Planner to check"),
+
+    };
   }
 
 private:
-  bool first_time;
+
   rclcpp::Node::SharedPtr node_;
-  std::string planner_;
+  std::string previous_planner_;
 };
 
 }  // namespace orunav2_behavior_tree
