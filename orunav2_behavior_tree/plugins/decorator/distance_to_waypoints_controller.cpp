@@ -95,6 +95,26 @@ for (size_t i = 0; i < waypoints_poses_.size(); i++) {
   m.scale.z = 1.0 * scale;
 
   ma.markers.push_back(m);
+
+  //Create a cylinder to show the area nearby the point
+  m.type = visualization_msgs::msg::Marker::CYLINDER;
+  m.action = visualization_msgs::msg::Marker::ADD;
+  m.ns = "waypoint_circle" + std::to_string(i);
+  m.id = i + waypoints_poses_.size();
+  m.color.r = 1;
+  m.color.g = 0;
+  m.color.b = 0;
+  m.color.a = 0.7;
+  m.pose.position = waypoints_poses_[i].position;
+  m.pose.position.z = 10;
+
+  m.scale.x = 1.0 * distance_;
+  m.scale.y = 1.0 * distance_;
+  m.scale.z = 0.1;
+
+  ma.markers.push_back(m);
+
+  
 }
 
   if(!ma.markers.empty()){
