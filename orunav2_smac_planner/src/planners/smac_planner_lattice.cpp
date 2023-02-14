@@ -239,7 +239,7 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   const geometry_msgs::msg::PoseStamped & start,
   const geometry_msgs::msg::PoseStamped & goal)
 {
-  RCLCPP_INFO(_logger, "Computing Global Plan");
+  RCLCPP_INFO(_logger, "Computing Global Plan with Lattice-Based Algorithm");
   std::lock_guard<std::mutex> lock_reinit(_mutex);
   steady_clock::time_point a = steady_clock::now();
 

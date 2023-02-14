@@ -194,7 +194,7 @@ nav_msgs::msg::Path SmacPlannerAStar::createPlan(
   const geometry_msgs::msg::PoseStamped & start,
   const geometry_msgs::msg::PoseStamped & goal)
 {
-  RCLCPP_INFO(_logger, "Computing Global Plan");
+  RCLCPP_INFO(_logger, "Computing Global Plan with AStar Algorithm");
   std::lock_guard<std::mutex> lock_reinit(_mutex);
   steady_clock::time_point a = steady_clock::now();
   std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
