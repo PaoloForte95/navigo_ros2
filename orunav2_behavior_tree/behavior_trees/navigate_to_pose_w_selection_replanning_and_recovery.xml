@@ -10,10 +10,8 @@
    <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
     <RecoveryNode number_of_retries="6" name="NavigateRecovery">
       <PipelineSequence name="NavigateWithReplanning">
-      <DistanceToWaypointsController  waypoints="[[6.83, 30.4],[-24.8, 28.3], [-25.5, 97.1], [77.5, 75.7], [159.0, 45.7]]" distance='3.0'>
-      <Sequence name="RestoringPlanners">
+      <DistanceToWaypointsController  waypoints="[[5.6, 29.7],[-24.8, 28.3], [-25.5, 97.1], [77.5, 75.7], [159.0, 45.7]]" distance='6.0'>
        <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
-      </Sequence>
       </DistanceToWaypointsController>
        <RateController hz="3.0">
       <GlobalPlannerSelector selector_id="CostmapBased" goal="{goal}" selected_planner="{planner}" planner_ids="{planner_ids}"/>
@@ -21,6 +19,9 @@
       <RateController hz="1.0">
       <Fallback name="Fallback">
         <Sequence name="CheckLatticePlanner">
+        <Inverter>
+        <IsPlannerUpdated planner = "{planner}"/>
+        </Inverter>
          <IsPlannerEqual planner_to_check="LatticeBased" />
         <IsPathValid path="{path}"/>
          <Inverter>
