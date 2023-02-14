@@ -241,7 +241,7 @@ std::string CostmapSelector::selectGlobalPlanner(
   RCLCPP_INFO(_logger, "Size:: %d", collision_points_g.size());
   std::vector<int> insidePoints = getPointsInside(collision_points_g);
   RCLCPP_INFO(_logger, "Point inside left polygon: %d and right polygon: %d", insidePoints[0], insidePoints[1]);
-  if (insidePoints[0] > _max_points && insidePoints[1] > _max_points ){
+  if (insidePoints[0] >= _max_points && insidePoints[1] >= _max_points ){
     RCLCPP_INFO(_logger, "Obstacles on both sides! Entering a corridor!");
     selected_planner = "GridBased";
   }
