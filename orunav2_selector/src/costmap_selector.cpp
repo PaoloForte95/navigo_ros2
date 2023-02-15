@@ -238,7 +238,7 @@ std::string CostmapSelector::selectGlobalPlanner(
     p.y = point.y;
     collision_points_g.push_back(p);
   }
-  RCLCPP_INFO(_logger, "Size:: %d", collision_points_g.size());
+  RCLCPP_INFO(_logger, "Collision Points %d", collision_points_g.size());
   std::vector<int> insidePoints = getPointsInside(collision_points_g);
   RCLCPP_INFO(_logger, "Point inside left polygon: %d and right polygon: %d", insidePoints[0], insidePoints[1]);
   if (insidePoints[0] >= _max_points && insidePoints[1] >= _max_points ){
@@ -277,55 +277,7 @@ std::string CostmapSelector::selectGlobalPlanner(
   return selected_planner;
 }
 
-rcl_interfaces::msg::SetParametersResult
-CostmapSelector::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)
-{
-  rcl_interfaces::msg::SetParametersResult result;
-  std::lock_guard<std::mutex> lock_reinit(_mutex);
 
-  bool reinit_downsampler = false;
-
-  for (auto parameter : parameters) {
-    const auto & type = parameter.get_type();
-    const auto & name = parameter.get_name();
-
-    if (type == ParameterType::PARAMETER_DOUBLE) {
-      if (name == _name + ".distance_threshold") {
-        _distance_threshold = static_cast<float>(parameter.as_double());
-      } 
-    } else if (type == ParameterType::PARAMETER_BOOL) {
-      if (name == _name + ".downsample_costmap") {
-        reinit_downsampler = true;
-        _downsample_costmap = parameter.as_bool();
-      } else if (name == _name + ".allow_unknown") {
-        _allow_unknown = parameter.as_bool();
-      } else if (name == _name + ".use_final_approach_orientation") {
-        
-      }
-    } else if (type == ParameterType::PARAMETER_INTEGER) {
-      if (name == _name + ".downsampling_factor") {
-        reinit_downsampler = true;
-        _downsampling_factor = parameter.as_int();
-      } 
-       
-    }
-  }
-  // Re-init if needed with mutex lock (to avoid re-init while creating a plan)
-  if (reinit_downsampler) {
-    // Re-Initialize costmap downsampler
-    if (reinit_downsampler) {
-      if (_downsample_costmap && _downsampling_factor > 1) {
-        auto node = _node.lock();
-        std::string topic_name = "downsampled_costmap";
-        _costmap_downsampler = std::make_unique<nav2_smac_planner::CostmapDownsampler>();
-        _costmap_downsampler->on_configure(
-          node, _global_frame, topic_name, _costmap, _downsampling_factor);
-      }
-    }
-  }
-  result.successful = true;
-  return result;
-}
 
 void CostmapSelector::publishPolygon() const {
   geometry_msgs::msg::Polygon polygon_;
@@ -411,6 +363,73 @@ inline bool CostmapSelector::isPointInside(const geometry_msgs::msg::Point & poi
     i = j;
   }
   return res;
+}
+
+
+rcl_interfaces::msg::SetParametersResult
+CostmapSelector::dynamicParametersCallback(
+  std::vector<rclcpp::Parameter> parameters)
+{
+  rcl_interfaces::msg::SetParametersResult result;
+  std::lock_guard<std::mutex> lock_reinit(mutex_);
+
+  bool reinit_downsampler = false;
+
+
+  for (auto parameter : parameters) {
+    const auto & type = parameter.get_type();
+    const auto & name = parameter.get_name();
+
+    if (type == ParameterType::PARAMETER_DOUBLE) {
+      if (name == _name + ".distance_threshold") {
+        _distance_threshold = static_cast<float>(parameter.as_double());
+      }
+
+    } else if (type == ParameterType::PARAMETER_BOOL) {
+      if (name == _name + ".downsample_costmap") {
+        reinit_downsampler = true;
+        _downsample_costmap = parameter.as_bool();
+      } else if (name == _name + ".allow_unknown") {
+        _allow_unknown = parameter.as_bool();
+      }
+    }
+    else if (type == ParameterType::PARAMETER_INTEGER){
+      if (name == _name + ".downsampling_factor") {
+        _downsampling_factor = parameter.as_bool();
+         reinit_downsampler = true;
+      } else if (name == _name + ".max_points") {
+        _max_points = parameter.as_bool();
+      } 
+    }
+    else if (type == ParameterType::PARAMETER_STRING){
+      if (name == _name + ".points") {
+        _points = parameter.as_string();
+      } else if (name == _name + ".polygon_pub_topic") {
+        polygon_pub_topic = parameter.as_string();
+      } else if (name == _name + ".base_frame_id") {
+        _base_frame_id = parameter.as_string();
+      } else if (name == _name + ".odom_frame_id") {
+        _odom_frame_id = parameter.as_string();
+      }
+    
+    }
+  }
+  // Re-init if needed with mutex lock (to avoid re-init while creating a plan)
+  if (reinit_downsampler) {
+    // Re-Initialize costmap downsampler
+    if (reinit_downsampler) {
+      if (_downsample_costmap && _downsampling_factor > 1) {
+        auto node = _node.lock();
+        std::string topic_name = "downsampled_costmap";
+        _costmap_downsampler = std::make_unique<nav2_smac_planner::CostmapDownsampler>();
+        _costmap_downsampler->on_configure(
+          node, _global_frame, topic_name, _costmap, _downsampling_factor);
+      }
+    }
+  }
+
+  result.successful = true;
+  return result;
 }
 
 

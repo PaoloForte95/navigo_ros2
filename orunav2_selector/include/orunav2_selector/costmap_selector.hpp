@@ -109,13 +109,15 @@ public:
    */
   bool isPointInside(const geometry_msgs::msg::Point & point, std::vector<geometry_msgs::msg::Point> _poly_points) const;
 
-protected:
-  /**
+    /**
    * @brief Callback executed when a parameter change is detected
    * @param event ParameterEvent message
    */
   rcl_interfaces::msg::SetParametersResult
   dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters);
+
+
+protected:
 
   nav2_costmap_2d::Costmap2D * _costmap;
   std::unique_ptr<nav2_smac_planner::CostmapDownsampler> _costmap_downsampler;
@@ -135,6 +137,7 @@ protected:
   rclcpp_lifecycle::LifecycleNode::WeakPtr _node;
   std::vector<std::shared_ptr<nav2_collision_monitor::Source>> _sources;
   // Dynamic parameters handler
+  std::mutex mutex_;
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr _dyn_params_handler;
 };
 
