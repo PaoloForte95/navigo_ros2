@@ -38,6 +38,7 @@ find_package(orunav2_conversions REQUIRED)
 find_package(orunav_geometry REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
 find_package(OpenCV REQUIRED)
+find_package(ecceleron_conversions REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
@@ -87,6 +88,7 @@ set(dependencies
   orunav2_generic
   orunav2_conversions
   orunav_geometry
+  ecceleron_conversions
   Boost
 )
 
