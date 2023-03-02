@@ -9,7 +9,7 @@
     <include>
       <uri>model://ground_plane</uri>
     </include>
-    <!-- The lawn -->
+    <!-- The mine -->
     <include>
       <uri>model://kankberg2_mesh</uri>
     </include>
