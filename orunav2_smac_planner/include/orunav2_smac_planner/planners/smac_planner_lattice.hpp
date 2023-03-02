@@ -90,6 +90,9 @@ public:
    */
   void deactivate() override;
 
+    // Uses tf to find out the joint angles
+  bool getArticulatedJointAngle(double &angle) const;
+
   /**
    * @brief Creating a plan from start and goal poses
    * @param start Start pose
@@ -101,15 +104,18 @@ public:
     const geometry_msgs::msg::PoseStamped & goal) override;
 
 
-protected:
-   
-  /**
+
+    /**
    * @brief Callback executed when a paramter change is detected
    * @param parameters list of changed parameters
    */
   rcl_interfaces::msg::SetParametersResult
   dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters);
 
+protected:
+   
+
+  std::shared_ptr<tf2_ros::Buffer> _tf; //!< pointer to tf buffer
   std::unique_ptr<nav2_smac_planner::Smoother> _smoother;
   rclcpp::Clock::SharedPtr _clock;
   rclcpp::Logger _logger{rclcpp::get_logger("SmacPlannerLattice")};
@@ -135,6 +141,8 @@ protected:
   double _min_incr_path_dist;
   // Dynamic parameters handler
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr _dyn_params_handler;
+  std::string _front_frame_id;
+  std::string _rear_frame_id;
 };
 
 

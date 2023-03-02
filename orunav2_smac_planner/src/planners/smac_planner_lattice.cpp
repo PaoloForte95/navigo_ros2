@@ -26,6 +26,9 @@
 #include "orunav2_smac_planner/nav_msgs_occupancy_grid_to_planner_map.hpp"
 
 
+
+#include <ecceleron/base/common/pose_utilities.h>
+#include <ecceleron_conversions/conversions.hpp>
 // #define BENCHMARK_TESTING
 
 
@@ -55,11 +58,12 @@ SmacPlannerLattice::~SmacPlannerLattice()
 
 void SmacPlannerLattice::configure(
   const rclcpp_lifecycle::LifecycleNode::WeakPtr & parent,
-  std::string name, std::shared_ptr<tf2_ros::Buffer>/*tf*/,
+  std::string name, std::shared_ptr<tf2_ros::Buffer>tf,
   std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros)
 {
   _node = parent;
   auto node = parent.lock();
+  _tf = tf;
   _logger = node->get_logger();
   _clock = node->get_clock();
   _costmap = costmap_ros->getCostmap();
@@ -127,6 +131,10 @@ void SmacPlannerLattice::configure(
     node, name + ".max_planning_time", rclcpp::ParameterValue(10.0));
   node->get_parameter(name + ".max_planning_time", _max_planning_time);
 
+  nav2_util::declare_parameter_if_not_declared(node, name + ".front_frame_id", rclcpp::ParameterValue("front_link_axis"));
+  nav2_util::declare_parameter_if_not_declared(node, name + ".rear_frame_id", rclcpp::ParameterValue("rear_link_axis"));
+  _front_frame_id = node->get_parameter(name + ".front_frame_id").as_string();
+  _rear_frame_id = node->get_parameter(name + ".rear_frame_id").as_string();
   _search_info.minimum_turning_radius =
     _metadata.min_turning_radius / (_costmap->getResolution());
   
@@ -137,9 +145,10 @@ void SmacPlannerLattice::configure(
     WP::setPrimitivesDir(_search_info.lattice_filepath);
     WP::setTablesDir(_search_info.lookup_tables_filepath);
     WP::setMapsDir(_search_info.maps_directory);
-    RCLCPP_INFO_STREAM(_logger, "[GetPathService] - Setting primitive dir : " << _search_info.lattice_filepath );
+    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - Setting primitive dir : " << _search_info.lattice_filepath );
+    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - Maps dir : " << _search_info.maps_directory );
   _model = new LHDModel(model);
-  RCLCPP_INFO_STREAM(_logger, "[GetPathService] - Using model : " << model );
+  RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - Using model : " << model );
   if (_max_on_approach_iterations <= 0) {
     RCLCPP_INFO(
       _logger, "On approach iteration selected as <= 0, "
@@ -246,8 +255,12 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
 
   //Information about start and goal
-  double steering_start = 0.0;
+  double steering_start= 0.0;
   double steering_goal = 0.0;
+
+  if (!getArticulatedJointAngle(steering_start)) {
+        RCLCPP_ERROR(_logger, "failed to query the articulated joint angle, check front_frame_id and rear_frame_id");
+  }
 
   RCLCPP_INFO(_logger, "[SmacPlannerLattice] - start : [%f,%f,%f](%f)", start.pose.position.x, start.pose.position.y,tf2::getYaw(start.pose.orientation), steering_start);
   RCLCPP_INFO(_logger, "[SmacPlannerLattice] - goal :  [%f,%f,%f](%f)", goal.pose.position.x, goal.pose.position.y,tf2::getYaw(goal.pose.orientation), steering_goal);
@@ -277,14 +290,18 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   pose.pose.orientation.w = 1.0;
   
   if (planner_map.getMap().empty()) {
-    RCLCPP_ERROR(_logger, "[GetPathService] - error in the provided map / conversion");
+    RCLCPP_ERROR(_logger, "[SmacPlannerLattice] - error in the provided map / conversion");
     return plan;
   }
 
-  if (planner_map.getMap().empty())
+  if (planner_map.getMap().empty()){
       _path_finder = new PathFinder(20, 20);
-    else
+       RCLCPP_ERROR(_logger, "[SmacPlannerLattice] - Creating PathFinder with empty map");
+      }
+    else{
       _path_finder = new PathFinder(planner_map);
+       RCLCPP_ERROR(_logger, "[SmacPlannerLattice] - Creating PathFinder with map");
+      }
     
   if (_max_planning_time > 0.) 
     _path_finder->setTimeBound(_max_planning_time);
@@ -297,19 +314,18 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
 
   _path_finder->addMission(&vm);
 
-  if (_max_planning_time > 0)
     
-    RCLCPP_INFO(_logger, "[GetPathService] - Starting to solve the path planning problem ... ");
+    RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Starting to solve the path planning problem ... ");
     rclcpp::Time start_time = _clock->now();
     std::vector<std::vector<Configuration*> > solution = _path_finder->solve(false);
     rclcpp::Time stop_time = _clock->now();
-    RCLCPP_INFO(_logger, "[GetPathService] - Starting to solve the path planning problem - done");
-    RCLCPP_INFO(_logger, "[GetPathService] - PATHPLANNER_PROCESSING_TIME: %f", (stop_time-start_time).seconds());
+    RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Starting to solve the path planning problem - done");
+    RCLCPP_INFO(_logger, "[SmacPlannerLattice] - PATHPLANNER_PROCESSING_TIME: %f", (stop_time-start_time).seconds());
     
     assert(!solution.empty());
     bool solution_found = (solution[0].size() != 0);
-    RCLCPP_INFO_STREAM(_logger, "[GetPathService] - solution_found : " << solution_found);
-    RCLCPP_INFO_STREAM(_logger, "[GetPathService] - solution[0].size() : " << solution[0].size());
+    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - solution_found : " << solution_found);
+    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - solution[0].size() : " << solution[0].size());
     
     orunav2_generic::Path path;
     
@@ -330,7 +346,7 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
       }
     }
 
-    RCLCPP_INFO_STREAM(_logger, "[GetPathService] - Nb of path points : " << path.sizePath());
+    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - Nb of path points : " << path.sizePath());
 
     // Cleanup
     for (std::vector<std::vector<Configuration*> >::iterator it = solution.begin(); it != solution.end(); it++) {
@@ -460,6 +476,30 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
 
 return plan;
 }
+
+  bool SmacPlannerLattice::getArticulatedJointAngle(double &angle) const
+  {
+    // Front pose and rear pose
+    // Utilize tf to be more generic towards simulation vs. real systems.
+    if (!_tf) {
+      RCLCPP_ERROR(_logger,"tf not initiated(!)");
+      return false;
+    }
+    try
+    {
+      // transform robot pose into the plan frame (we do not wait here, since pruning not crucial, if missed a few times)
+      geometry_msgs::msg::TransformStamped joint = _tf->lookupTransform(_front_frame_id, _rear_frame_id, rclcpp::Time(0));
+      
+      ecl::PoseVector2d joint_angle2d = ecl::base::conversions::toPoseVector2d(ecl::base::conversions::toPoseMsg(joint.transform));
+      angle = joint_angle2d[2];
+    }
+    catch (const tf2::TransformException &ex)
+    {
+      RCLCPP_ERROR(_logger,"Cannot get the articulated angle as no transform is available: %s\n", ex.what());
+      return false;
+    }
+    return true;  
+  }
 
 rcl_interfaces::msg::SetParametersResult
 SmacPlannerLattice::dynamicParametersCallback(std::vector<rclcpp::Parameter> parameters)
@@ -604,6 +644,8 @@ SmacPlannerLattice::dynamicParametersCallback(std::vector<rclcpp::Parameter> par
   result.successful = true;
   return result;
 }
+
+
 
 
 }  // namespace orunav2_smac_planner
