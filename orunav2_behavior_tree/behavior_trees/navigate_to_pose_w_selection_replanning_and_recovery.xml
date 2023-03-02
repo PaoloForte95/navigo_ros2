@@ -10,7 +10,7 @@
    <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
     <RecoveryNode number_of_retries="6" name="NavigateRecovery">
       <PipelineSequence name="NavigateWithReplanning">
-      <DistanceToWaypointsController  waypoints="[[5.6, 29.7],[-24.8, 28.3], [-25.5, 97.1], [77.5, 75.7], [159.0, 45.7]]" distance='6.0'>
+      <DistanceToWaypointsController  waypoints="[[4.6, 27.1],[-15.4, 32.0], [-15.9, 97.3], [66.8, 76.5], [143.0, 52.1]]" distance='6.0'>
        <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
       </DistanceToWaypointsController>
        <RateController hz="3.0">
@@ -33,12 +33,12 @@
             <Sequence name="RemovePlannerAndClearingAction">
               <RemoveUnfeasiblePlanner name="RemovePlannerAction " planner_ids="{planner_ids}" planner_id="{planner}"/>
               <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
-              <Wait wait_duration="2"/>
+              <Wait wait_duration="1"/>
             </Sequence>
           </RecoveryNode>
        </Fallback> 
        </RateController>
-        <RecoveryNode number_of_retries="1" name="FollowSpline">
+        <RecoveryNode number_of_retries="1" name="LocalController">
           <FollowPath path="{path}" controller_id="FollowSpline"/>
           <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
         </RecoveryNode>
