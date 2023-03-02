@@ -13,16 +13,16 @@ void convertNavMsgsOccupancyGridToWorldOccupancyMapRef(nav2_costmap_2d::Costmap2
   
   std::vector<std::vector<double> > occupancyMap;
   occupancyMap.resize(ycells);
-  
+
   unsigned int k = 0;
   for (unsigned int i = 0; i < ycells; i++)
     {
       occupancyMap[i].resize(xcells);
       for (unsigned int j = 0; j < xcells; j++)
-	{
-	  occupancyMap[i][j] = costmap->getCost(k)*0.01;
-	  k++;
-	}
+      {
+        occupancyMap[i][j] = costmap->getCost(k)*0.01;
+        k++;
+      }
     }
   
   map.initialize(xcells, ycells, granularity, occupancyMap);
