@@ -122,14 +122,10 @@ void CostmapSelector::configure(
       s->configure();
       _sources.push_back(s);
 
-    } else if (source_type == "pointcloud") {
-      std::shared_ptr<nav2_collision_monitor::PointCloud> p = std::make_shared<nav2_collision_monitor::PointCloud>(node, source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
+    } else if (source_type == "image") {
+      std::shared_ptr<orunav2_selector::Image> p = std::make_shared<orunav2_selector::Image>(node, name + "." + source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
       p->configure();
       _sources.push_back(p);
-    } else if (source_type == "range") {
-      std::shared_ptr<nav2_collision_monitor::Range> r = std::make_shared<nav2_collision_monitor::Range>(node, source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
-      r->configure();
-      _sources.push_back(r);
     } else {  // Error if something else
       RCLCPP_ERROR(node->get_logger(),"[%s]: Unknown source type: %s", source_name.c_str(), source_type.c_str());
     }
@@ -227,19 +223,22 @@ std::string CostmapSelector::selectGlobalPlanner(
   // Fill collision_points array from different data sources
   auto node = _node.lock();
   rclcpp::Time curr_time =  node->get_clock()->now();
-  std::vector<nav2_collision_monitor::Point> collision_points;
-  std::vector<geometry_msgs::msg::Point> collision_points_g;
-  for (std::shared_ptr<nav2_collision_monitor::Source> source : _sources) {
+
+  //Scan, PointCloud and Range
+  std::vector<geometry_msgs::msg::Point> collision_points;
+  for (std::shared_ptr<orunav2_selector::Source> source : _sources) {
     source->getData(curr_time, collision_points);
   }
-  for(nav2_collision_monitor::Point point : collision_points){
-    geometry_msgs::msg::Point p;
-    p.x = point.x;
-    p.y = point.y;
-    collision_points_g.push_back(p);
+
+  //Image
+  std::vector<double> colors;
+    for (std::shared_ptr<orunav2_selector::Source> source : _sources) {
+    source->getData(curr_time, colors);
   }
-  RCLCPP_INFO(_logger, "Collision Points %d", collision_points_g.size());
-  std::vector<int> insidePoints = getPointsInside(collision_points_g);
+
+
+  RCLCPP_INFO(_logger, "Collision Points %d", collision_points.size());
+  std::vector<int> insidePoints = getPointsInside(collision_points);
   RCLCPP_INFO(_logger, "Point inside left polygon: %d and right polygon: %d", insidePoints[0], insidePoints[1]);
   if (insidePoints[0] >= _max_points && insidePoints[1] >= _max_points ){
     RCLCPP_INFO(_logger, "Obstacles on both sides! Entering a corridor!");

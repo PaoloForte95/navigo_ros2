@@ -73,48 +73,9 @@ void Scan::configure()
   RCLCPP_INFO(logger_, "[%s]: Scan subscribing to topic: %s", source_name_.c_str(), source_topic.c_str() );
 }
 
-/*
 void Scan::getData(
   const rclcpp::Time & curr_time,
-  std::vector<nav2_collision_monitor::Point> & data) const
-{
-  // Ignore data from the source if it is not being published yet or
-  // not being published for a long time
-  if (data_ == nullptr) {
-    return;
-  }
-  if (!sourceValid(data_->header.stamp, curr_time)) {
-    return;
-  }
-
-  // Obtaining the transform to get data from source frame and time where it was received
-  // to the base frame and current time
-  tf2::Transform tf_transform;
-  if (!getTransform(data_->header.frame_id, data_->header.stamp, curr_time, tf_transform)) {
-    return;
-  }
-
-  // Calculate poses and refill data array
-  float angle = data_->angle_min;
-  for (size_t i = 0; i < data_->ranges.size(); i++) {
-    if (data_->ranges[i] >= data_->range_min && data_->ranges[i] <= data_->range_max) {
-      // Transform point coordinates from source frame -> to base frame
-      tf2::Vector3 p_v3_s(
-        data_->ranges[i] * std::cos(angle),
-        data_->ranges[i] * std::sin(angle),
-        0.0);
-      tf2::Vector3 p_v3_b = tf_transform * p_v3_s;
-
-      // Refill data array
-      data.push_back({p_v3_b.x(), p_v3_b.y()});
-    }
-    angle += data_->angle_increment;
-  }
-*/
-
-void Scan::getData(
-  const rclcpp::Time & curr_time,
-  std::vector<nav2_collision_monitor::Point> & data) const
+  std::vector<geometry_msgs::msg::Point> & data) const
 {
     sensor_msgs::msg::PointCloud2 cloud;
     laser_geometry::LaserProjection laser_projection;
@@ -144,7 +105,7 @@ void Scan::getData(
     p.y = o.y();
     p.z = 0.;
     tmp.points.push_back(p);
-    nav2_collision_monitor::Point ob_point;
+    geometry_msgs::msg::Point ob_point;
     ob_point.x = o.x();
     ob_point.y = o.y();
     data.push_back(ob_point);
@@ -156,6 +117,11 @@ void Scan::getData(
         RCLCPP_WARN(logger_,"%s", ex.what());
       } 
 
+}
+
+void Scan::getData(const rclcpp::Time & curr_time, std::vector<double> & data) const
+{
+    //DO nothing
 }
 
 void Scan::dataCallback(sensor_msgs::msg::LaserScan msg)

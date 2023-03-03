@@ -29,10 +29,9 @@
 #include "tf2/utils.h"
 #include "rcl_interfaces/msg/set_parameters_result.hpp"
 #include "nav2_smac_planner/costmap_downsampler.hpp"
-#include "nav2_collision_monitor/source.hpp"
+#include "orunav2_selector/sensors/source.hpp"
 #include "orunav2_selector/sensors/scan.hpp"
-#include "nav2_collision_monitor/pointcloud.hpp"
-#include "nav2_collision_monitor/range.hpp"
+#include "orunav2_selector/sensors/image.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 
 
@@ -135,7 +134,7 @@ protected:
   std::string _global_frame, _name, _odom_frame_id, _base_frame_id;
   std::mutex _mutex;
   rclcpp_lifecycle::LifecycleNode::WeakPtr _node;
-  std::vector<std::shared_ptr<nav2_collision_monitor::Source>> _sources;
+  std::vector<std::shared_ptr<orunav2_selector::Source>> _sources;
   // Dynamic parameters handler
   std::mutex mutex_;
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr _dyn_params_handler;
