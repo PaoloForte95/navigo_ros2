@@ -1,0 +1,13 @@
+    material Ground/Image
+    {
+      technique
+      {
+        pass
+        {
+          texture_unit
+          {
+            texture ground.png
+          }
+        }
+      }
+    }
