@@ -45,7 +45,7 @@ namespace orunav2_planner
 {
 
 /**
- * @class orunav2_planner::EclPlannerServer
+ * @class orunav2_planner::PlannerServer
  * @brief An action server implements the behavior tree's ComputePathToPose
  * interface and hosts various plugins of different algorithms to compute plans.
  */
@@ -53,12 +53,12 @@ class PlannerServer : public nav2_util::LifecycleNode
 {
 public:
   /**
-   * @brief A constructor for orunav2_planner::EclPlannerServer
+   * @brief A constructor for orunav2_planner::PlannerServer
    * @param options Additional options to control creation of the node.
    */
   explicit PlannerServer(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
   /**
-   * @brief A destructor for orunav2_planner::EclPlannerServer
+   * @brief A destructor for orunav2_planner::PlannerServer
    */
   ~PlannerServer();
 
