@@ -28,6 +28,13 @@
             <uri>model://narnia_mesh/meshes/map.stl</uri>
           </mesh>
         </geometry>
+                <material>
+          <script>
+            <uri>model://narnia_mesh/materials/scripts</uri>
+            <uri>model://narnia_mesh/materials/textures</uri>
+            <name>Wall/Image</name>
+          </script>
+        </material>
       </visual>
     </link>
     <static>1</static>
