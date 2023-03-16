@@ -21,7 +21,7 @@
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 
-#include "orunav2_selector/costmap_selector.hpp"
+#include "orunav2_selector/selectors/costmap_selector.hpp"
 #include "nav2_util/geometry_utils.hpp"
 #include "nav2_costmap_2d/footprint.hpp"
 
@@ -214,6 +214,7 @@ std::string CostmapSelector::selectGlobalPlanner(
     }
     return selected_planner;
   }
+   RCLCPP_INFO(_logger, " CostMap cost %f", costmap->getCost(mx_start, my_start));
 
   //Get the current robot position
   double start_x = start.pose.position.x;

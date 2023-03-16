@@ -73,7 +73,7 @@ ament_target_dependencies(${library_name}
 
 # Costmap Selector
 add_library(costmap_selector SHARED
-  src/costmap_selector.cpp
+  src/selectors/costmap_selector.cpp
   src/sensors/scan.cpp
   src/sensors/source.cpp
   src/sensors/image.cpp
