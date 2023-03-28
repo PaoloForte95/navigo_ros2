@@ -54,7 +54,7 @@ namespace orunav2_costmap_2d
 AreaFilter::AreaFilter()
 : filter_info_sub_(nullptr), mask_sub_(nullptr),
   area_state_pub_(nullptr), filter_mask_(nullptr), mask_frame_(""), global_frame_(""),
-  default_state_(false), area_state_(default_state_)
+  default_state_(0), area_state_(default_state_)
 {
 }
 
@@ -74,9 +74,12 @@ void AreaFilter::initializeFilter(
   node->get_parameter(name_ + "." + "default_state", default_state_);
   declareParameter("area_state_topic", rclcpp::ParameterValue("area_state"));
   node->get_parameter(name_ + "." + "area_state_topic", area_state_topic);
-
   filter_info_topic_ = filter_info_topic;
   // Setting new costmap filter info subscriber
+  RCLCPP_INFO(
+    logger_,
+    "AreaFilter: publishing to \"%s\" topic for area data...",
+    area_state_topic.c_str());
   RCLCPP_INFO(
     logger_,
     "AreaFilter: Subscribing to \"%s\" topic for filter info...",
@@ -96,7 +99,7 @@ void AreaFilter::initializeFilter(
   base_ = nav2_costmap_2d::BASE_DEFAULT;
   multiplier_ = nav2_costmap_2d::MULTIPLIER_DEFAULT;
 
-  // Initialize state as "false" by-default
+  // Initialize state as 0 (i.e., free) by-default
   changeState(default_state_);
 }
 
@@ -207,7 +210,6 @@ void AreaFilter::process(
     RCLCPP_ERROR(logger_, "AreaFilter: Found unknown cell in filter_mask[%i, %i], which is invalid for this kind of filter", mask_robot_i, mask_robot_j);
     return;
   } else{
-    RCLCPP_INFO(logger_,"AreaFilter: value[%d]",area_mask_data);
     changeState(area_mask_data);
   }
 
@@ -241,11 +243,7 @@ bool AreaFilter::isActive()
 void AreaFilter::changeState(const int state)
 {
   area_state_ = state;
-  if (state) {
-    RCLCPP_INFO(logger_, "AreaFilter: Switched on");
-  } else {
-    RCLCPP_INFO(logger_, "AreaFilter: Switched off");
-  }
+  RCLCPP_INFO(logger_,"AreaFilter: current area value[%d]", area_state_);
 
   // Forming and publishing new AreaState message
   std::unique_ptr<std_msgs::msg::Int32> msg = std::make_unique<std_msgs::msg::Int32>();
