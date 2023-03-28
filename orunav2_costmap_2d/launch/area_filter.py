@@ -21,7 +21,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from nav2_common.launch import RewrittenYaml
+from nav2_common.launch import RewrittenYaml, ReplaceString
 
 
 def generate_launch_description():
@@ -63,6 +63,12 @@ def generate_launch_description():
             'mask',
             default_value=os.path.join(costmap_filters_dir, 'maps', 'area_mask.yaml'),
             description='Full path to filter mask yaml file to load')
+
+    params_file = ReplaceString(
+            source_file=params_file,
+            replacements={'<robot_namespace>': ('/', namespace),
+                          '//': ('/')
+                          })
 
     # Make re-written yaml
     param_substitutions = {
