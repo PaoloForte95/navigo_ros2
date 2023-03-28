@@ -41,7 +41,7 @@ namespace orunav2_selector
 PlannerSelectorServer::PlannerSelectorServer(const rclcpp::NodeOptions & options)
 : nav2_util::LifecycleNode("selector_server", "", options),
   gp_loader_("orunav2_core", "orunav2_core::GlobalPlannerSelector"),
-  default_ids_{"CostmapBased22"},
+  default_ids_{"CostmapBased"},
   default_types_{"orunav2_selector::CostmapSelector"}
 {
   RCLCPP_INFO(get_logger(), "Creating selector server");
@@ -119,7 +119,7 @@ PlannerSelectorServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
 
   RCLCPP_INFO(
     get_logger(),
-    "Global Planner Selector Server has %s planners available.", selector_ids_concat_.c_str());
+    "Global Planner Selector Server has %s selectors available.", selector_ids_concat_.c_str());
 
  
   // Initialize pubs & subs

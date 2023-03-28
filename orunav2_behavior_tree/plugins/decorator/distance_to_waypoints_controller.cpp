@@ -160,7 +160,7 @@ inline BT::NodeStatus DistanceToWaypointsController::tick()
           first_time_ = false;
       }else{
         previous_closest_waypoint_ = waypoint;
-        RCLCPP_INFO(node_->get_logger(), "Nearby a waypoint! Entering a new area! Restoring all planners!");
+        RCLCPP_INFO(node_->get_logger(), "Nearby a waypoint! Entering a new area!");
       }
 
       const BT::NodeStatus child_state = child_node_->executeTick();

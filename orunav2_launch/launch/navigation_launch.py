@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Paolo Forte
+# Copyright (c) 2023 Paolo Forte
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -202,6 +202,19 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings +
                         [('cmd_vel', 'cmd_vel_nav'), ('cmd_vel_smoothed', 'cmd_vel')]),
+            
+            Node(
+                condition=IfCondition(use_selector),
+                package='orunav2_selector',
+                executable='selector_server',
+                name='selector_server',
+                output='screen',
+                respawn=use_respawn,
+                respawn_delay=2.0,
+                parameters=[configured_params],
+                arguments=['--ros-args', '--log-level', log_level],
+                remappings=remappings),
+              
             Node(
                 package='nav2_lifecycle_manager',
                 executable='lifecycle_manager',
@@ -214,17 +227,7 @@ def generate_launch_description():
                             {'bond_timeout': 25.0}
                             ]),
 
-            Node(
-                condition=IfCondition(use_selector),
-                package='orunav2_selector',
-                executable='selector_server',
-                name='selector_server',
-                output='screen',
-                respawn=use_respawn,
-                respawn_delay=2.0,
-                parameters=[configured_params],
-                arguments=['--ros-args', '--log-level', log_level],
-                remappings=remappings),
+
         ]
     )
 

@@ -465,7 +465,6 @@ PlannerServer::computePlan()
     if (!validatePath(action_server_pose_, goal_pose, result->path, goal->planner_id)) {
       return;
     }
-
     // Publish the plan for visualization purposes
     publishPlan(result->path);
 
