@@ -66,7 +66,7 @@ add_library(${library_name} SHARED
 ament_target_dependencies(${library_name}
   ${dependencies}
 )
-
+#Actions
 add_library(orunav2_remove_unfeasible_planner_action_bt_node SHARED plugins/action/remove_unfeasible_planner_action.cpp)
 list(APPEND plugin_libs orunav2_remove_unfeasible_planner_action_bt_node)
 
@@ -76,6 +76,7 @@ list(APPEND plugin_libs orunav2_add_planners_action_bt_node)
 add_library(orunav2_global_planner_selector_action_bt_node SHARED plugins/action/global_planner_selector_node.cpp)
 list(APPEND plugin_libs orunav2_global_planner_selector_action_bt_node)
 
+#Conditions
 add_library(orunav2_is_planner_updated_condition_bt_node SHARED plugins/condition/is_planner_updated_condition.cpp)
 list(APPEND plugin_libs orunav2_is_planner_updated_condition_bt_node)
 
@@ -85,8 +86,12 @@ list(APPEND plugin_libs orunav2_is_planner_equal_condition_bt_node)
 add_library(orunav2_is_path_computed_condition_bt_node SHARED plugins/condition/is_path_computed_condition.cpp)
 list(APPEND plugin_libs orunav2_is_path_computed_condition_bt_node)
 
+#Decorators
 add_library(orunav2_distance_waypoints_controller_bt_node SHARED plugins/decorator/distance_to_waypoints_controller.cpp)
 list(APPEND plugin_libs orunav2_distance_waypoints_controller_bt_node)
+
+add_library(orunav2_segmented_area_controller_bt_node SHARED plugins/decorator/segmented_area_controller.cpp)
+list(APPEND plugin_libs orunav2_segmented_area_controller_bt_node)
 
 foreach(bt_plugin ${plugin_libs})
   ament_target_dependencies(${bt_plugin} ${dependencies})

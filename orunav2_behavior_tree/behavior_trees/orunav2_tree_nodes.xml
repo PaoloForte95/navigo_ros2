@@ -320,5 +320,10 @@
       <input_port name="robot_base_frame">Robot base frame</input_port>
     </Decorator>
 
+    <Decorator ID="SegmentedAreaController">
+      <input_port name="area_state_topic">Area state topic</input_port>
+      <input_port name="initial_value">Value of the initial area</input_port>
+    </Decorator>
+
   </TreeNodesModel>
 </root>
