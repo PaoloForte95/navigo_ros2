@@ -1,9 +1,0 @@
--
-  ros1_package_name: 'plan2_msgs'
-  ros1_message_name: 'Action'
-  ros2_package_name: 'plan2_msgs'
-  ros2_message_name: 'Action'
-  fields_1_to_2:
-    robotiD: 'robotid'
-    
-
