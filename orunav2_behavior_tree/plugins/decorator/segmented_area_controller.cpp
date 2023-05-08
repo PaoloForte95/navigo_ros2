@@ -114,7 +114,7 @@ inline BT::NodeStatus SegmentedAreaController::tick()
 void SegmentedAreaController::AreaStateCallback(std_msgs::msg::Int32::SharedPtr msg)
 {
   current_area_value_ = msg->data;
-  RCLCPP_INFO(node_->get_logger(), "Current Area Value %d:",current_area_value_);
+  RCLCPP_INFO(node_->get_logger(), "Current Area Value %d!",current_area_value_);
 }
 
 

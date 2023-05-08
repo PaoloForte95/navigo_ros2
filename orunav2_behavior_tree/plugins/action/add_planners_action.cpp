@@ -59,6 +59,10 @@ inline BT::NodeStatus AddPlanners::tick()
             RCLCPP_INFO(node_->get_logger(), "Restoring planning algorithm: %s!", planner.c_str());
             goal_planner_ids.push_back(planner);
         }
+        else {
+            RCLCPP_INFO(node_->get_logger(), "Planning algorithm %s is already present in the list! No need to restore it!", planner.c_str());
+        }
+
     }
     
     //Add the planner currently in the blackboard

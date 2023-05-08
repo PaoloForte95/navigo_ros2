@@ -70,7 +70,7 @@ void AreaFilter::initializeFilter(
 
   // Declare parameters specific to AreaFilter only
   std::string area_state_topic;
-  declareParameter("default_state", rclcpp::ParameterValue(1));
+  declareParameter("default_state", rclcpp::ParameterValue(0));
   node->get_parameter(name_ + "." + "default_state", default_state_);
   declareParameter("area_state_topic", rclcpp::ParameterValue("area_state"));
   node->get_parameter(name_ + "." + "area_state_topic", area_state_topic);
@@ -196,8 +196,8 @@ void AreaFilter::process(
     // Robot went out of mask range. Set "false" state by-default
     RCLCPP_WARN(
       logger_,
-      "AreaFilter: Robot is outside of filter mask. Resetting area state to default.");
-    changeState(default_state_);
+      "AreaFilter: Robot is outside of filter mask. Resetting area state to latest known state.");
+    changeState(area_state_);
     return;
   }
 
@@ -219,8 +219,8 @@ void AreaFilter::resetFilter()
 {
   std::lock_guard<CostmapFilter::mutex_t> guard(*getMutex());
 
-  RCLCPP_INFO(logger_, "AreaFilter: Resetting the filter to default state");
-  changeState(default_state_);
+  RCLCPP_INFO(logger_, "AreaFilter: Resetting the filter to the latest state");
+  changeState(area_state_);
 
   filter_info_sub_.reset();
   mask_sub_.reset();
@@ -243,7 +243,7 @@ bool AreaFilter::isActive()
 void AreaFilter::changeState(const int state)
 {
   area_state_ = state;
-  RCLCPP_INFO(logger_,"AreaFilter: current area value[%d]", area_state_);
+  RCLCPP_INFO(logger_,"AreaFilter: current area value[%d]!", area_state_);
 
   // Forming and publishing new AreaState message
   std::unique_ptr<std_msgs::msg::Int32> msg = std::make_unique<std_msgs::msg::Int32>();

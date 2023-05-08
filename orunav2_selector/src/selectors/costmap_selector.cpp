@@ -115,7 +115,7 @@ void CostmapSelector::configure(
   for (std::string source_name : source_names) {
     nav2_util::declare_parameter_if_not_declared(node, name + "." + source_name + ".type",rclcpp::ParameterValue(""));  // Laser scanner by default
     const std::string source_type = node->get_parameter(name + "." + source_name + ".type").as_string();
-    RCLCPP_ERROR(node->get_logger(),"Adding source of type: %s", source_type.c_str());
+    RCLCPP_INFO(node->get_logger(),"Adding source of type: %s", source_type.c_str());
     
     if (source_type == "scan") {
       std::shared_ptr<orunav2_selector::Scan> s = std::make_shared<orunav2_selector::Scan>(node, name + "." + source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
