@@ -7,6 +7,7 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
@@ -21,6 +22,7 @@ find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_smac_planner REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(nav2_collision_monitor REQUIRED)
+find_package(rclpy REQUIRED)
 
 
 
@@ -69,22 +71,25 @@ ament_target_dependencies(${library_name}
 
 
 ##############################
-
+#Sources 
+add_library(sources SHARED
+  src/sensors/scan.cpp
+  src/sensors/source.cpp
+  src/sensors/image.cpp
+)
+ament_target_dependencies(sources
+  ${dependencies}
+)
 
 # Costmap Selector
 add_library(costmap_selector SHARED
   src/selectors/costmap_selector.cpp
-  src/sensors/scan.cpp
-  src/sensors/source.cpp
-  src/sensors/image.cpp
 )
 
 ament_target_dependencies(costmap_selector
   ${dependencies}
 )
-
-
-
+target_link_libraries(costmap_selector sources)
 
 ament_target_dependencies(${executable_name}
   ${dependencies_server}
@@ -94,11 +99,14 @@ target_link_libraries(${executable_name} ${library_name})
 
 
 rclcpp_components_register_nodes(${library_name} "orunav2_selector::PlannerSelectorServer")
+
+
+
 ##############
 # Install 
 #############
 #Server
-install(TARGETS ${library_name} costmap_selector
+install(TARGETS ${library_name} costmap_selector sources
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -115,26 +123,39 @@ install(DIRECTORY include/
 
 install(DIRECTORY
   params
+  launch
   DESTINATION share/${PROJECT_NAME}/
+)
+
+# Install Python modules
+ament_python_install_package(${PROJECT_NAME})
+# Install Python executables
+install(PROGRAMS
+  src/detector/weather_detection.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
+
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  #Tests
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
+  add_subdirectory(test)
+
+
 endif()
 
 
 
 ament_export_include_directories(include)
 ament_export_libraries(costmap_selector
-${library_name})
+${library_name}
+sources)
 ament_export_dependencies(${dependencies})
 
 pluginlib_export_plugin_description_file(orunav2_core costmap_selector.xml)

@@ -29,6 +29,7 @@
 
 
 #include "orunav2_selector/sensors/source.hpp"
+#include "orunav2_msgs/srv/get_weather_condition.hpp"
 
 
 
@@ -102,6 +103,10 @@ protected:
 
   /// @brief Laser scanner data subscriber
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr data_sub_;
+  rclcpp::Client<orunav2_msgs::srv::GetWeatherCondition>::SharedPtr weather_condition_client_;
+  rclcpp::CallbackGroup::SharedPtr callback_group_;
+  rclcpp::executors::SingleThreadedExecutor::SharedPtr callback_group_executor_;
+  rclcpp::Node::SharedPtr client_node_;
   
   
   /// @brief Latest data obtained from laser scanner
