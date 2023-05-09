@@ -93,13 +93,11 @@ void Image::getData(const rclcpp::Time & curr_time, std::vector<double> & data) 
 
     auto request = std::make_shared<orunav2_msgs::srv::GetWeatherCondition::Request>();
     request->image = data_;
-    RCLCPP_INFO(logger_, "Test img: %ld", data_.width);
     auto result = weather_condition_client_->async_send_request(request);
     //auto future = callback_group_executor_->spin_until_future_complete(result, std::chrono::seconds(1));
     auto future = rclcpp::spin_until_future_complete(client_node_, result, std::chrono::seconds(5));
     if (future != rclcpp::FutureReturnCode::SUCCESS)
     {
-      RCLCPP_INFO(logger_, "Failed to call service %d", (future ==rclcpp::FutureReturnCode::TIMEOUT));
       RCLCPP_INFO(logger_, "Failed to call service %s", weather_condition_client_->get_service_name());
       return;
     }
