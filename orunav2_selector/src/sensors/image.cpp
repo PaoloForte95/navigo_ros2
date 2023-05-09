@@ -110,7 +110,6 @@ void Image::getData(const rclcpp::Time & curr_time, std::vector<double> & data) 
 
 void Image::dataCallback(sensor_msgs::msg::Image msg)
 {
-  RCLCPP_INFO(logger_, "Received image!");
   data_ = msg;
 }
 
