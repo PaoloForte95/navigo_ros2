@@ -168,7 +168,22 @@ void WeatherDetector::process()
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   auto state = result.get()->condition;
-  RCLCPP_INFO(logger_, "Got weather condition!It is %ld ", state);
+  auto state_str = "";
+  switch (state.condition) {
+    case 0:
+      state_str = "CLEAR";
+      break;
+    case 1:
+      state_str = "FOG";
+      break;
+    case 2:
+      state_str = "RAIN";
+      break;
+    case 3:
+      state_str = "SNOW";
+      break;
+  }
+  RCLCPP_INFO(logger_, "Got weather condition!It is %s ", state_str);
 
 
   std::unique_ptr<orunav2_msgs::msg::WeatherState> weather_state_msg =std::make_unique<orunav2_msgs::msg::WeatherState>();
@@ -180,8 +195,6 @@ void WeatherDetector::process()
 void WeatherDetector::dataCallback(sensor_msgs::msg::Image msg)
 {
   data_ = msg;
-  RCLCPP_INFO(logger_, "Current time %d ",   msg.header.stamp.sec);
-  RCLCPP_INFO(logger_, "Last time %d ",   last_evaluation_time_);
   auto time_diff = msg.header.stamp.sec - last_evaluation_time_;
   if(time_diff > rate_){
     process();
