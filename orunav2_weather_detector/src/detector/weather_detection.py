@@ -29,7 +29,7 @@ class WeatherDetection:
         
     def preprocess_image(self, image):
         '''
-        This will be the class function for the ROS service
+        This will be the class function for the ROS2 service
         input:
             img: numpy array (h, w, 3) in bgr format
         '''
@@ -80,13 +80,14 @@ class WeatherDetection:
 class WeahterDetectionService(Node):
 
     def __init__(self):
-        super().__init__('weather_detection_server')
+        super().__init__('weather_detection_service')
         #Declare ROS2 parameters
         self.declare_parameter("namespace", "")
+        self.declare_parameter("service_name", "get_weather_condition")
         self.namespace = self.get_parameter("namespace").get_parameter_value().string_value
-
-        self.srv = self.create_service(GetWeatherCondition, self.namespace+'/get_weather_condition', self.get_weather_condition_callback)
-        self.module_path = os.getcwd() + "/src/navigation2_oru/orunav2_selector"
+        self.service_name = self.get_parameter("service_name").get_parameter_value().string_value
+        self.srv = self.create_service(GetWeatherCondition, self.namespace+'/'+ self.service_name, self.get_weather_condition_callback)
+        self.module_path = os.getcwd() + "/src/navigation2_oru/orunav2_weather_detector"
         self.bridge = CvBridge()
 
     def get_weather_condition_callback(self, request, response):

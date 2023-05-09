@@ -1,12 +1,12 @@
 #C++ Tests
-ament_add_gtest(sources_image_test sources_image_test.cpp)
-ament_target_dependencies(sources_image_test
+ament_add_gtest(collision_monitor_node_test weather_detector_node_test.cpp)
+ament_target_dependencies(collision_monitor_node_test
   ${dependencies}
 )
-target_link_libraries(sources_image_test
-  sources
+target_link_libraries(collision_monitor_node_test
   ${library_name}
 )
+
 
 #Python Tests
 set(_pytest_tests

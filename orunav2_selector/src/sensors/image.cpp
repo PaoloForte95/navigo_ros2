@@ -72,9 +72,8 @@ void Image::configure()
   //callback_group_executor_->add_callback_group(callback_group_, node->get_node_base_interface());
   //rclcpp::SubscriptionOptions options;
   //options.callback_group = callback_group_;
-  client_node_ = rclcpp::Node::make_shared("client_node");
+
   data_sub_ = node->create_subscription<sensor_msgs::msg::Image>(source_topic, scan_qos,std::bind(&Image::dataCallback, this, std::placeholders::_1));
-  weather_condition_client_ = client_node_->create_client<orunav2_msgs::srv::GetWeatherCondition>("get_weather_condition",  rclcpp::ServicesQoS().get_rmw_qos_profile());
   RCLCPP_INFO(logger_, "[%s]: Camera subscribing to topic: %s", source_name_.c_str(), source_topic.c_str() );
 }
 
@@ -87,22 +86,7 @@ void Image::getData(const rclcpp::Time & curr_time, std::vector<geometry_msgs::m
 void Image::getData(const rclcpp::Time & curr_time, std::vector<double> & data) const
 { 
 
-    //auto client_node = rclcpp::Node::make_shared("client_node");
-
-    //Get the weather condition
-
-    auto request = std::make_shared<orunav2_msgs::srv::GetWeatherCondition::Request>();
-    request->image = data_;
-    auto result = weather_condition_client_->async_send_request(request);
-    //auto future = callback_group_executor_->spin_until_future_complete(result, std::chrono::seconds(1));
-    auto future = rclcpp::spin_until_future_complete(client_node_, result, std::chrono::seconds(5));
-    if (future != rclcpp::FutureReturnCode::SUCCESS)
-    {
-      RCLCPP_INFO(logger_, "Failed to call service %s", weather_condition_client_->get_service_name());
-      return;
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    RCLCPP_INFO(logger_, "Got weather condition!It is %ld ", result.get()->condition);
+    //TODO
 
 }
 
