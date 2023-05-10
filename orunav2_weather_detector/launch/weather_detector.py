@@ -81,6 +81,11 @@ def generate_launch_description():
             source_file=params_file,
             replacements={'<robot_namespace>': ('/', namespace)})
 
+    params_file = ReplaceString(
+            source_file=params_file,
+            replacements={'//': ('/', namespace)})
+    
+
     configured_params = RewrittenYaml(
             source_file=params_file,
             root_key=namespace,
