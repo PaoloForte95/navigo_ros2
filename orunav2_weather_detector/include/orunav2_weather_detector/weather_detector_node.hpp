@@ -32,6 +32,7 @@
 #include "orunav2_selector/sensors/image.hpp"
 
 #include "sensor_msgs/msg/image.hpp"
+#include "nav2_msgs/msg/speed_limit.hpp"
 #include "orunav2_msgs/srv/get_weather_condition.hpp"
 #include "orunav2_msgs/msg/weather_state.hpp"
 
@@ -119,8 +120,8 @@ rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr data_sub_;
 /// @brief Weather condition client 
 rclcpp::Client<orunav2_msgs::srv::GetWeatherCondition>::SharedPtr weather_condition_client_;
 rclcpp::Node::SharedPtr client_node_;
-
 rclcpp_lifecycle::LifecyclePublisher<orunav2_msgs::msg::WeatherState>::SharedPtr weather_condition_pub_;
+rclcpp_lifecycle::LifecyclePublisher<nav2_msgs::msg::SpeedLimit>::SharedPtr speed_limit_pub_;
 
 std::vector<std::shared_ptr<orunav2_selector::Image>> source_;
 
@@ -130,9 +131,12 @@ bool process_active_;
 
 /// @brief Latest data obtained from camera
 sensor_msgs::msg::Image data_;
+nav2_msgs::msg::SpeedLimit limited_speed;
 
 int rate_;
 int last_evaluation_time_ = 0;
+double slowdown_ratio_;
+bool percentage_;
 
 rclcpp::Logger logger_{rclcpp::get_logger("WeatherDetector")};
 

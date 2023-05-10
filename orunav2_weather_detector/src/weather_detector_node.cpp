@@ -41,27 +41,34 @@ WeatherDetector::on_configure(const rclcpp_lifecycle::State & /*state*/)
     RCLCPP_INFO(logger_, "Configuring weather detector");
     rclcpp::QoS scan_qos = rclcpp::SensorDataQoS();  // set to default
 
-    std::string image_topic, service_name, base_frame_id, odom_frame_id;
+    std::string image_topic, service_name, base_frame_id, odom_frame_id,speed_limit_topic;
     std::string source_type = "image";
     // Obtaining ROS parameters
     nav2_util::declare_parameter_if_not_declared(node, "rate", rclcpp::ParameterValue(1));
     nav2_util::declare_parameter_if_not_declared(node, "image_topic", rclcpp::ParameterValue("/intel_realsense_r200_depth/image_raw"));
-    nav2_util::declare_parameter_if_not_declared(node, "service_name", rclcpp::ParameterValue("get_weather_condition"));
+    nav2_util::declare_parameter_if_not_declared(node, "service_name", rclcpp::ParameterValue("/get_weather_condition"));
     nav2_util::declare_parameter_if_not_declared(node, "base_frame_id", rclcpp::ParameterValue("base_link"));
     nav2_util::declare_parameter_if_not_declared(node, "odom_frame_id", rclcpp::ParameterValue("world"));
-    
-
+    nav2_util::declare_parameter_if_not_declared(node, "speed_limit_topic", rclcpp::ParameterValue("/speed_limit"));
+    nav2_util::declare_parameter_if_not_declared(node, "slowdown_ratio", rclcpp::ParameterValue(1.0));
+    nav2_util::declare_parameter_if_not_declared(node, "percentage", rclcpp::ParameterValue(true));
+  
+  
     image_topic = node->get_parameter("image_topic").as_string();
     service_name = node->get_parameter("service_name").as_string();
     base_frame_id = node->get_parameter("base_frame_id").as_string();
     odom_frame_id =  node->get_parameter("odom_frame_id").as_string();
+    speed_limit_topic = node->get_parameter("speed_limit_topic").as_string();
+    slowdown_ratio_ = node->get_parameter("slowdown_ratio").as_double();
+    percentage_ =node->get_parameter("percentage").as_bool();
+    
 
     rate_ = node->get_parameter("rate").as_int();
 
     data_sub_ = node->create_subscription<sensor_msgs::msg::Image>(image_topic, scan_qos,std::bind(&WeatherDetector::dataCallback, this, std::placeholders::_1));
     RCLCPP_INFO(logger_, "[%s]: Camera subscribing to topic: %s", source_type.c_str(), image_topic.c_str() );
     weather_condition_pub_ = this->create_publisher<orunav2_msgs::msg::WeatherState>("/weather_condition", 1);
-
+    speed_limit_pub_ = this->create_publisher<nav2_msgs::msg::SpeedLimit>(speed_limit_topic, 1);
     tf2::Duration transform_tolerance = tf2::durationFromSec(0.5);
     rclcpp::Duration source_timeout = rclcpp::Duration::from_seconds(6.0);
     std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -94,6 +101,7 @@ WeatherDetector::on_activate(const rclcpp_lifecycle::State & /*state*/)
 
    // Activating lifecycle publisher
   weather_condition_pub_->on_activate();
+  speed_limit_pub_->on_activate();
 
 
   // Activating main worker
@@ -113,6 +121,7 @@ WeatherDetector::on_deactivate(const rclcpp_lifecycle::State & /*state*/)
 
   // Deactivating lifecycle publishers
   weather_condition_pub_->on_deactivate();
+  speed_limit_pub_->on_deactivate();
 
   // Deactivating main worker
   process_active_ = false;
@@ -127,8 +136,12 @@ nav2_util::CallbackReturn
 WeatherDetector::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
 {
   RCLCPP_INFO(logger_, "Cleaning up weather detector");
-
+  
+  //Pubs
   weather_condition_pub_.reset();
+  speed_limit_pub_.reset();
+
+  //Subs
   data_sub_.reset();
   weather_condition_client_.reset();
 
@@ -185,10 +198,21 @@ void WeatherDetector::process()
   }
   RCLCPP_INFO(logger_, "Got weather condition!It is %s ", state_str);
 
-
   std::unique_ptr<orunav2_msgs::msg::WeatherState> weather_state_msg =std::make_unique<orunav2_msgs::msg::WeatherState>();
   weather_state_msg->condition = state.condition;
   weather_condition_pub_->publish(std::move(weather_state_msg));
+  std::unique_ptr<nav2_msgs::msg::SpeedLimit> speed_limit_msg =std::make_unique<nav2_msgs::msg::SpeedLimit>();
+  
+  if(percentage_){
+    RCLCPP_INFO(logger_, "The weather is not good....Reducing speed of %.2f%s ", slowdown_ratio_, "%");
+  }
+  else{
+    RCLCPP_INFO(logger_, "The weather is not good....Reducing speed to %.2f ", slowdown_ratio_);
+  }
+  speed_limit_msg->percentage = percentage_;
+  speed_limit_msg->speed_limit = slowdown_ratio_;
+  speed_limit_pub_->publish(std::move(speed_limit_msg));
+
 }
 
 
@@ -200,6 +224,7 @@ void WeatherDetector::dataCallback(sensor_msgs::msg::Image msg)
     process();
     last_evaluation_time_ =  msg.header.stamp.sec;
   }
+ 
 
 }
 

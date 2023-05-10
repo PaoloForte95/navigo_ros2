@@ -15,6 +15,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(orunav2_core REQUIRED)
 find_package(orunav2_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(tf2_ros REQUIRED)
@@ -38,6 +39,7 @@ set(dependencies
   std_msgs
   visualization_msgs
   nav2_util
+  nav2_msgs
   geometry_msgs
   builtin_interfaces
   tf2_ros

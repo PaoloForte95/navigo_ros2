@@ -1,11 +1,14 @@
 weather_detector:
   ros__parameters:
-    rate: 10
+    rate: 5
     use_sim_time: True
     base_frame_id: "base_footprint"
     odom_frame_id: "odom"
     image_topic: "<robot_namespace>/intel_realsense_r200_depth/image_raw"
+    speed_limit_topic: "<robot_namespace>/speed_limit"
     service_name: "<robot_namespace>/get_weather_condition"
+    percentage: true # Setting speed limit in percentage if true or in absolute values in false case
+    slowdown_ratio: 30.0 #Percent of maximum allowed speed
     image:
         type: "image"
         topic: "<robot_namespace>/intel_realsense_r200_depth/image_raw"
