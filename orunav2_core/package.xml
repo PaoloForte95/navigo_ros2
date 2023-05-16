@@ -16,7 +16,7 @@
   <depend>nav2_costmap_2d</depend>
   <depend>geometry_msgs</depend>
   <depend>ecceleron_conversions</depend>
-  <depend>orunav2_msgs</depend>
+  <depend>nav_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

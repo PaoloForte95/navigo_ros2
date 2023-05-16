@@ -22,6 +22,7 @@
   <depend>nav2_smac_planner</depend>
   <depend>nav2_util</depend>
   <depend>nav2_collision_monitor</depend>
+  <depend>orunav2_selector</depend>
   <depend>nav2_msgs</depend>
 
 

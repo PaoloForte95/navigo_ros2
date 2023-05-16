@@ -83,7 +83,7 @@ public:
    * @return If smoothing was completed (true) or interrupted by time limit (false)
    */
   bool smooth(
-    orunav2_msgs::msg::Path & path,
+    nav_msgs::msg::Path & path,
     const rclcpp::Duration & max_time) override;
 
 protected:
@@ -96,7 +96,7 @@ protected:
    * @return If smoothing was successful
    */
   bool smoothImpl(
-    orunav2_msgs::msg::Path & path,
+    nav_msgs::msg::Path & path,
     bool & reversing_segment,
     const nav2_costmap_2d::Costmap2D * costmap,
     const double & max_time);
@@ -108,7 +108,7 @@ protected:
    * @return dim value
    */
   inline double getFieldByDim(
-    const orunav2_msgs::msg::PathPoint & msg,
+    const geometry_msgs::msg::PoseStamped & msg,
     const unsigned int & dim);
 
   /**
@@ -118,7 +118,7 @@ protected:
    * @param value to set the dimention to for the pose
    */
   inline void setFieldByDim(
-    orunav2_msgs::msg::PathPoint & msg, const unsigned int dim,
+    geometry_msgs::msg::PoseStamped & msg, const unsigned int dim,
     const double & value);
 
   double tolerance_, data_w_, smooth_w_;

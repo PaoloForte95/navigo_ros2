@@ -19,6 +19,7 @@
   <depend>pluginlib</depend>
   <depend>nav2_smac_planner</depend>
   <depend>nav2_util</depend>
+  <depend>orunav2_msgs</depend>
   <depend>nav2_collision_monitor</depend>
 
   <test_depend>ament_lint_auto</test_depend>

@@ -102,7 +102,7 @@ SmootherServer::on_configure(const rclcpp_lifecycle::State &)
   }
 
   // Initialize pubs & subs
-  plan_publisher_ = create_publisher<orunav2_msgs::msg::Path>("plan_smoothed", 1);
+  plan_publisher_ = create_publisher<nav_msgs::msg::Path>("plan_smoothed", 1);
 
   // Create the action server that we implement with our smoothPath method
   action_server_ = std::make_unique<ActionServer>(
@@ -269,9 +269,9 @@ void SmootherServer::smoothPlan()
 
     // Perform smoothing
     auto goal = action_server_->get_current_goal();
-    result->path = goal->path;
+    result->smoothed_path = goal->path;
     result->was_completed = smoothers_[current_smoother_]->smooth(
-      result->path, goal->max_smoothing_duration);
+      result->smoothed_path, goal->max_smoothing_duration);
     result->smoothing_duration = steady_clock_.now() - start_time;
 
     if (!result->was_completed) {
@@ -283,13 +283,13 @@ void SmootherServer::smoothPlan()
         rclcpp::Duration(goal->max_smoothing_duration).seconds(),
         rclcpp::Duration(result->smoothing_duration).seconds());
     }
-    plan_publisher_->publish(result->path);
+    plan_publisher_->publish(result->smoothed_path);
 
     // Check for collisions
     if (goal->check_for_collisions) {
       geometry_msgs::msg::Pose2D pose2d;
       bool fetch_data = true;
-      for (const auto & pose : result->path.poses) {
+      for (const auto & pose : result->smoothed_path.poses) {
         pose2d.x = pose.pose.position.x;
         pose2d.y = pose.pose.position.y;
         pose2d.theta = tf2::getYaw(pose.pose.orientation);

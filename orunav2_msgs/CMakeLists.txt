@@ -21,20 +21,23 @@ find_package(builtin_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(action_msgs REQUIRED)
+
 
 rosidl_generate_interfaces(${PROJECT_NAME} 
    
   #Actions
   "action/GlobalPlannerSelector.action"
+  "action/SmoothPath.action"
 
   #Messages
     "msg/WeatherState.msg"
   #Services
      "srv/GetWeatherCondition.srv"
      "srv/IsPlannerValid.srv"
-  DEPENDENCIES builtin_interfaces std_msgs action_msgs geometry_msgs sensor_msgs
+  DEPENDENCIES builtin_interfaces std_msgs action_msgs geometry_msgs sensor_msgs nav_msgs
 )
 
 ament_export_dependencies(rosidl_default_runtime)

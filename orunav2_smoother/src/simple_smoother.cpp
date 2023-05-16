@@ -54,7 +54,7 @@ void SimpleSmoother::configure(
 }
 
 bool SimpleSmoother::smooth(
-  orunav2_msgs::msg::Path & path,
+  nav_msgs::msg::Path & path,
   const rclcpp::Duration & max_time)
 {
   auto costmap = costmap_sub_->getCostmap();
@@ -64,7 +64,7 @@ bool SimpleSmoother::smooth(
   double time_remaining = max_time.seconds();
 
   bool success = true, reversing_segment;
-  orunav2_msgs::msg::Path curr_path_segment;
+  nav_msgs::msg::Path curr_path_segment;
   curr_path_segment.header = path.header;
 
   std::vector<PathSegment> path_segments = findDirectionalPathSegments(path);
@@ -98,7 +98,7 @@ bool SimpleSmoother::smooth(
 }
 
 bool SimpleSmoother::smoothImpl(
-  orunav2_msgs::msg::Path & path,
+  nav_msgs::msg::Path & path,
   bool & reversing_segment,
   const nav2_costmap_2d::Costmap2D * costmap,
   const double & max_time)
@@ -112,8 +112,8 @@ bool SimpleSmoother::smoothImpl(
   double x_i, y_i, y_m1, y_ip1, y_i_org;
   unsigned int mx, my;
 
-  orunav2_msgs::msg::Path new_path = path;
-  orunav2_msgs::msg::Path last_path = path;
+  nav_msgs::msg::Path new_path = path;
+  nav_msgs::msg::Path last_path = path;
 
   while (change >= tolerance_) {
     its += 1;
@@ -192,7 +192,7 @@ bool SimpleSmoother::smoothImpl(
 }
 
 double SimpleSmoother::getFieldByDim(
-  const orunav2_msgs::msg::PathPoint & msg, const unsigned int & dim)
+  const geometry_msgs::msg::PoseStamped & msg, const unsigned int & dim)
 {
   if (dim == 0) {
     return msg.pose.position.x;
@@ -204,7 +204,7 @@ double SimpleSmoother::getFieldByDim(
 }
 
 void SimpleSmoother::setFieldByDim(
-  orunav2_msgs::msg::PathPoint & msg, const unsigned int dim,
+  geometry_msgs::msg::PoseStamped & msg, const unsigned int dim,
   const double & value)
 {
   if (dim == 0) {

@@ -22,10 +22,8 @@
 #include "geometry_msgs/msg/pose2_d.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/quaternion.hpp"
-#include "orunav2_msgs/msg/path_point.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
-#include "orunav2_msgs/msg/path_point.hpp"
-#include "orunav2_msgs/msg/path.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "nav2_util/geometry_utils.hpp"
 
 using nav2_util::geometry_utils::euclidean_distance;
@@ -109,53 +107,6 @@ inline double euclidean_distance(
   return euclidean_distance(pos1.pose, pos2.pose, is_3d);
 }
 
-
-/**
- * @brief Get the L2 distance between 2 geometry_msgs::PoseStamped
- * @param pos1 First pose
- * @param pos1 Second pose
- * @param is_3d True if a true L2 distance is desired (default false)
- * @return double L2 distance
- */
-inline double euclidean_distance(
-  const orunav2_msgs::msg::PathPoint & pos1,
-  const geometry_msgs::msg::PoseStamped & pos2,
-  const bool is_3d = false)
-{
-  return euclidean_distance(pos1.pose, pos2.pose, is_3d);
-}
-
-/**
- * @brief Get the L2 distance between 2 geometry_msgs::PoseStamped
- * @param pos1 First pose
- * @param pos1 Second pose
- * @param is_3d True if a true L2 distance is desired (default false)
- * @return double L2 distance
- */
-inline double euclidean_distance(
-  const geometry_msgs::msg::PoseStamped & pos1,
-  const orunav2_msgs::msg::PathPoint & pos2,
-  const bool is_3d = false)
-{
-  return euclidean_distance(pos1.pose, pos2.pose, is_3d);
-}
-
-/**
- * @brief Get the L2 distance between 2 geometry_msgs::PoseStamped
- * @param pos1 First pose
- * @param pos1 Second pose
- * @param is_3d True if a true L2 distance is desired (default false)
- * @return double L2 distance
- */
-inline double euclidean_distance(
-  const orunav2_msgs::msg::PathPoint & pos1,
-  const orunav2_msgs::msg::PathPoint & pos2,
-  const bool is_3d = false)
-{
-  return euclidean_distance(pos1.pose, pos2.pose, is_3d);
-}
-
-
 /**
  * @brief Get the L2 distance between 2 geometry_msgs::Pose2D
  * @param pos1 First pose
@@ -221,7 +172,7 @@ inline Iter first_after_integrated_distance(Iter begin, Iter end, Getter getComp
  * subset of the path.
  * @return double Path length
  */
-inline double calculate_path_length(const orunav2_msgs::msg::Path & path, size_t start_index = 0)
+inline double calculate_path_length(const nav_msgs::msg::Path & path, size_t start_index = 0)
 {
   if (start_index + 1 >= path.poses.size()) {
     return 0.0;

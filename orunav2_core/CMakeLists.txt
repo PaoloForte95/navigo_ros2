@@ -15,7 +15,7 @@ find_package(nav2_util REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(orunav2_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(ecceleron_conversions REQUIRED)
 
 set(dependencies
@@ -27,7 +27,7 @@ set(dependencies
   nav2_costmap_2d
   geometry_msgs
   ecceleron_conversions
-  orunav2_msgs
+  nav_msgs
 )
 
 install(DIRECTORY include/

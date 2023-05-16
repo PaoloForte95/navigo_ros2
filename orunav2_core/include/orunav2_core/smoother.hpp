@@ -25,7 +25,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "pluginlib/class_loader.hpp"
-#include "orunav2_msgs/msg/path.hpp"
+#include "nav_msgs/msg/path.hpp"
 
 
 namespace orunav2_core
@@ -74,7 +74,7 @@ public:
    * @return If smoothing was completed (true) or interrupted by time limit (false)
    */
   virtual bool smooth(
-    orunav2_msgs::msg::Path & path,
+    nav_msgs::msg::Path & path,
     const rclcpp::Duration & max_time) = 0;
 
 };
