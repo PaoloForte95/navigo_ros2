@@ -272,7 +272,8 @@ nav_msgs::msg::Path SmacPlannerAStar::createPlan(
       _name.c_str(), error.c_str());
     return plan;
   }
-
+  RCLCPP_INFO_STREAM(_logger, "[SmacPlannerAStar] - solution_found : " << (path.size() != 0));
+  RCLCPP_INFO_STREAM(_logger, "[SmacPlannerAStar] - Path length : " << path.size());
   // Convert to world coordinates
   plan.poses.reserve(path.size());
   for (int i = path.size() - 1; i >= 0; --i) {

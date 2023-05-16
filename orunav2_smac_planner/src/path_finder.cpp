@@ -118,9 +118,9 @@ std::vector<std::vector<Configuration*>> PathFinder::solve(bool visualization) {
 	myWorld_ = new World(worldMap_, missions_);
 	if (WP::LOG_LEVEL >= 1) {
 		if(worldMap_->containsObstacles()) {
-			writeLogLine(std::string("Creating World from Map"), "PathFinder", WP::LOG_FILE);
+			writeLogLine(std::string("Created World from Map"), "PathFinder", WP::LOG_FILE);
 		} else {
-			writeLogLine(std::string("Creating simple World"), "PathFinder", WP::LOG_FILE);
+			writeLogLine(std::string("Created simple World"), "PathFinder", WP::LOG_FILE);
 		}
 	}
 

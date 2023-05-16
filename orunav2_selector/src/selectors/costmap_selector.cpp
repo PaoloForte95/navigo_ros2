@@ -214,7 +214,7 @@ std::string CostmapSelector::selectGlobalPlanner(
     }
     return selected_planner;
   }
-   RCLCPP_INFO(_logger, " CostMap cost %f", costmap->getCost(mx_start, my_start));
+  //RCLCPP_INFO(_logger, " CostMap cost at starting position %f", costmap->getCost(mx_start, my_start));
 
   //Get the current robot position
   double start_x = start.pose.position.x;
@@ -272,7 +272,7 @@ std::string CostmapSelector::selectGlobalPlanner(
     " milliseconds with " << num_iterations << " iterations." << std::endl;
 #endif
 
-  RCLCPP_INFO(_logger, "Setting  global planner to: %s ", selected_planner.c_str());
+  RCLCPP_INFO(_logger, "Best global planner is: %s ", selected_planner.c_str());
   publishPolygon();
   return selected_planner;
 }

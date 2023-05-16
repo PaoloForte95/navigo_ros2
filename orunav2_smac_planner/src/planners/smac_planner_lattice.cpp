@@ -107,7 +107,7 @@ void SmacPlannerLattice::configure(
   nav2_util::declare_parameter_if_not_declared(
     node, name + ".lookup_tables_directory", rclcpp::ParameterValue(
       ament_index_cpp::get_package_share_directory("orunav2_smac_planner") + 
-      "/lattice_lookup_tables/output.json"));   
+      "/lattice_lookup_tables/"));   
   node->get_parameter(name + ".lookup_tables_directory", _search_info.lookup_tables_filepath);
   
   nav2_util::declare_parameter_if_not_declared(
@@ -208,7 +208,7 @@ void SmacPlannerLattice::configure(
   RCLCPP_INFO(
     _logger, "Configured plugin %s of type SmacPlannerLattice with "
     "maximum iterations %i, max on approach iterations %i, "
-    "and %s. Tolerance %.2f. Using motion model: %s. State lattice file: %s.",
+    "and %s. Tolerance %.2f. Using motion model: %s. State lattice filepath: %s.",
     _name.c_str(), _max_iterations, _max_on_approach_iterations,
     _allow_unknown ? "allowing unknown traversal" : "not allowing unknown traversal",
     _tolerance, toString(_motion_model).c_str(), _search_info.lattice_filepath.c_str());
@@ -255,11 +255,11 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   std::unique_lock<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(_costmap->getMutex()));
 
   //Information about start and goal
-  double steering_start= 0.0;
+  double steering_start = 0.0;
   double steering_goal = 0.0;
 
   if (!getArticulatedJointAngle(steering_start)) {
-        RCLCPP_ERROR(_logger, "failed to query the articulated joint angle, check front_frame_id and rear_frame_id");
+        RCLCPP_WARN(_logger, "failed to query the articulated joint angle, check front_frame_id and rear_frame_id. Set start steering angle to 0");
   }
 
   RCLCPP_INFO(_logger, "[SmacPlannerLattice] - start : [%f,%f,%f](%f)", start.pose.position.x, start.pose.position.y,tf2::getYaw(start.pose.orientation), steering_start);
@@ -289,18 +289,14 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
   pose.pose.orientation.z = 0.0;
   pose.pose.orientation.w = 1.0;
   
-  if (planner_map.getMap().empty()) {
-    RCLCPP_ERROR(_logger, "[SmacPlannerLattice] - error in the provided map / conversion");
-    return plan;
-  }
 
   if (planner_map.getMap().empty()){
       _path_finder = new PathFinder(20, 20);
-       RCLCPP_ERROR(_logger, "[SmacPlannerLattice] - Creating PathFinder with empty map");
+       RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Creating PathFinder with empty map");
       }
     else{
       _path_finder = new PathFinder(planner_map);
-       RCLCPP_ERROR(_logger, "[SmacPlannerLattice] - Creating PathFinder with map");
+       RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Creating PathFinder with map");
       }
     
   if (_max_planning_time > 0.) 
@@ -308,8 +304,8 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
 
   
   VehicleMission vm(_model,
-                      start.pose.position.x-map_offset_x, start.pose.position.y-map_offset_y, start_orientation, 0, //FIXME -> steering not 0 
-                      goal.pose.position.x-map_offset_x, goal.pose.position.y-map_offset_y, goal_orientation, 0);
+                      start.pose.position.x-map_offset_x, start.pose.position.y-map_offset_y, start_orientation, steering_start,
+                      goal.pose.position.x-map_offset_x, goal.pose.position.y-map_offset_y, goal_orientation, steering_goal);
 
 
   _path_finder->addMission(&vm);

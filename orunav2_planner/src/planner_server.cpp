@@ -81,8 +81,8 @@ PlannerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
   costmap_ = costmap_ros_->getCostmap();
 
   RCLCPP_DEBUG(
-    get_logger(), "Costmap size: %d,%d",
-    costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY());
+    get_logger(), "Costmap size: %d,%d ... Origin: %f,%f",
+    costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY(),costmap_->getOriginX(), costmap_->getOriginY());
 
   tf_ = costmap_ros_->getTfBuffer();
 
