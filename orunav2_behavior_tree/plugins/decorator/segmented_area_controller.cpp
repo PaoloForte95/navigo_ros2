@@ -38,7 +38,8 @@ SegmentedAreaController::SegmentedAreaController(
 : BT::DecoratorNode(name, conf),
   area_state_topic_("area_state"),
   first_time_(false),
-  previous_value_(-1)
+  previous_value_(0),
+  current_area_value_(0)
 {
   getInput("area_state_topic", area_state_topic_);
   getInput("initial_value", previous_value_ );
