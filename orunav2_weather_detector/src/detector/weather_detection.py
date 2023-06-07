@@ -23,6 +23,8 @@ class WeatherDetection:
                             2: "Rain",
                             3: "Snow",
                        }
+        self._mean = np.array([0.485, 0.456, 0.406])
+        self._std = np.array([0.229, 0.224, 0.225])
         
         # you can insert the ROS based variables here (subscriber, publishers, or service related variables)
         #
@@ -33,15 +35,24 @@ class WeatherDetection:
         input:
             img: numpy array (h, w, 3) in bgr format
         '''
-        image = cv2.resize(image, (self._image_size+int(self._image_size*0.1), self._image_size+int(self._image_size*0.1)))
-        h, w, _ = image.shape
         
-        x = int(w/2 - self._image_size/2)
-        y = int(h/2 - self._image_size/2)
+        h, w, _ = image.shape
+        if h<=w:
+            h_new = self._image_size
+            w_new = int(w * (h_new / h))
+        else:
+            w_new = self._image_size
+            h_new = int(h * (w_new / w))
+
+        image = cv2.resize(image, (w_new, h_new))
+        
+        x = int(w_new/2 - self._image_size/2)
+        y = int(h_new/2 - self._image_size/2)
 
         crop_img = image[int(y):int(y+self._image_size), int(x):int(x+self._image_size)] # center crop of image
         crop_img = cv2.cvtColor(crop_img, cv2.COLOR_BGR2RGB)
-        img_array = (np.array(crop_img).transpose((2, 0, 1)))[None,:,:,:]/255.0
+        norm_img = (crop_img/255.0 - self._mean)/self._std
+        img_array = (norm_img.transpose((2, 0, 1)))[None,:,:,:]
         return img_array
     
     def get_inference(self, image):
