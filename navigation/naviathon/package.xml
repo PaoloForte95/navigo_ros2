@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>naviathon</name>
+  <version>0.0.1</version>
+  <description>ROS2 Navigation</description>
+  <maintainer email="paolo.forte@oru.se">pofe</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>navthon_behavior_tree</exec_depend>
+  <exec_depend>navthon_controller</exec_depend>
+  <exec_depend>navthon_core</exec_depend>
+  <exec_depend>navthon_costmap_2d</exec_depend>
+  <exec_depend>navthon_generic</exec_depend>
+  <exec_depend>navthon_launch</exec_depend>
+  <exec_depend>navthon_maps</exec_depend>
+  <exec_depend>navthon_msgs</exec_depend>
+  <exec_depend>navthon_planner</exec_depend>
+  <exec_depend>navthon_selector</exec_depend>
+  <exec_depend>navthon_smac_planner</exec_depend>
+  <exec_depend>navthon_smoother</exec_depend>
+  <exec_depend>navthon_util</exec_depend>
+  <exec_depend>navthon_weather_detector</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

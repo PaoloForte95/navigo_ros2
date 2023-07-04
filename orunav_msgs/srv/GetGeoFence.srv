@@ -1,3 +1,0 @@
-#get the current GeoFence from the AC mission server
----
-orunav_msgs/GeoFence geo_fence
