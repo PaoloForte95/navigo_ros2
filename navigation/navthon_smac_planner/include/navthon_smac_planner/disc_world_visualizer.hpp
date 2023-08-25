@@ -7,7 +7,7 @@
 #ifndef WORLDVISUALIZER_HPP_
 #define WORLDVISUALIZER_HPP_
 
-#include "opencv/cv.h"
+#include <opencv2/opencv.hpp>
 #include "opencv/highgui.h"
 #ifdef _WIN32 // windows
 #include <boost/thread/thread.hpp>
