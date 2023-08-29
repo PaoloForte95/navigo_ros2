@@ -43,7 +43,7 @@ NavthonPanel::NavthonPanel(QWidget * parent)
     const QString selected_controller_unknown("<table><tr><td width=100><b>Controller:</b></td><td>unknown</td></tr></table>");
 
     selected_planner_indicator_->setText(selected_planner_unknown);
-    selected_controller_indicator_->setText(selected_planner_unknown);
+    selected_controller_indicator_->setText(selected_controller_unknown);
 
     selected_planner_indicator_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     selected_controller_indicator_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -85,10 +85,10 @@ void NavthonPanel::getSelectedPlannerLabel(const std_msgs::msg::String::SharedPt
     if(msg->data.empty()){
         msg->data = "unknown";
     }
-    QString planner();
+    QString planner;
     selected_planner_indicator_->setText( QString(std::string("<table><tr><td width=100><b>Planner:</b></td>"
     "<td><font color=green>"+ msg->data + "</color></td></tr></table>").c_str()));
-    selected_controller_indicator_->setText( QString(std::string("<table><tr><td width=100><b>Planner:</b></td>"
+    selected_controller_indicator_->setText( QString(std::string("<table><tr><td width=100><b>Controller:</b></td>"
     "<td><font color=green>Spline Controller</color></td></tr></table>").c_str()));
 }
 
