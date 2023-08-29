@@ -1,9 +1,9 @@
 #C++ Tests
-ament_add_gtest(collision_monitor_node_test weather_detector_node_test.cpp)
-ament_target_dependencies(collision_monitor_node_test
+ament_add_gtest(weather_detector_node_test weather_detector_node_test.cpp)
+ament_target_dependencies(weather_detector_node_test
   ${dependencies}
 )
-target_link_libraries(collision_monitor_node_test
+target_link_libraries(weather_detector_node_test
   ${library_name}
 )
 

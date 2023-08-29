@@ -204,10 +204,10 @@ void WeatherDetector::process()
   std::unique_ptr<nav2_msgs::msg::SpeedLimit> speed_limit_msg =std::make_unique<nav2_msgs::msg::SpeedLimit>();
   
   if(percentage_){
-    RCLCPP_INFO(logger_, "The weather is not good....Reducing speed of %.2f%s ", slowdown_ratio_, "%");
+    RCLCPP_INFO(logger_, "Detected %s....Reducing speed of %.2f%s ",state_str,  slowdown_ratio_, "%");
   }
   else{
-    RCLCPP_INFO(logger_, "The weather is not good....Reducing speed to %.2f ", slowdown_ratio_);
+    RCLCPP_INFO(logger_, "Detected %s....Reducing speed to %.2f ",state_str, slowdown_ratio_);
   }
   speed_limit_msg->percentage = percentage_;
   speed_limit_msg->speed_limit = slowdown_ratio_;
