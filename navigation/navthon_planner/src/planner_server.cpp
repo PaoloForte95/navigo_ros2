@@ -500,8 +500,35 @@ PlannerServer::getPlan(
     goal.pose.position.x, goal.pose.position.y);
 
   if (planners_.find(planner_id) != planners_.end()) {
-
-    return planners_[planner_id]->createPlan(start, goal);
+      auto plan = planners_[planner_id]->createPlan(start, goal);
+      geometry_msgs::msg::PoseStamped pose;
+      costmap_ros_->getRobotPose(pose);
+      // Find the closest pose to current pose on global path. Since patht 
+      nav_msgs::msg::Path & current_path = plan;
+      auto find_closest_pose_idx =
+        [&pose, &current_path]() {
+          size_t closest_pose_idx = 0;
+          double curr_min_dist = std::numeric_limits<double>::max();
+          for (size_t curr_idx = 0; curr_idx < current_path.poses.size(); ++curr_idx) {
+            double curr_dist = nav2_util::geometry_utils::euclidean_distance(
+              pose, current_path.poses[curr_idx]);
+            if (curr_dist < curr_min_dist) {
+              curr_min_dist = curr_dist;
+              closest_pose_idx = curr_idx;
+            }
+          }
+          return closest_pose_idx;
+        };
+    int closest_id = static_cast<int>(find_closest_pose_idx());
+    int i = 2;
+    //remove eventually the path until the robot current pose;
+    RCLCPP_ERROR( get_logger(), "Removing %d poses from path of size%d", closest_id, plan.poses.size());
+    while(i < closest_id){
+      
+      plan.poses.erase(plan.poses.begin());
+      i++;
+    }
+    return plan;
   } else {
     if (planners_.size() == 1 && planner_id.empty()) {
       RCLCPP_WARN_ONCE(
