@@ -522,7 +522,9 @@ PlannerServer::getPlan(
     int closest_id = static_cast<int>(find_closest_pose_idx());
     int i = 2;
     //remove eventually the path until the robot current pose;
-    RCLCPP_ERROR( get_logger(), "Removing %d poses from path of size%d", closest_id, plan.poses.size());
+    if(i < closest_id){
+      RCLCPP_WARN( get_logger(), "Removing %d poses from path of size%d", closest_id, plan.poses.size());
+    } 
     while(i < closest_id){
       
       plan.poses.erase(plan.poses.begin());
