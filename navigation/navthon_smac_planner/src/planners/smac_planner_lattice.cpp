@@ -128,7 +128,7 @@ void SmacPlannerLattice::configure(
   node->get_parameter(name + ".save_paths", _save_paths);
 
   nav2_util::declare_parameter_if_not_declared(
-    node, name + ".max_planning_time", rclcpp::ParameterValue(10.0));
+    node, name + ".max_planning_time", rclcpp::ParameterValue(100.0));
   node->get_parameter(name + ".max_planning_time", _max_planning_time);
 
   nav2_util::declare_parameter_if_not_declared(node, name + ".front_frame_id", rclcpp::ParameterValue("front_link_axis"));
@@ -317,7 +317,8 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
     rclcpp::Time stop_time = _clock->now();
     RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Starting to solve the path planning problem - done");
     RCLCPP_INFO(_logger, "[SmacPlannerLattice] - PATHPLANNER_PROCESSING_TIME: %f", (stop_time-start_time).seconds());
-    
+    //std::string str = std::to_string((stop_time-start_time).seconds()) +"\n";
+    //ecl::serialization::saveToTextArchive( str, "computationalTime.txt",true);
     assert(!solution.empty());
     bool solution_found = (solution[0].size() != 0);
     RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - solution_found : " << solution_found);
@@ -368,8 +369,17 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
 
       plan = navthon_util::conversion_utils::createPathMsgFromPathInterface(path_dir_change);
       plan.header.frame_id = _global_frame;
-
    }
+   //std::string str_path_length = std::to_string(nav2_util::geometry_utils::calculate_path_length(plan)) + "\n";
+   //ecl::serialization::saveToTextArchive( str_path_length, "pathLength.txt", true);
+   
+   
+   //std::string goal_x = std::to_string(goal.pose.position.x);
+   //std::string goal_y = std::to_string(goal.pose.position.y);
+   //std::string goal_t = std::to_string(tf2::getYaw(goal.pose.orientation));
+   //std::string goal_str = "Goal:" + goal_x + " "+  goal_y + " " + goal_t + "\n";
+
+   //ecl::serialization::saveToTextArchive( goal_str, "goals.txt", true);
 
   // Compute plan
   

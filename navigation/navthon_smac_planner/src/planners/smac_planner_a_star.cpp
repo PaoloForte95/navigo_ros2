@@ -21,6 +21,7 @@
 #include "navthon_smac_planner/planners/smac_planner_astar.hpp"
 #include "nav2_util/geometry_utils.hpp"
 
+//#include <ecceleron/base/common/serialization.h>
 // #define BENCHMARK_TESTING
 
 namespace navthon_smac_planner
@@ -250,6 +251,7 @@ nav_msgs::msg::Path SmacPlannerAStar::createPlan(
   nav2_smac_planner::Node2D::CoordinateVector path;
   int num_iterations = 0;
   std::string error;
+  //rclcpp::Time start_time = _clock->now();
   try {
     if (!_a_star->createPath(
         path, num_iterations, _tolerance / static_cast<float>(costmap->getResolution())))
@@ -272,14 +274,19 @@ nav_msgs::msg::Path SmacPlannerAStar::createPlan(
       _name.c_str(), error.c_str());
     return plan;
   }
+  //rclcpp::Time stop_time = _clock->now();
   RCLCPP_INFO_STREAM(_logger, "[SmacPlannerAStar] - solution_found : " << (path.size() != 0));
   RCLCPP_INFO_STREAM(_logger, "[SmacPlannerAStar] - Path length : " << path.size());
+  //std::string str = std::to_string((stop_time-start_time).seconds()) +"\n";
+  //ecl::serialization::saveToTextArchive( str, "computationalTime.txt",true);
   // Convert to world coordinates
   plan.poses.reserve(path.size());
   for (int i = path.size() - 1; i >= 0; --i) {
     pose.pose = nav2_smac_planner::getWorldCoords(path[i].x, path[i].y, costmap);
     plan.poses.push_back(pose);
   }
+  //std::string str_path_length = std::to_string(nav2_util::geometry_utils::calculate_path_length(plan)) + "\n";
+  //ecl::serialization::saveToTextArchive( str_path_length, "pathLength.txt", true);
  
   // Publish raw path for debug
   if (_raw_plan_publisher->get_subscription_count() > 0) {
