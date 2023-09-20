@@ -97,7 +97,7 @@ void World::calculateGridDistancesFromGoals() {
 						// check if in the boundaries
 						if (new_x >= 0 && new_y >= 0 && new_x < (int) gridDistances[0].size() && new_y < (int) gridDistances.size()) {
 							// check clear of obstacles
-							if (!this->containsObstacles() || !(this->map_->getOccupancyValueInCell(new_x, new_y) >= WP::OCCUPANCY_THRESHOLD)) {
+							if (!this->containsObstacles() || !(this->map_->getOccupancyValueInCell(new_x, new_y) == WP::OCCUPANCY_THRESHOLD)) {
 								double newCost = parent->cost;
 								if (dx == 0 || dy == 0) {
 									newCost += WP::WORLD_SPACE_GRANULARITY; // not a diagonal
