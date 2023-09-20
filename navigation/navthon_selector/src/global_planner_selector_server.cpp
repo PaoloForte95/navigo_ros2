@@ -282,11 +282,17 @@ bool PlannerSelectorServer::transformPosesToGlobalFrame(
   geometry_msgs::msg::PoseStamped & curr_start,
   geometry_msgs::msg::PoseStamped & curr_goal)
 {
-  if (!costmap_ros_->transformPoseToGlobalFrame(curr_start, curr_start) ||
-    !costmap_ros_->transformPoseToGlobalFrame(curr_goal, curr_goal))
+  if (!costmap_ros_->transformPoseToGlobalFrame(curr_goal, curr_goal))
   {
     RCLCPP_WARN(
-      get_logger(), "Could not transform the start or goal pose in the costmap frame");
+      get_logger(), "Could not transform the goal pose in the costmap frame");
+    action_server->terminate_current();
+    return false;
+  }
+  if (!costmap_ros_->transformPoseToGlobalFrame(curr_start, curr_start))
+  {
+    RCLCPP_WARN(
+      get_logger(), "Could not transform the start pose in the costmap frame");
     action_server->terminate_current();
     return false;
   }
