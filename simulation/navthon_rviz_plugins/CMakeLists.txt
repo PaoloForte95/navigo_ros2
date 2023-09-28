@@ -87,7 +87,7 @@ target_link_libraries(${library_name}
 
 target_compile_definitions(${library_name} PRIVATE "RVIZ_DEFAULT_PLUGINS_BUILDING_LIBRARY")
 
-pluginlib_export_plugin_description_file(nav2_rviz_plugins plugins_description.xml)
+pluginlib_export_plugin_description_file(rviz_common plugins_description.xml)
 
 
 install(

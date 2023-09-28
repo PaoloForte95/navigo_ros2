@@ -1,7 +1,5 @@
 <library path="navthon_rviz_plugins">
-    <class name="navthon_rviz_plugins/Navthon" 
-    type="navthon_rviz_plugins::NavthonPanel" 
-    base_class_type="rviz_common::Panel">
+    <class name="navthon_rviz_plugins/Navthon"  type="navthon_rviz_plugins::NavthonPanel"  base_class_type="rviz_common::Panel">
     <description>The Navthon rviz panel.</description>
   </class>
 

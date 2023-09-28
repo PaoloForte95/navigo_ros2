@@ -29,7 +29,6 @@
   <build_depend>nav2_util</build_depend>
   <build_depend>lifecycle_msgs</build_depend>
   <build_depend>nav2_common</build_depend>
-  <build_depend>plan2_msgs</build_depend>
   <build_depend>navthon_msgs</build_depend>
   
 
@@ -47,7 +46,6 @@
   <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>nav2_util</exec_depend>
   <exec_depend>lifecycle_msgs</exec_depend>
-  <exec_depend>plan2_msgs</exec_depend>
   <exec_depend>navthon_msgs</exec_depend>
 
   <test_depend>ament_lint_common</test_depend>
