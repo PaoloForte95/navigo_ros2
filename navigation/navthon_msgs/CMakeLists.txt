@@ -31,12 +31,12 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   #Actions
   "action/GlobalPlannerSelector.action"
   "action/SmoothPath.action"
-
   #Messages
     "msg/WeatherState.msg"
   #Services
      "srv/GetWeatherCondition.srv"
      "srv/IsPlannerValid.srv"
+     "srv/GetCurrentPath.srv"
   DEPENDENCIES builtin_interfaces std_msgs action_msgs geometry_msgs sensor_msgs nav_msgs
 )
 
