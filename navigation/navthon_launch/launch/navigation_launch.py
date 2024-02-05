@@ -225,8 +225,6 @@ def generate_launch_description():
                             {'node_names': lifecycle_nodes},
                             {'bond_timeout': 25.0}
                             ]),
-
-
         ]
     )
 
@@ -278,18 +276,19 @@ def generate_launch_description():
                 remappings=remappings +
                            [('cmd_vel', cmd_vel_string), ('cmd_vel_smoothed', 'cmd_vel')]),
             ComposableNode(
+                package='navthon_selector',
+                plugin='navthon_selector::PlannerSelectorServer',
+                name='selector_server',
+                parameters=[configured_params],
+                remappings=remappings),
+            ComposableNode(
                 package='nav2_lifecycle_manager',
                 plugin='nav2_lifecycle_manager::LifecycleManager',
                 name='lifecycle_manager_navigation',
                 parameters=[{'use_sim_time': use_sim_time,
                              'autostart': autostart,
                              'node_names': lifecycle_nodes}]),
-            ComposableNode(
-                package='navthon_selector',
-                plugin='navthon_selector::PlannerSelectorServer',
-                name='selector_server',
-                parameters=[configured_params],
-                remappings=remappings),
+
         ],
     )
 

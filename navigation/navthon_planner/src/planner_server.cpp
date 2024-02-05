@@ -75,8 +75,7 @@ PlannerServer::~PlannerServer()
 nav2_util::CallbackReturn
 PlannerServer::on_configure(const rclcpp_lifecycle::State & /*state*/)
 {
-  RCLCPP_INFO(get_logger(), "Configuring");
-
+  RCLCPP_INFO(get_logger(), "Configuring path planner server");
   costmap_ros_->configure();
   costmap_ = costmap_ros_->getCostmap();
 

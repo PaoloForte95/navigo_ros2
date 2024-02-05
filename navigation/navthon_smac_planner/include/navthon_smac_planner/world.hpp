@@ -10,7 +10,6 @@
 #include <queue>
 #include "world_occupancy_map.hpp"
 #include "collision_detector.hpp"
-#include "disc_world_visualizer.hpp"
 #include "vehicle_mission.hpp"
 
 /**
@@ -42,8 +41,6 @@ class World {
 
 	/** Visualization flag (true to allow graphics) */
 	bool visualization_;
-	/** Pointer to visualizer */
-	DiscWorldVisualizer* visualizer_;
 
 	/**
 	 * Calculate the grid-distance from goal for each vehicle taking obstacles into account.
@@ -94,12 +91,6 @@ public:
 	 */
 	CollisionDetectorInterface* getCollisionDetector();
 
-	/**
-	 * Generate a DiscWorldVisualiser object.
-	 * To be invoked after constructor, goal and start setting.
-	 * @param scale Defines the scale factor to be used in the world representation (pixels per meter)
-	 */
-	void enableVisualization(int scale);
 
 	/**
 	 * Check if the visualization is enabled

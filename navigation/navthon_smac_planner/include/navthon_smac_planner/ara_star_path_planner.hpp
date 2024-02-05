@@ -11,7 +11,9 @@
 #include <unordered_map>
 #include "a_star.hpp"
 #include "path_node.hpp"
-
+#include <boost/thread/thread.hpp>
+#include <boost/thread.hpp>
+#include <boost/date_time.hpp>
 /**
  * @class ARAStarPathPlanner
  * ARAStarPathPlanner based on ARA* (Anytime Repairing A*) search.

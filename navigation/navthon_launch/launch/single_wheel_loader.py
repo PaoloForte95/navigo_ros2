@@ -91,7 +91,7 @@ def generate_launch_description():
                           }.items()))
 
     default_nav_to_pose_bt_xml = os.path.join(
-            get_package_share_directory('plan2_behavior_tree'),
+            get_package_share_directory('athena_behavior_tree'),
             'behavior_trees', 'planning_w_navigation.xml')
 
     nav_instances_cmds = []

@@ -5,7 +5,7 @@
   <version>0.0.1</version>
   <description>TODO: Package description</description>
   <maintainer email="paolo.forte@oru.se">Paolo Forte</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GPL-3.0-only</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

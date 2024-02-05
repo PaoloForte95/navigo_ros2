@@ -43,7 +43,6 @@ find_package(navthon_msgs REQUIRED)
 find_package(navthon_generic REQUIRED)
 find_package(navthon_util REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
-find_package(OpenCV REQUIRED)
 find_package(ecceleron_conversions REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -118,8 +117,6 @@ src/a_star_path_planner.cpp
 src/a_star.cpp
 src/ara_star_path_planner.cpp
 src/collision_detector.cpp
-src/disc_world_visualizer.cpp
-src/map_generators.cpp
 src/motion_primitive_data.cpp
 src/motion_primitive_selector.cpp
 src/path_finder.cpp
@@ -145,8 +142,7 @@ target_link_libraries(${library_name}_lattice ${OMPL_LIBRARIES}
 Boost::serialization 
 Boost::thread 
 Boost::program_options 
-Boost::regex  
-${OpenCV_LIBS})
+Boost::regex )
 target_include_directories(${library_name}_lattice PUBLIC ${Eigen3_INCLUDE_DIRS})
 
 ament_target_dependencies(${library_name}_lattice

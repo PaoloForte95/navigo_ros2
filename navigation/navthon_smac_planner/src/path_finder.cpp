@@ -127,7 +127,6 @@ std::vector<std::vector<Configuration*>> PathFinder::solve(bool visualization) {
 	// enable world visualization
 	if (visualization) {
 		int scale = xSize_ > ySize_ ? (int) (1200 / xSize_) : (int) (1000 / ySize_);
-		myWorld_->enableVisualization(scale);
 	}
 
 	// create the initial node

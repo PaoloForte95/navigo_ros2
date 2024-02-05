@@ -10,7 +10,9 @@
  */
 
 #include "navthon_smac_planner/world.hpp"
-
+#include <boost/thread/thread.hpp>
+#include <boost/thread.hpp>
+#include <boost/date_time.hpp>
 
 World::World(WorldOccupancyMap* m, std::vector<VehicleMission*> missions) {
 	missions_ = missions;
@@ -31,7 +33,6 @@ World::World(WorldOccupancyMap* m, std::vector<VehicleMission*> missions) {
 	cd_ = new navthon_smac_planner::CollisionDetector(map_);
 	// by default the world is not visualized
 	visualization_ = false;
-	visualizer_ = 0;
 	// now calculate the grid distances for each VehicleMission
 	if (map_->containsObstacles()) {
 		calculateGridDistancesFromGoals();
@@ -41,7 +42,6 @@ World::World(WorldOccupancyMap* m, std::vector<VehicleMission*> missions) {
 World::World(const World& other) : xSize_(other.xSize_), ySize_(other.ySize_), xCells_(other.xCells_),
 		yCells_(other.yCells_),visualization_(other.visualization_) {
 	if (other.visualization_) {
-		this->visualizer_ = other.visualizer_;
 	}
 	if (other.map_) {
 		this->map_ = other.map_;
@@ -54,7 +54,6 @@ World::World(const World& other) : xSize_(other.xSize_), ySize_(other.ySize_), x
 World::~World() {
 	// The Configurations in the discWorld Map are cleaned up when the PathNode are deleted
 	if (visualization_) {
-		delete visualizer_;
 	}
 	// delete the collision detector
 	delete cd_;
@@ -139,18 +138,6 @@ CollisionDetectorInterface* World::getCollisionDetector() {
 	return cd_;
 }
 
-void World::enableVisualization(int scale) {
-	visualization_ = true;
-	// accounting for the approximation to the world limit
-	visualizer_ = new DiscWorldVisualizer(xCells_, yCells_,	scale * WP::WORLD_SPACE_GRANULARITY);
-	if (this->map_) {
-		visualizer_->drawOccupancy(this->map_->getMap());
-	}
-	for(std::vector<VehicleMission*>::iterator mit = missions_.begin(); mit != missions_.end(); mit++ ) {
-		visualizer_->drawStart((*mit)->getStartConfiguration(), (*mit)->getVehicleID());
-		visualizer_->drawGoal((*mit)->getGoalConfiguration(), (*mit)->getVehicleID());
-	}
-}
 
 bool World::isVisualizationEnabled() {
 	return visualization_;
@@ -158,20 +145,15 @@ bool World::isVisualizationEnabled() {
 
 void World::resetVisualization() {
 	if (visualization_) {
-		visualizer_->resetVisualizer();
 		if (this->map_) {
-			visualizer_->drawOccupancy(map_->getMap());
 		}
 		for(std::vector<VehicleMission*>::iterator mit = missions_.begin(); mit != missions_.end(); mit++ ) {
-			visualizer_->drawStart((*mit)->getStartConfiguration(), (*mit)->getVehicleID());
-			visualizer_->drawGoal((*mit)->getStartConfiguration(), (*mit)->getVehicleID());
 		}
 	}
 }
 
 void World::visualizeConfigurations(std::vector<Configuration*> confs) {
 	if (visualization_) {
-		visualizer_->drawConfigurations(confs);
 	}
 }
 
