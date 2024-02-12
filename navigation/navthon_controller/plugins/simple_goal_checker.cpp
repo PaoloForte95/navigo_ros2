@@ -122,7 +122,7 @@ bool SimpleGoalChecker::isGoalReached(
   ecl::PoseVector2d global_goal = ecl::base::conversions::toPoseVector2d(goal_pose);
   if (check_xy_) {
     double d_dist = ecl::pose_utilities::getDistanceBetween(robot_pose2d, global_goal);
-    double d_orient = ecl::pose_utilities::getOrientationBetween(robot_pose2d, global_goal);
+    double d_orient = ecl::pose_utilities::getYawBetween(robot_pose2d, global_goal);
     if (d_dist  > xy_goal_tolerance_){
       return false;
     }
