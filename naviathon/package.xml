@@ -24,6 +24,7 @@
   <exec_depend>navthon_util</exec_depend>
   <exec_depend>navthon_weather_detector</exec_depend>
   <exec_depend>navthon_rviz_plugins</exec_depend>
+  <exec_depend>navthon_pcl</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
