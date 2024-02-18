@@ -51,12 +51,8 @@ pointcloud_filter_node
 
 install(DIRECTORY
   launch
+  config
   DESTINATION share/${PROJECT_NAME}/
-)
-
-# Rviz2 config for visualization
-install(FILES config/navthon_pcl.rviz 
-  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

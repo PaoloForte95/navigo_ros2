@@ -57,13 +57,13 @@ PointCloudFilter::on_configure(const rclcpp_lifecycle::State & /*state*/)
     RCLCPP_INFO(get_logger(), "Configuring PointCloudFilter node");
     publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(topic_out_,2);
     subscription_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(topic_in_, 10, std::bind(&PointCloudFilter::topic_callback, this, _1));
-
+     return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn
 PointCloudFilter::on_activate(const rclcpp_lifecycle::State & /*state*/)
 {
-  RCLCPP_INFO(get_logger(), "Activating PointCloudFilter node");
+  RCLCPP_INFO(get_logger(), "Activating");
 
   return CallbackReturn::SUCCESS;
 }
@@ -72,7 +72,7 @@ PointCloudFilter::on_activate(const rclcpp_lifecycle::State & /*state*/)
 CallbackReturn
 PointCloudFilter::on_deactivate(const rclcpp_lifecycle::State & /*state*/)
 {
-  RCLCPP_INFO(get_logger(), "Deactivating PointCloudFilter node ");
+  RCLCPP_INFO(get_logger(), "Deactivating");
   return CallbackReturn::SUCCESS;
 }
 
@@ -80,7 +80,7 @@ PointCloudFilter::on_deactivate(const rclcpp_lifecycle::State & /*state*/)
 CallbackReturn
 PointCloudFilter::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
 {
-  RCLCPP_INFO(get_logger(), "Cleaning up PointCloudFilter node");
+  RCLCPP_INFO(get_logger(), "Cleaning up");
   publisher_.reset();
   subscription_.reset();
   return CallbackReturn::SUCCESS;
@@ -89,7 +89,7 @@ PointCloudFilter::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
 CallbackReturn
 PointCloudFilter::on_shutdown(const rclcpp_lifecycle::State &)
 {
-  RCLCPP_INFO(get_logger(), "Shutting down PointCloudFilter node");
+  RCLCPP_INFO(get_logger(), "Shutting down");
   return CallbackReturn::SUCCESS;
 }
 
@@ -107,7 +107,7 @@ void PointCloudFilter::topic_callback(const sensor_msgs::msg::PointCloud2::Share
   pcl_conversions::toPCL(*msg,*cloud);    
                        
 
-    // Create the filtering object
+  // Create the filtering object
 
   pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> sor;
 
@@ -126,7 +126,7 @@ void PointCloudFilter::topic_callback(const sensor_msgs::msg::PointCloud2::Share
   pcl_conversions::fromPCL(*cloud_filtered,cloud_out);  
 
   unsigned int num_points_out = cloud_out.width;
-  RCLCPP_INFO(this->get_logger(), "The number of points in the pcl_example_out pointcloud is %i", num_points_out);
+  RCLCPP_INFO(this->get_logger(), "The number of points in the output pointcloud is %i", num_points_out);
 
   cloud_out.header.frame_id = msg->header.frame_id;
   cloud_out.header.stamp = msg->header.stamp;
