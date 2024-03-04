@@ -28,12 +28,6 @@ class VehicleMission {
 
 private:
 
-	/** The vehicleID_ counter */
-	static unsigned short int vehicleNum_;
-	/** The number of active missions */
-	static unsigned short int activeMissions_;
-
-
 	/** The VehicleModel used for the planning */
 	VehicleModel* vm_;
 	/** The initial configuration of the VehicleModel */

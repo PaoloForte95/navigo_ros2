@@ -23,7 +23,6 @@ PathFinder::PathFinder(double x, double y) {
 	dataGatheringForVehicleHT_ = false;
 	timeBound_ = 0;
 	myWorld_ = 0;
-	missions_.clear();
 }
 
 PathFinder::PathFinder(std::string filename) {
@@ -33,7 +32,6 @@ PathFinder::PathFinder(std::string filename) {
 	dataGatheringForVehicleHT_ = false;
 	timeBound_ = 0;
 	myWorld_ = 0;
-	missions_.clear();
 }
 
 PathFinder::PathFinder(const WorldOccupancyMap& map) {
@@ -44,7 +42,6 @@ PathFinder::PathFinder(const WorldOccupancyMap& map) {
 	dataGatheringForVehicleHT_ = false;
 	timeBound_ = 0;
 	myWorld_ = 0;
-	missions_.clear();
 }
 
 PathFinder::~PathFinder() {
@@ -69,7 +66,7 @@ void PathFinder::selectSubMap(double xfrom, double yfrom, double xto, double yto
 }
 
 void PathFinder::addMission(VehicleMission* m) {
-	missions_.push_back(m);
+	mission_ = m;
 }
 
 void PathFinder::enableDataGatheringForVehicleHT() {
@@ -80,23 +77,15 @@ void PathFinder::setTimeBound(int seconds) {
 	timeBound_ = seconds;
 }
 
-std::vector<std::vector<Configuration*>> PathFinder::solve(bool visualization) {
+std::vector<Configuration*> PathFinder::solve(bool visualization) {
 
-	std::vector<std::vector<Configuration*> > result;
+	std::vector<Configuration*> result;
 	result.clear();
 
-	// do we have missions?
-	if (missions_.size() == 0) {
-		writeLogLine(std::string("No missions to accomplish"), "PathFinder", WP::LOG_FILE);
-		return result;
-	}
 
-	// check if all VehicleModels have the same world granularity
-	for (std::vector<VehicleMission*>::iterator it =  missions_.begin(); it != missions_.end(); it ++) {
-		if (fabs((*it)->getVehicleModel()->getModelGranularity() - WP::WORLD_SPACE_GRANULARITY) > WP::CALCULATION_APPROXIMATION_ERROR) {
+	if (fabs((mission_)->getVehicleModel()->getModelGranularity() - WP::WORLD_SPACE_GRANULARITY) > WP::CALCULATION_APPROXIMATION_ERROR) {
       writeLogLine(std::string("FATAL ERROR: mismatching model resolutions (check also that the primitive file was loaded)"), "PathFinder", WP::LOG_FILE);
 			return result;
-		}
 	}
 
 	// first, check if PathFinder has been properly invoked
@@ -115,6 +104,8 @@ std::vector<std::vector<Configuration*>> PathFinder::solve(bool visualization) {
 	}
 
 	// create the world
+	std::vector<VehicleMission*> missions_;
+	missions_.push_back(mission_);
 	myWorld_ = new World(worldMap_, missions_);
 	if (WP::LOG_LEVEL >= 1) {
 		if(worldMap_->containsObstacles()) {
@@ -132,11 +123,9 @@ std::vector<std::vector<Configuration*>> PathFinder::solve(bool visualization) {
 	// create the initial node
 	std::vector<Configuration*> initialConfs;
 	initialConfs.clear();
-	for (std::vector<VehicleMission*>::iterator it = missions_.begin(); it != missions_.end(); it++) {
-		// clone the start configurations
-		Configuration* conf = (*it)->getStartConfiguration()->clone();
-		initialConfs.push_back(conf);
-	}
+	// clone the start configurations
+	Configuration* conf = (mission_)->getStartConfiguration()->clone();
+	initialConfs.push_back(conf);
 
 	// create the first node and pass it to the PathPlanner (clone it, because it
 	// shouldn't be destroyed when the planner is done)
@@ -188,36 +177,33 @@ std::vector<std::vector<Configuration*>> PathFinder::solve(bool visualization) {
 
 	// prepare the result to return, extracting the Configurations. Cleanup
 	PathNode* pn;
-	unsigned short int numberOfVehicles = missions_.size();
-	result.resize(numberOfVehicles);
+
 	for (std::vector<Node*>::iterator it = solution.begin(); it != solution.end(); it++) {
 		pn = dynamic_cast<PathNode*>(*it);
-		for (unsigned short int i = 0; i < numberOfVehicles; i ++) {
-			Configuration* c = (pn->getConfigurations())[i];
-			result[i].push_back(c->clone());
-		}
+		Configuration* c = (pn->getConfigurations())[0];
+		result.push_back(c->clone());
 		delete pn;
 	}
 
 	// remove duplicate Configurations from the results
 	std::vector<Configuration*> tmp;
-	for (unsigned short int i = 0; i < numberOfVehicles; i ++) {
-		tmp.clear();
-		while (result[i].size() > 0) {
-			if (result[i].size() > 1 && result[i][0]->equalConfigurations(result[i][1])) {
-				Configuration* config = result[i][0];
-				delete config;
-				result[i].erase(result[i].begin());
-			} else {
-				tmp.push_back(result[i][0]->clone());
-				Configuration* config = result[i][0];
-				delete config;
-				result[i].erase(result[i].begin());
-			}
+	
+	tmp.clear();
+	while (result.size() > 0) {
+		if (result.size() > 1 && result[0]->equalConfigurations(result[1])) {
+			Configuration* config = result[0];
+			delete config;
+			result.erase(result.begin());
+		} else {
+			tmp.push_back(result[0]->clone());
+			Configuration* config = result[0];
+			delete config;
+			result.erase(result.begin());
 		}
-		result[i].clear();
-		result[i] = tmp;
 	}
+	result.clear();
+	result = tmp;
+	
 
 	return result;
 }

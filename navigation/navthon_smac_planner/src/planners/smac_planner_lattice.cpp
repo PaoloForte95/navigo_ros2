@@ -313,46 +313,45 @@ nav_msgs::msg::Path SmacPlannerLattice::createPlan(
     
     RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Starting to solve the path planning problem ... ");
     rclcpp::Time start_time = _clock->now();
-    std::vector<std::vector<Configuration*> > solution = _path_finder->solve(false);
+    std::vector<Configuration*> solution = _path_finder->solve(false);
     rclcpp::Time stop_time = _clock->now();
     RCLCPP_INFO(_logger, "[SmacPlannerLattice] - Starting to solve the path planning problem - done");
     RCLCPP_INFO(_logger, "[SmacPlannerLattice] - PATHPLANNER_PROCESSING_TIME: %f", (stop_time-start_time).seconds());
     //std::string str = std::to_string((stop_time-start_time).seconds()) +"\n";
     //ecl::serialization::saveToTextArchive( str, "computationalTime.txt",true);
     assert(!solution.empty());
-    bool solution_found = (solution[0].size() != 0);
+    bool solution_found = (solution.size() != 0);
     RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - solution_found : " << solution_found);
-    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - solution[0].size() : " << solution[0].size());
+    RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - solution[0].size() : " << solution.size());
     
     navthon_generic::Path path;
     
-    for (std::vector<std::vector<Configuration*> >::iterator it = solution.begin(); it != solution.end(); it++)
-    {
-      for (std::vector<Configuration*>::iterator confit = (*it).begin(); confit != (*it).end(); confit++) {
-        std::vector<vehicleSimplePoint> path_local = (*confit)->getTrajectory();
+
+    for (std::vector<Configuration*>::iterator confit = (solution).begin(); confit != (solution).end(); confit++) {
+      std::vector<vehicleSimplePoint> path_local = (*confit)->getTrajectory();
+      
+      for (std::vector<vehicleSimplePoint>::iterator it2 = path_local.begin(); it2 != path_local.end(); it2++) {
+        double orientation = it2->orient;  
         
-        for (std::vector<vehicleSimplePoint>::iterator it2 = path_local.begin(); it2 != path_local.end(); it2++) {
-          double orientation = it2->orient;  
-          
-          navthon_generic::State2d state(navthon_generic::Pose2d(it2->x+map_offset_x,
-                                                               it2->y+map_offset_y,
-                                                               orientation), it2->steering);
-          path.addState2dInterface(state);
-          
-        }
+        navthon_generic::State2d state(navthon_generic::Pose2d(it2->x+map_offset_x,
+                                                              it2->y+map_offset_y,
+                                                              orientation), it2->steering);
+        path.addState2dInterface(state);
+        
       }
     }
+    
 
     RCLCPP_INFO_STREAM(_logger, "[SmacPlannerLattice] - Nb of path points : " << path.sizePath());
 
     // Cleanup
-    for (std::vector<std::vector<Configuration*> >::iterator it = solution.begin(); it != solution.end(); it++) {
-      std::vector<Configuration*> confs = (*it);
-      for (std::vector<Configuration*>::iterator confit = confs.begin(); confit != confs.end(); confit++) {
-        delete *confit;
-      }
-      confs.clear();
+
+    std::vector<Configuration*> confs = (solution);
+    for (std::vector<Configuration*>::iterator confit = confs.begin(); confit != confs.end(); confit++) {
+      delete *confit;
     }
+      confs.clear();
+    
     solution.clear();
     // Cleanup - end
 

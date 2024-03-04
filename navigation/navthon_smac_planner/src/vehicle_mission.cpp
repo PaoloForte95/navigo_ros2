@@ -20,17 +20,10 @@
 
 
 
-// init the static counter
-unsigned short int VehicleMission::vehicleNum_ = 0;
-unsigned short int VehicleMission::activeMissions_ = 0;
-
 VehicleMission::VehicleMission(VehicleModel* m, double start_x, double start_y, double start_o, double start_steering,
 		double goal_x, double goal_y, double goal_o, double goal_steering, std::string name /*= ""*/) {
 	vm_ = m;
-	vehicleID_ = vehicleNum_;
-	// increment the static counter and the number of active missions
-	vehicleNum_++;
-	activeMissions_++;
+	vehicleID_ = 1;
 
 	unsigned short int startXcell, startYcell, goalXcell, goalYcell;
 	uint8_t startOrientationID, startSteeringID, goalSteeringID, goalOrientationID;
@@ -120,11 +113,6 @@ VehicleMission::~VehicleMission() {
 		(*it).clear();
 	}
 	gridDistanceFromGoal_.clear();
-	// reduce the number of active missions and reset the ID counter if this was the last one
-	activeMissions_--;
-	if (activeMissions_ == 0) {
-		vehicleNum_ = 0;
-	}
 }
 
 void VehicleMission::setGridDistanceFromGoal(std::vector<std::vector<double> > distances) {

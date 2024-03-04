@@ -1,88 +1,16 @@
-/**
- * \mainpage Multi-Robot Timeless Path Finder Library
- *
- * @image html author.png
- * @author Paolo Forte
- *
- * @image html orientation_angles.png
- *
- * test
- *
- * @todo FINISH THE DOCUMENTATION
- *
- * \section intro_sec Introduction
- * The TimelessPathFinder library provides different functionalities and models to calculate paths for
- * both holonomic and non-holonomic vehicles. Currently, three different types of vehicles are supported:
- * Unicycles, Car-like vehicles and Waist actuated vehicles.
- *
- *
- * \section example_sec Examples
- *
- * @code
- * WP::setLogLevel(2);
- * @endcode
- *
- * @see WP (WorldParameters)
- *
- * @code
- * WP::setLogLevel(3);
- * WP::setLogFile("/home/marcello/test.txt");
- * WP::setSaveFinalVisualizationToFile(true);
- *
- * //load the model
- * CarModel* model = new CarModel("SnowWhite_16_3_02");
- *
- * VehicleMission* mission1 = new VehicleMission(model, 2, 1.8, 0   , 0, 6, 1.8, 0   , 0, std::string("myfirstvehicle"));
- * VehicleMission* mission2 = new VehicleMission(model, 6, 1.5, M_PI, 0, 2, 1.5, M_PI, 0, "mysecondvehicle");
- *
- * PathFinder* pf = new PathFinder(10, 5);
- * pf->addMission(mission1);
- * pf->addMission(mission2);
- * pf->setTimeBound(1600);
- *
- * std::vector<std::vector<Configuration*> > sol = pf->solve(true);
- * pf->printPaths(sol);
- *
- * // cleanup
- * delete pf;
- * delete mission1;
- * delete mission2;
- * delete model;
-
- * for (std::vector<std::vector<Configuration*> >::iterator it = sol.begin(); it != sol.end(); it++) {
- *		std::vector<Configuration*> confs = (*it);
- *		for (std::vector<Configuration*>::iterator confit = confs.begin(); confit != confs.end(); confit++) {
- *			delete *confit;
- *		}
- *		confs.clear();
- * }
- * sol.clear();
- * @endcode
- *
- * \section model_generation Model Generation
- *
- * \section model_refinement Model Refinement
- *
- * @code
- * CarModel* model = new CarModel("SnowWhite_16_3_02");
- * ModelUtilities::generateModelHeuristicTable(model, 7, 0);
- * delete model;
- * @endcode
- *
- * @code
- * CarModel* model = new CarModel("SnowWhite_16_3_02");
- * ModelUtilities::reduceModelMotionPrimitiveSet(model, 1.4);
- * delete model;
- * @endcode
- *
- *
- */
-
-/**
- * @file PathFinder.hpp
- * @author Paolo Forte
- *
- */
+// Copyright (c) 2022, Paolo Forte
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License. Reserved.
 
 #ifndef PATHFINDER_HPP_
 #define PATHFINDER_HPP_
@@ -111,8 +39,8 @@ private:
 
 	World* myWorld_;
 
-	/** A Vector containing pointers to the VehicleMissions */
-	std::vector<VehicleMission*> missions_;
+
+	VehicleMission* mission_;
 
 	/** If true (false, by default) enables the PathPlanner to extract data for the
 	 * current vehicle Heuristic Table during the search. Only possible using an
@@ -174,7 +102,7 @@ public:
 	 * @param visualization Enable/disable visualization
 	 * @returns A vector of vectors of pointers to Configurations solving the problem (1 vector per vehicle)
 	 */
-	std::vector<std::vector<Configuration*> > solve(bool visualization);
+	std::vector<Configuration*>  solve(bool visualization);
 
 	/**
 	 * Extract the waypoints from a solution vector (of Configuration)
