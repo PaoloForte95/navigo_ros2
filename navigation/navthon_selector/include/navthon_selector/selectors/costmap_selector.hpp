@@ -32,6 +32,7 @@
 #include "navthon_selector/sensors/source.hpp"
 #include "navthon_selector/sensors/scan.hpp"
 #include "navthon_selector/sensors/image.hpp"
+#include "navthon_selector/sensors/pointcloud.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 
 

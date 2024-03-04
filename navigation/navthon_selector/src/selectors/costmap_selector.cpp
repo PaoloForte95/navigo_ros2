@@ -126,7 +126,11 @@ void CostmapSelector::configure(
       std::shared_ptr<navthon_selector::Image> p = std::make_shared<navthon_selector::Image>(node, name + "." + source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
       p->configure();
       _sources.push_back(p);
-    } else {  // Error if something else
+    }else if (source_type == "pointcloud") {
+      std::shared_ptr<navthon_selector::PointCloud> p = std::make_shared<navthon_selector::PointCloud>(node, name + "." + source_name, costmap_ros->getTfBuffer(), _base_frame_id, _odom_frame_id, transform_tolerance, source_timeout);
+      p->configure();
+      _sources.push_back(p);
+    }  else {  // Error if something else
       RCLCPP_ERROR(node->get_logger(),"[%s]: Unknown source type: %s", source_name.c_str(), source_type.c_str());
     }
   }
@@ -247,16 +251,16 @@ std::string CostmapSelector::selectGlobalPlanner(
   }
   else if (insidePoints[0] > _max_points){
     RCLCPP_INFO(_logger, "Obstacles on left side!");
-    selected_planner = "LatticeBased";
+    selected_planner = "GridBased";
   
   }
   else if(insidePoints[1] > _max_points){
     RCLCPP_INFO(_logger, "Obstacles on right side!");
-    selected_planner = "LatticeBased";
+    selected_planner = "GridBased";
   }
   else {
     RCLCPP_INFO(_logger, " No obstacles detected in the polygons. Open space ");
-    selected_planner = "LatticeBased";
+    selected_planner = "GridBased";
   }
 
   //After selected the planner let's check if it failed before to compute the path

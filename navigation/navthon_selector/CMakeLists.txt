@@ -74,6 +74,7 @@ add_library(sources SHARED
   src/sensors/scan.cpp
   src/sensors/source.cpp
   src/sensors/image.cpp
+  src/sensors/pointcloud.cpp
 )
 ament_target_dependencies(sources
   ${dependencies}
