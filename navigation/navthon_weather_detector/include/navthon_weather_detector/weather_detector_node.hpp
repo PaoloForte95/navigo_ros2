@@ -140,12 +140,7 @@ bool percentage_;
 
 rclcpp::Logger logger_{rclcpp::get_logger("WeatherDetector")};
 
-
-
 };// class WeatherDetector
-
-
-
 
 }// namespace navthon_weather_detector
 

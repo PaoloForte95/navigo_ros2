@@ -182,6 +182,7 @@ void WeatherDetector::process()
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
   auto state = result.get()->condition;
   auto state_str = "";
+  bool limit_velocity = false;
   switch (state.condition) {
     case 0:
       state_str = "CLEAR";
@@ -191,9 +192,11 @@ void WeatherDetector::process()
       break;
     case 2:
       state_str = "RAIN";
+       limit_velocity= true;
       break;
     case 3:
       state_str = "SNOW";
+      limit_velocity= true;
       break;
   }
   RCLCPP_INFO(logger_, "Got weather condition!It is %s ", state_str);
@@ -202,16 +205,23 @@ void WeatherDetector::process()
   weather_state_msg->condition = state.condition;
   weather_condition_pub_->publish(std::move(weather_state_msg));
   std::unique_ptr<nav2_msgs::msg::SpeedLimit> speed_limit_msg =std::make_unique<nav2_msgs::msg::SpeedLimit>();
-  
-  if(percentage_){
-    RCLCPP_INFO(logger_, "Detected %s....Reducing speed of %.2f%s ",state_str,  slowdown_ratio_, "%");
+  if(limit_velocity){
+    if(percentage_){
+      RCLCPP_INFO(logger_, "Detected %s....Reducing speed of %.2f%s ",state_str,  slowdown_ratio_, "%");
+      
+    }
+    else{
+      RCLCPP_INFO(logger_, "Detected %s....Reducing speed to %.2f ",state_str, slowdown_ratio_);
+    }
+    speed_limit_msg->percentage = percentage_;
+    speed_limit_msg->speed_limit = slowdown_ratio_;
+    speed_limit_pub_->publish(std::move(speed_limit_msg));
   }
-  else{
-    RCLCPP_INFO(logger_, "Detected %s....Reducing speed to %.2f ",state_str, slowdown_ratio_);
+  else {
+    RCLCPP_INFO(logger_, "Detected %s.... No need to reduce velocity!",state_str);
   }
-  speed_limit_msg->percentage = percentage_;
-  speed_limit_msg->speed_limit = slowdown_ratio_;
-  speed_limit_pub_->publish(std::move(speed_limit_msg));
+   
+
 
 }
 

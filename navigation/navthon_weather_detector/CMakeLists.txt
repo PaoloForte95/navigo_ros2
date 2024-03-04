@@ -59,6 +59,10 @@ add_executable(${executable_name}
   src/main.cpp
 )
 
+add_executable(weather_adapter
+  src/weather_adapter.cpp
+)
+
 set(library_name ${executable_name}_core)
 #Weather Detector server
 ############
@@ -71,6 +75,7 @@ ament_target_dependencies(${library_name}
 )
 
 target_link_libraries(${executable_name} ${library_name})
+target_link_libraries(weather_adapter ${library_name})
 
 
 rclcpp_components_register_nodes(${library_name} "navthon_weather_detector::WeatherDetector")
@@ -87,7 +92,7 @@ install(TARGETS ${library_name}
 )
 
 
-install(TARGETS ${executable_name}
+install(TARGETS ${executable_name} weather_adapter
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 

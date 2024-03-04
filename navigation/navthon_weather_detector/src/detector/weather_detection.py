@@ -15,7 +15,7 @@ from navthon_msgs.msg import WeatherState
 
 class WeatherDetection:
     def __init__(self, model_path:str="image_based_weather_detection.onnx"):
-        self._image_size = 456
+        self._image_size = 224
         self._ort_session = onnxruntime.InferenceSession(model_path)
         self._labels = {
                             0: "Clear",
