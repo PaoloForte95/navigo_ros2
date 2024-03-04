@@ -32,27 +32,30 @@ using namespace std::chrono_literals;
 namespace navthon_rviz_plugins
 {
 
-
 NavthonPanel::NavthonPanel(QWidget * parent)
 : Panel(parent)
 {
     selected_planner_indicator_ = new QLabel;
     selected_controller_indicator_ = new QLabel;
+    weather_detection_indicator_ = new QLabel;
 
     const QString selected_planner_unknown("<table><tr><td width=100><b>Planner:</b></td><td>unknown</td></tr></table>");
     const QString selected_controller_unknown("<table><tr><td width=100><b>Controller:</b></td><td>unknown</td></tr></table>");
-
+    const QString detected_weather_unknown("<table><tr><td width=100><b>Weather:</b></td><td>unknown</td></tr></table>");
     selected_planner_indicator_->setText(selected_planner_unknown);
     selected_controller_indicator_->setText(selected_controller_unknown);
+    weather_detection_indicator_->setText(detected_weather_unknown);
 
     selected_planner_indicator_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     selected_controller_indicator_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    weather_detection_indicator_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
 
     // Lay out the items in the panel
     QVBoxLayout * main_layout = new QVBoxLayout;
     main_layout->addWidget(selected_planner_indicator_);
     main_layout->addWidget(selected_controller_indicator_);
+    main_layout->addWidget(weather_detection_indicator_);
 
 
     main_layout->setContentsMargins(10, 10, 10, 10);
@@ -71,12 +74,19 @@ NavthonPanel::onInitialize()
     
     auto node = getDisplayContext()->getRosNodeAbstraction().lock()->get_raw_node();
 
-  // create action feedback subscribers
-  selected_planner_sub_ =
-    node->create_subscription<std_msgs::msg::String>(
-    "selected_planner",
-    rclcpp::SystemDefaultsQoS(),
-    std::bind(&NavthonPanel::getSelectedPlannerLabel, this, std::placeholders::_1));
+    // create action feedback subscribers
+    selected_planner_sub_ =
+        node->create_subscription<std_msgs::msg::String>(
+        "selected_planner",
+        rclcpp::SystemDefaultsQoS(),
+        std::bind(&NavthonPanel::getSelectedPlannerLabel, this, std::placeholders::_1));
+    
+    detected_weather_sub_ =
+        node->create_subscription<navthon_msgs::msg::WeatherState>(
+        "/weather_condition",
+        rclcpp::SystemDefaultsQoS(),
+        std::bind(&NavthonPanel::getWeatherDetected, this, std::placeholders::_1));
+
 
 }
 
@@ -92,6 +102,23 @@ void NavthonPanel::getSelectedPlannerLabel(const std_msgs::msg::String::SharedPt
     "<td><font color=green>Spline Controller</color></td></tr></table>").c_str()));
 }
 
+void NavthonPanel::getWeatherDetected(const navthon_msgs::msg::WeatherState::SharedPtr msg){
+    std::string weather = "unknown";
+    if(msg->condition == navthon_msgs::msg::WeatherState::CLEAR){
+        weather = "Clear";
+    }
+    else if(msg->condition == navthon_msgs::msg::WeatherState::FOG){
+        weather = "Fog";
+    }
+    else if(msg->condition == navthon_msgs::msg::WeatherState::RAIN){
+        weather = "Rain";
+    }
+    else if(msg->condition == navthon_msgs::msg::WeatherState::SNOW){
+        weather = "Snow";
+    }
+    weather_detection_indicator_->setText( QString(std::string("<table><tr><td width=100><b>Weather:</b></td>"
+    "<td><font color=green>" + weather + "</color></td></tr></table>").c_str()));
+}
 
 }  // namespace nav2_rviz_plugins
 

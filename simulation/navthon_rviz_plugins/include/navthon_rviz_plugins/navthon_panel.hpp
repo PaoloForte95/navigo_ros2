@@ -27,6 +27,7 @@
 
 #include "nav2_rviz_plugins/nav2_panel.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "navthon_msgs/msg/weather_state.hpp"
 
 class QPushButton;
 using namespace nav2_rviz_plugins;
@@ -47,12 +48,16 @@ public:
 private:
   QLabel * selected_planner_indicator_{nullptr};
   QLabel * selected_controller_indicator_{nullptr};
+  QLabel * weather_detection_indicator_{nullptr};
   // Navigation subscribers
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr selected_planner_sub_;
+  rclcpp::Subscription<navthon_msgs::msg::WeatherState>::SharedPtr detected_weather_sub_;
 
 
   // create label string from string msg
   void getSelectedPlannerLabel(const std_msgs::msg::String::SharedPtr msg);
+
+  void getWeatherDetected(const navthon_msgs::msg::WeatherState::SharedPtr msg);
 
 };
 
