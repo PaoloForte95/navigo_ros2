@@ -4,6 +4,8 @@
 #ifndef NAVTHON_PCL__POINTCLOUD_FILTER_NODE_HPP_
 #define NAVTHON_PCL__POINTCLOUD_FILTER_NODE_HPP_
 
+
+#include "bondcpp/bond.hpp"
 #include "rclcpp/rclcpp.hpp"  
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
@@ -76,10 +78,13 @@ class PointCloudFilter : public rclcpp_lifecycle::LifecycleNode
     std::string param_topic_pointcloud_in;
     
     // ROS2 publisher and related topic name 
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
+    rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
     std::string topic_in_, topic_out_;
     int min_neigh_;
     double radius_;
+
+    // Connection to tell that server is still up
+    std::unique_ptr<bond::Bond> bond_{nullptr};
     
 };
 

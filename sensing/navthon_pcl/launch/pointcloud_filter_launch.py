@@ -81,7 +81,7 @@ def generate_launch_description():
                 name='pointcloud_filter_node',
                 output='screen',
                 respawn_delay=2.0,
-                parameters=[configured_params],
+                parameters=[configured_params, {'topic_in':'/ouster/points', 'topic_out':'/ouster_filtered_points'}],
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings),
               

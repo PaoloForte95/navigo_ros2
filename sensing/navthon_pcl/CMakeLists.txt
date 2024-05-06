@@ -23,6 +23,8 @@ find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(PCL 1.10 REQUIRED)
+find_package(bond REQUIRED)
+find_package(bondcpp REQUIRED)
 
 include_directories(${PCL_INCLUDE_DIRS} include)
 link_directories(${PCL_LIBRARY_DIRS})
@@ -42,6 +44,8 @@ ament_target_dependencies(
   std_msgs 
   sensor_msgs
   pcl_conversions
+  bond
+  bondcpp
 )
 
 install(TARGETS

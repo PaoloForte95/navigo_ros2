@@ -33,6 +33,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/SmoothPath.action"
   #Messages
     "msg/WeatherState.msg"
+    "msg/HumanDetection.msg"
   #Services
      "srv/GetWeatherCondition.srv"
      "srv/IsPlannerValid.srv"
