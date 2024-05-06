@@ -43,7 +43,7 @@
 #include "nav2_util/geometry_utils.hpp"
 
 //Ecceleron
-#include <ecceleron_conversions/conversions.hpp>
+#include <ecceleron_conversions/conversions.h>
 #include <ecceleron/base/common/pose_utilities.h>
 #include <ecceleron/base/geometry/spline_utilities.h>
 

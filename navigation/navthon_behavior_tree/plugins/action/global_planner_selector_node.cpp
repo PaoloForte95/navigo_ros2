@@ -26,8 +26,6 @@ SelectGlobalPlannerAction::SelectGlobalPlannerAction(
   const BT::NodeConfiguration & conf)
 : BtActionNode<navthon_msgs::action::GlobalPlannerSelector>(xml_tag_name, action_name, conf)
 {
-
-  
 }
 
 void SelectGlobalPlannerAction::on_tick()
