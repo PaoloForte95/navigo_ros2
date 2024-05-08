@@ -42,6 +42,9 @@
           </RecoveryNode>
        </Fallback> 
        </RateController>
+       <HumanDetectionController name="HumanDetectionController" topic="human_detection" >
+       <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+        </HumanDetectionController>
         <RecoveryNode number_of_retries="1" name="LocalController">
           <FollowPath path="{path}" controller_id="FollowSpline"/>
           <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>

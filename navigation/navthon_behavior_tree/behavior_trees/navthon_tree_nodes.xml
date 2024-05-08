@@ -325,5 +325,10 @@
       <input_port name="initial_value">Value of the initial area</input_port>
     </Decorator>
 
+    <Decorator ID="HumanDetectionController">
+      <input_port name="topic">Human Detection topic name</input_port>
+      <input_port name="waiting_time">Waiting time before updating the costmap after a human was detected</input_port>
+    </Decorator>
+
   </TreeNodesModel>
 </root>

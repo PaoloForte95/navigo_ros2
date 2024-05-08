@@ -93,6 +93,9 @@ list(APPEND plugin_libs navthon_distance_waypoints_controller_bt_node)
 add_library(navthon_segmented_area_controller_bt_node SHARED plugins/decorator/segmented_area_controller.cpp)
 list(APPEND plugin_libs navthon_segmented_area_controller_bt_node)
 
+add_library(navthon_human_detection_controller_bt_node SHARED plugins/decorator/human_detection_controller.cpp)
+list(APPEND plugin_libs navthon_human_detection_controller_bt_node)
+
 foreach(bt_plugin ${plugin_libs})
   ament_target_dependencies(${bt_plugin} ${dependencies})
   target_compile_definitions(${bt_plugin} PRIVATE BT_PLUGIN_EXPORT)

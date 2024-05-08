@@ -193,12 +193,14 @@ class HumanDetectionRos(Node):
         self.declare_parameter("namespace", "")
         self.declare_parameter("topic_name", "human_detection")
         self.declare_parameter("module_path", "src/naviathon/sensing/navthon_human_detection/src/detector/humandet.onnx")
+        self.declare_parameter("rate", 0.1)
         self.namespace = self.get_parameter("namespace").get_parameter_value().string_value
         self.topic_name = self.get_parameter("topic_name").get_parameter_value().string_value
         self.module_path = self.get_parameter("module_path").get_parameter_value().string_value
-        self.publisher_ = self.create_publisher(HDMsg, self.topic_name, 10)
-        timer_period = 0.1  # seconds
-        self.timer = self.create_timer(timer_period, self.hd_callback)
+        self.publisher_ = self.create_publisher(HDMsg, self.namespace+'/'+ self.topic_name, 10)
+        self.timer_period = self.get_parameter("rate").get_parameter_value().double_value  # seconds
+        print("Time Period", self.timer_period)
+        self.timer = self.create_timer(self.timer_period, self.hd_callback)
         self.humnadet = HumanDetection(self.module_path)
        
 
