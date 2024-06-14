@@ -251,16 +251,16 @@ std::string CostmapSelector::selectGlobalPlanner(
   }
   else if (insidePoints[0] > _max_points){
     RCLCPP_INFO(_logger, "Obstacles on left side!");
-    selected_planner = "GridBased";
+    selected_planner = "LatticeBased";
   
   }
   else if(insidePoints[1] > _max_points){
     RCLCPP_INFO(_logger, "Obstacles on right side!");
-    selected_planner = "GridBased";
+    selected_planner = "LatticeBased";
   }
   else {
     RCLCPP_INFO(_logger, " No obstacles detected in the polygons. Open space ");
-    selected_planner = "GridBased";
+    selected_planner = "LatticeBased";
   }
 
   //After selected the planner let's check if it failed before to compute the path
