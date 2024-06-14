@@ -24,7 +24,6 @@
 #include <laser_geometry/laser_geometry.hpp>
 #include <sensor_msgs/point_cloud_conversion.hpp>
 
-#include <ecceleron/navigation/mpc/articulated.h>
 #include "geometry_msgs/msg/point.hpp"
 
 

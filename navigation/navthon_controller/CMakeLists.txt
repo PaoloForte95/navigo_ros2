@@ -20,11 +20,11 @@ find_package(nav_2d_utils REQUIRED)
 find_package(nav_2d_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(nav2_core REQUIRED)
-find_package(ecceleron_conversions REQUIRED)
-find_package(ecceleron REQUIRED COMPONENTS ecceleron::eclbas_external
-                                           ecceleron::eclbas_common
-                                           ecceleron::eclnav_mpc
-)
+#find_package(ecceleron_conversions REQUIRED)
+#find_package(ecceleron REQUIRED COMPONENTS ecceleron::eclbas_external
+                                           #ecceleron::eclbas_common
+                                           #ecceleron::eclnav_mpc
+#)
 
 
 include_directories(
@@ -56,7 +56,7 @@ set(dependencies
   nav2_util
   pluginlib
   nav2_core
-  ecceleron_conversions
+  #ecceleron_conversions
 )
 
 

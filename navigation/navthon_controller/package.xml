@@ -20,7 +20,7 @@
   <depend>nav_2d_msgs</depend>
   <depend>nav2_core</depend>
   <depend>pluginlib</depend>
-  <depend>ecceleron_conversions</depend>
+  <!-- <depend>ecceleron_conversions</depend> -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 

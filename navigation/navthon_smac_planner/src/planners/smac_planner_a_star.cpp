@@ -21,7 +21,6 @@
 #include "navthon_smac_planner/planners/smac_planner_astar.hpp"
 #include "nav2_util/geometry_utils.hpp"
 
-//#include <ecceleron/base/common/serialization.h>
 // #define BENCHMARK_TESTING
 
 namespace navthon_smac_planner

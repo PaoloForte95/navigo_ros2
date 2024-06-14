@@ -26,13 +26,6 @@
 #include "navthon_smac_planner/nav_msgs_occupancy_grid_to_planner_map.hpp"
 
 
-
-#include <ecceleron/base/common/pose_utilities.h>
-#include <ecceleron_conversions/conversions.h>
-// #define BENCHMARK_TESTING
-
-
-
 namespace navthon_smac_planner
 {
 
@@ -477,25 +470,8 @@ return plan;
 
   bool SmacPlannerLattice::getArticulatedJointAngle(double &angle) const
   {
-    // Front pose and rear pose
-    // Utilize tf to be more generic towards simulation vs. real systems.
-    if (!_tf) {
-      RCLCPP_ERROR(_logger,"tf not initiated(!)");
-      return false;
-    }
-    try
-    {
-      // transform robot pose into the plan frame (we do not wait here, since pruning not crucial, if missed a few times)
-      geometry_msgs::msg::TransformStamped joint = _tf->lookupTransform(_front_frame_id, _rear_frame_id, rclcpp::Time(0));
-      
-      ecl::PoseVector2d joint_angle2d = ecl::base::conversions::toPoseVector2d(ecl::base::conversions::toPoseMsg(joint.transform));
-      angle = joint_angle2d[2];
-    }
-    catch (const tf2::TransformException &ex)
-    {
-      RCLCPP_ERROR(_logger,"Cannot get the articulated angle as no transform is available: %s\n", ex.what());
-      return false;
-    }
+    //FIXME get the steering joint angle. Can be != 0
+    angle = 0.0;
     return true;  
   }
 

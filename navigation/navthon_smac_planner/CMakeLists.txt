@@ -42,8 +42,7 @@ find_package(OpenMP REQUIRED)
 find_package(navthon_msgs REQUIRED)
 find_package(navthon_generic REQUIRED)
 find_package(navthon_util REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
-find_package(ecceleron_conversions REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system serialization program_options thread regex)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
@@ -92,7 +91,6 @@ set(dependencies
   navthon_msgs
   navthon_generic
   navthon_util
-  ecceleron_conversions
   Boost
 )
 

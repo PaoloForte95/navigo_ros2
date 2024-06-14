@@ -43,9 +43,9 @@
 #include "nav2_util/geometry_utils.hpp"
 
 //Ecceleron
-#include <ecceleron_conversions/conversions.h>
-#include <ecceleron/base/common/pose_utilities.h>
-#include <ecceleron/base/geometry/spline_utilities.h>
+//#include <ecceleron_conversions/conversions.h>
+//#include <ecceleron/base/common/pose_utilities.h>
+//#include <ecceleron/base/geometry/spline_utilities.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -118,27 +118,45 @@ bool SimpleGoalChecker::isGoalReached(
   const geometry_msgs::msg::Pose & query_pose, const geometry_msgs::msg::Pose & goal_pose,
   const geometry_msgs::msg::Twist & velocity)
 {
-  ecl::PoseVector2d robot_pose2d = ecl::base::conversions::toPoseVector2d(query_pose);
-  ecl::PoseVector2d global_goal = ecl::base::conversions::toPoseVector2d(goal_pose);
-  if (check_xy_) {
-    double d_dist = ecl::pose_utilities::getDistanceBetween(robot_pose2d, global_goal);
-    double d_orient = ecl::pose_utilities::getYawBetween(robot_pose2d, global_goal);
-    if (d_dist  > xy_goal_tolerance_){
-      return false;
+      if (check_xy_) {
+      double dx = query_pose.position.x - goal_pose.position.x,
+        dy = query_pose.position.y - goal_pose.position.y;
+      if (dx * dx + dy * dy > xy_goal_tolerance_sq_) {
+        return false;
+      }
+      // We are within the window
+      // If we are stateful, change the state.
+      if (stateful_) {
+        check_xy_ = false;
+      }
     }
-    if (fabs(d_orient) > yaw_goal_tolerance_){
-      return false;
-    }
-    // We are within the window
-    // If we are stateful, change the state.
-    if (stateful_) {
-      check_xy_ = false;
-      RCLCPP_WARN(logger_,"SimpleGoalChecker -REACHED GOAL");
-    }  
-  }
-  return (fabs(velocity.angular.z) <= theta_stopped_vel_
-           && hypot(velocity.linear.x, velocity.linear.y) <= trans_stopped_vel_
-          || free_goal_vel_);
+    double dyaw = angles::shortest_angular_distance(
+      tf2::getYaw(query_pose.orientation),
+      tf2::getYaw(goal_pose.orientation));
+    return fabs(dyaw) < yaw_goal_tolerance_;
+  // ecl::PoseVector2d robot_pose2d = ecl::base::conversions::toPoseVector2d(query_pose);
+  // ecl::PoseVector2d global_goal = ecl::base::conversions::toPoseVector2d(goal_pose);
+  // if (check_xy_) {
+  //   double d_dist = ecl::pose_utilities::getDistanceBetween(robot_pose2d, global_goal);
+  //   double d_orient = ecl::pose_utilities::getYawBetween(robot_pose2d, global_goal);
+  //   if (d_dist  > xy_goal_tolerance_){
+  //     return false;
+  //   }
+  //   if (fabs(d_orient) > yaw_goal_tolerance_){
+  //     return false;
+  //   }
+  //   // We are within the window
+  //   // If we are stateful, change the state.
+  //   if (stateful_) {
+  //     check_xy_ = false;
+  //     RCLCPP_WARN(logger_,"SimpleGoalChecker -REACHED GOAL");
+  //   }  
+  // }
+  // return (fabs(velocity.angular.z) <= theta_stopped_vel_
+  //          && hypot(velocity.linear.x, velocity.linear.y) <= trans_stopped_vel_
+  //         || free_goal_vel_);
+
+  //}
 
 }
 

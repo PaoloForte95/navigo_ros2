@@ -17,7 +17,7 @@
 
 #include "navthon_selector/sensors/scan.hpp"
 #include "nav2_util/node_utils.hpp"
-
+#include "nav2_util/robot_utils.hpp"
 
 namespace navthon_selector
 {
@@ -78,15 +78,15 @@ void Scan::getData(
   std::vector<geometry_msgs::msg::Point> & data) const
 {
     sensor_msgs::msg::PointCloud2 cloud;
-    laser_geometry::LaserProjection laser_projection;
+    //laser_geometry::LaserProjection laser_projection;
     try
     {
-    laser_projection.transformLaserScanToPointCloud(base_frame_id_, data_, cloud, *tf_buffer_, max_obstacle_range_);
+    //laser_projection.transformLaserScanToPointCloud(base_frame_id_, data_, cloud, *tf_buffer_, max_obstacle_range_);
 
     // To avoid that to many point obstacles are generated, subsample the cloud while preserving important points.
 
     // For this simple operation, just utilize PointCloud message as it is easier to access the elements
-    sensor_msgs::msg::PointCloud tmp;
+    /*sensor_msgs::msg::PointCloud tmp;
     sensor_msgs::convertPointCloud2ToPointCloud(cloud, tmp);
     ecl::navigation::PointDistancesSelected pds = convertPointCloudMsgToPointDistancesSelected(tmp);
 
@@ -112,10 +112,38 @@ void Scan::getData(
   }
   RCLCPP_WARN(logger_,"Number of all obstacles: %d", data.size());
   sensor_msgs::convertPointCloudToPointCloud2(tmp, cloud);
-  }catch (tf2::TransformException &ex)
-        {
-        RCLCPP_WARN(logger_,"%s", ex.what());
-      } 
+  */
+  tf2::Transform tf_transform;
+    if (!nav2_util::getTransform(data_.header.frame_id, base_frame_id_, transform_tolerance_, 
+    tf_buffer_, tf_transform)) {
+      return;
+    }
+
+    // Calculate poses and refill data array
+    float angle = data_.angle_min;
+    for (size_t i = 0; i < data_.ranges.size(); i++) {
+      if (data_.ranges[i] >= data_.range_min && data_.ranges[i] <= data_.range_max) {
+        // Transform point coordinates from source frame -> to base frame
+        tf2::Vector3 p_v3_s(
+          data_.ranges[i] * std::cos(angle),
+          data_.ranges[i] * std::sin(angle),
+          0.0);
+        tf2::Vector3 p_v3_b = tf_transform * p_v3_s;
+
+        // Refill data array
+        geometry_msgs::msg::Point ob_point;
+        ob_point.x = p_v3_b.x();
+        ob_point.y = p_v3_b.y();
+        data.push_back(ob_point);
+      }
+      angle += data_.angle_increment;
+    }
+    return;
+    }catch (tf2::TransformException &ex)
+          {
+          RCLCPP_WARN(logger_,"%s", ex.what());
+        } 
+      
 
 }
 
@@ -130,15 +158,15 @@ void Scan::dataCallback(sensor_msgs::msg::LaserScan msg)
 }
 
 
-ecl::navigation::PointDistancesSelected Scan::convertPointCloudMsgToPointDistancesSelected(const sensor_msgs::msg::PointCloud &cloud) const
-  {
-    ecl::navigation::PointDistancesSelected ret;
-    for (size_t i = 0; i < cloud.points.size(); i++)
-    {
-      ecl::navigation::PointDistanceSelected p(Eigen::Vector2d(cloud.points[i].x, cloud.points[i].y));
-      ret.push_back(p);
-    }
-    return ret;
-  }
+// ecl::navigation::PointDistancesSelected Scan::convertPointCloudMsgToPointDistancesSelected(const sensor_msgs::msg::PointCloud &cloud) const
+//   {
+//     ecl::navigation::PointDistancesSelected ret;
+//     for (size_t i = 0; i < cloud.points.size(); i++)
+//     {
+//       ecl::navigation::PointDistanceSelected p(Eigen::Vector2d(cloud.points[i].x, cloud.points[i].y));
+//       ret.push_back(p);
+//     }
+//     return ret;
+//   }
 
 }  // namespace navthon_selector
