@@ -65,12 +65,14 @@ inline BT::NodeStatus HumanDetectionController::tick()
     || (human_detected_  && !detection_msg_.human_detected) 
     || (human_detected_  && (time_diff > waiting_time_)))
     {
-       if(first_time_){
+      if(first_time_){
           first_time_ = false;
-       }
-      last_time_update_ = node_->get_clock()->now().seconds();
-      RCLCPP_INFO(node_->get_logger(), "Human non more detected! Clearing costmap!");
-      human_detected_ = false;
+          return BT::NodeStatus::SUCCESS;
+      }else{
+        last_time_update_ = node_->get_clock()->now().seconds();
+        RCLCPP_INFO(node_->get_logger(), "Human non more detected! Clearing costmap!");
+        human_detected_ = false;
+      }
 
       const BT::NodeStatus child_state = child_node_->executeTick();
       switch (child_state) {
@@ -98,6 +100,7 @@ void HumanDetectionController::dataCallback(navthon_msgs::msg::HumanDetection ms
     RCLCPP_INFO(node_->get_logger(), "Detected Human!");
     human_detected_ = true;
   }
+  else {RCLCPP_INFO(node_->get_logger(), "Human not detected!");}
 }
 
 }

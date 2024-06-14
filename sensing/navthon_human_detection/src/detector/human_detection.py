@@ -31,7 +31,7 @@ class HumanDetection:
         self.model_path = Path(model_path)
         assert self.model_path.suffix=='.onnx' and self.model_path.exists()
         
-        self.detecton_threshold = 0.3
+        self.detecton_threshold = 0.5
         self.segmentation_threshold = 0.01
         
         self.color = np.random.randint(0, 255, 3, dtype=np.uint8)
@@ -125,9 +125,8 @@ class HumanDetection:
         pred_nms = non_max_suppression(prediction=pred, conf_thres=0.3, iou_thres=0.45, classes=0, agnostic=False, max_det=50,nm=0) #32 is for seg
         for i, det in enumerate(pred_nms):
             det[:, :4] = scale_boxes([480, 640], det[:, :4], [480, 640]).round()
-
+        num_humans = 0
         if len(det):
-            num_humans = 0
             self.dists_to_humans = []
             for d in det:
                 if d[-2]>=self.detecton_threshold and ((d[2]-d[0]) * (d[3]-d[1]))>50:
@@ -138,29 +137,32 @@ class HumanDetection:
                     indexes = np.argwhere(depth_det==np.median(depth_det))
                     #print(len(indexes))
                     mask = np.zeros_like(self.depth_image, dtype=bool)
-                    mask[d[1]:d[3], d[0]:d[2]] = flood(depth_det, seed_point=(indexes[0,0],indexes[0,1]), connectivity=1, tolerance=self.segmentation_threshold)
-                    # mask[d[1]:d[3], d[0]:d[2]] = flood(self.depth_image, seed_point=(indexes[0,0],indexes[0,1]), connectivity=1, tolerance=self.segmentation_threshold)
-                    
-                    index = np.argwhere(mask).mean(axis=0).astype(int)
-                    z = self.depth_image[mask].mean()
-                    x = (float(index[1]) - self.cx)*z/self.fx
-                    y = (float(index[0]) - self.cy)*z/self.fy
-                    
-                    #Segmentation Mask
-                    masked_img = np.where(mask[...,None], self.color, self.color_image[:,:,:3])
-                    self.color_image = cv2.addWeighted(self.color_image[:,:,:3], 0.8, masked_img, 0.2, 0)
-                    
-                    #Bounding Box
-                    box_org = (d[0], d[1])
-                    box_end = (d[2], d[3])
-                    self.color_image = cv2.rectangle(self.color_image, box_org, box_end, self.color.tolist(), 2)
-                    
-                    #Distance Text
-                    text_org = (d[0], d[1])
-                    # text = f'X:{x:.2f}, Y:{y:.2f}, Z:{z:.2f}'
-                    text = f'Z:{z:.2f}'
-                    self.dists_to_humans.append(z)
-                    self.color_image = cv2.putText(self.color_image, text, text_org, cv2.FONT_HERSHEY_SIMPLEX, 1., self.color.tolist(), 2, cv2.LINE_AA) 
+                    try:
+                        mask[d[1]:d[3], d[0]:d[2]] = flood(depth_det, seed_point=(indexes[0,0],indexes[0,1]), connectivity=1, tolerance=self.segmentation_threshold)
+                        # mask[d[1]:d[3], d[0]:d[2]] = flood(self.depth_image, seed_point=(indexes[0,0],indexes[0,1]), connectivity=1, tolerance=self.segmentation_threshold)
+                        
+                        index = np.argwhere(mask).mean(axis=0).astype(int)
+                        z = self.depth_image[mask].mean()
+                        x = (float(index[1]) - self.cx)*z/self.fx
+                        y = (float(index[0]) - self.cy)*z/self.fy
+                        
+                        #Segmentation Mask
+                        masked_img = np.where(mask[...,None], self.color, self.color_image[:,:,:3])
+                        self.color_image = cv2.addWeighted(self.color_image[:,:,:3], 0.8, masked_img, 0.2, 0)
+                        
+                        #Bounding Box
+                        box_org = (d[0], d[1])
+                        box_end = (d[2], d[3])
+                        self.color_image = cv2.rectangle(self.color_image, box_org, box_end, self.color.tolist(), 2)
+                        
+                        #Distance Text
+                        text_org = (d[0], d[1])
+                        # text = f'X:{x:.2f}, Y:{y:.2f}, Z:{z:.2f}'
+                        text = f'Z:{z:.2f}'
+                        self.dists_to_humans.append(z)
+                        self.color_image = cv2.putText(self.color_image, text, text_org, cv2.FONT_HERSHEY_SIMPLEX, 1., self.color.tolist(), 2, cv2.LINE_AA) 
+                    except:
+                        print("Flood Failed.")
         else:
             self.dists_to_humans = []
             self.count = 0
