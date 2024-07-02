@@ -39,6 +39,11 @@ def generate_launch_description():
     container_name = LaunchConfiguration('container_name')
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
+    set_initial_pose =  LaunchConfiguration('set_initial_pose')
+    initial_pose_x = LaunchConfiguration('initial_pose_x')
+    initial_pose_y = LaunchConfiguration('initial_pose_y')
+    initial_pose_z = LaunchConfiguration('initial_pose_z')
+    initial_pose_yaw = LaunchConfiguration('initial_pose_yaw')
 
     lifecycle_nodes = ['map_server', 'amcl']
 
@@ -97,6 +102,30 @@ def generate_launch_description():
     declare_log_level_cmd = DeclareLaunchArgument(
         'log_level', default_value='info',
         description='log level')
+    
+    declare_set_initial_pose_cmd = DeclareLaunchArgument(
+        'set_initial_pose', default_value='False',
+        description='Causes AMCL to set initial pose from the initial_pose* parameters instead of waiting for the initial_pose message.')
+
+    declare_initial_pose_x_cmd = DeclareLaunchArgument(
+        'initial_pose_x',
+        default_value='0.0',
+        description='The x value of the initial pose')
+    
+    declare_initial_pose_y_cmd = DeclareLaunchArgument(
+        'initial_pose_y',
+        default_value='0.0',
+        description='The y value of the initial pose')
+    
+    declare_initial_pose_z_cmd = DeclareLaunchArgument(
+        'initial_pose_z',
+        default_value='0.0',
+        description='The z value of the initial pose')
+    
+    declare_initial_pose_yaw_cmd = DeclareLaunchArgument(
+        'initial_pose_yaw',
+        default_value='0.0',
+        description='The yaw value of the initial pose')
 
     load_nodes = GroupAction(
         condition=IfCondition(PythonExpression(['not ', use_composition])),
@@ -118,7 +147,11 @@ def generate_launch_description():
                 output='screen',
                 respawn=use_respawn,
                 respawn_delay=2.0,
-                parameters=[configured_params],
+                parameters=[configured_params, {'set_initial_pose': set_initial_pose,
+                                                'initial_pose.x': initial_pose_x,
+                                                'initial_pose.y': initial_pose_y,
+                                                'initial_pose.z': initial_pose_z,
+                                                'initial_pose.yaw': initial_pose_yaw}],
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings),
             Node(
@@ -175,6 +208,11 @@ def generate_launch_description():
     ld.add_action(declare_container_name_cmd)
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
+    ld.add_action(declare_set_initial_pose_cmd)
+    ld.add_action(declare_initial_pose_x_cmd)
+    ld.add_action(declare_initial_pose_y_cmd)
+    ld.add_action(declare_initial_pose_z_cmd)
+    ld.add_action(declare_initial_pose_yaw_cmd)
 
     # Add the actions to launch all of the localiztion nodes
     ld.add_action(load_nodes)

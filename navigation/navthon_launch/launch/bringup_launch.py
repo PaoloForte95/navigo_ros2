@@ -45,6 +45,11 @@ def generate_launch_description():
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
     use_selector = LaunchConfiguration('use_selector')
+    set_initial_pose =  LaunchConfiguration('set_initial_pose')
+    initial_pose_x = LaunchConfiguration('initial_pose_x')
+    initial_pose_y = LaunchConfiguration('initial_pose_y')
+    initial_pose_z = LaunchConfiguration('initial_pose_z')
+    initial_pose_yaw = LaunchConfiguration('initial_pose_yaw')
 
     remappings = [('/tf', 'tf'),
                   ('/tf_static', 'tf_static')]
@@ -125,6 +130,31 @@ def generate_launch_description():
             default_value= 'False',
             description='Use global planner selector if true')
 
+    declare_set_initial_pose_cmd = DeclareLaunchArgument(
+        'set_initial_pose', default_value='False',
+        description='Causes AMCL to set initial pose from the initial_pose* parameters instead of waiting for the initial_pose message.')
+
+
+    declare_initial_pose_x_cmd = DeclareLaunchArgument(
+        'initial_pose_x',
+        default_value='0.0',
+        description='The x value of the initial pose')
+    
+    declare_initial_pose_y_cmd = DeclareLaunchArgument(
+        'initial_pose_y',
+        default_value='0.0',
+        description='The y value of the initial pose')
+    
+    declare_initial_pose_z_cmd = DeclareLaunchArgument(
+        'initial_pose_z',
+        default_value='0.0',
+        description='The z value of the initial pose')
+    
+    declare_initial_pose_yaw_cmd = DeclareLaunchArgument(
+        'initial_pose_yaw',
+        default_value='0.0',
+        description='The yaw value of the initial pose')
+
     # Specify the actions
     bringup_cmd_group = GroupAction([
         PushRosNamespace(
@@ -159,6 +189,11 @@ def generate_launch_description():
                               'params_file': params_file,
                               'use_composition': use_composition,
                               'use_respawn': use_respawn,
+                                'set_initial_pose': set_initial_pose,
+                                'initial_pose_x': initial_pose_x,
+                                'initial_pose_y': initial_pose_y,
+                                'initial_pose_z': initial_pose_z,
+                                'initial_pose_yaw': initial_pose_yaw,
                               'container_name': 'nav2_container'}.items()),
 
         IncludeLaunchDescription(
@@ -197,6 +232,11 @@ def generate_launch_description():
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
     ld.add_action(declare_use_selector_cmd)
+    ld.add_action(declare_set_initial_pose_cmd)
+    ld.add_action(declare_initial_pose_x_cmd)
+    ld.add_action(declare_initial_pose_y_cmd)
+    ld.add_action(declare_initial_pose_z_cmd)
+    ld.add_action(declare_initial_pose_yaw_cmd)
     # Add the actions to launch all of the navigation nodes
     ld.add_action(bringup_cmd_group)
 
