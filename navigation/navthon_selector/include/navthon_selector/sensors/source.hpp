@@ -48,7 +48,7 @@ public:
    * @param source_timeout Maximum time interval in which data is considered valid
    */
   Source(
-    const nav2_util::LifecycleNode::WeakPtr & node,
+    const rclcpp_lifecycle::LifecycleNode::WeakPtr & node,
     const std::string & source_name,
     const std::shared_ptr<tf2_ros::Buffer> tf_buffer,
     const std::string & base_frame_id,
@@ -104,7 +104,7 @@ protected:
   // ----- Variables -----
 
   /// @brief Global Planner Selector node
-  nav2_util::LifecycleNode::WeakPtr node_;
+  rclcpp_lifecycle::LifecycleNode::WeakPtr node_;
   /// @brief Global Planner Selector node logger stored for further usage
   rclcpp::Logger logger_{rclcpp::get_logger("global_planner_selector")};
 

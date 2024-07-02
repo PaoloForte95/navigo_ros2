@@ -19,10 +19,19 @@
 
 namespace navthon_weather_detector
 {
-WeatherDetector::WeatherDetector(const rclcpp::NodeOptions & options)
-: nav2_util::LifecycleNode("weather_detector", "", options),
-  process_active_(false)
+WeatherDetector::WeatherDetector(const std::string & node_name,
+  const std::string & ns,
+  const rclcpp::NodeOptions & options)
+: rclcpp_lifecycle::LifecycleNode(node_name, ns, options)
 {
+
+  std::string speed_limit_topic;
+  logger_ = get_logger();
+  
+  declare_parameter("speed_limit_topic", rclcpp::ParameterValue("/speed_limit"));
+  speed_limit_topic = get_parameter("speed_limit_topic").as_string();
+  weather_condition_pub_ = create_publisher<navthon_msgs::msg::WeatherState>("/weather_condition", 1);
+  speed_limit_pub_ = create_publisher<nav2_msgs::msg::SpeedLimit>(speed_limit_topic, 1);
 }
 
 WeatherDetector::~WeatherDetector()
@@ -31,44 +40,42 @@ WeatherDetector::~WeatherDetector()
 }
 
 
-nav2_util::CallbackReturn
+CallbackReturn
 WeatherDetector::on_configure(const rclcpp_lifecycle::State & /*state*/)
 
 {
-    auto node = shared_from_this();
+ 
 
-    logger_ = node->get_logger();
     RCLCPP_INFO(logger_, "Configuring weather detector");
     rclcpp::QoS scan_qos = rclcpp::SensorDataQoS();  // set to default
 
-    std::string image_topic, service_name, base_frame_id, odom_frame_id,speed_limit_topic;
+    std::string image_topic, service_name, base_frame_id, odom_frame_id;
     std::string source_type = "image";
     // Obtaining ROS parameters
-    nav2_util::declare_parameter_if_not_declared(node, "rate", rclcpp::ParameterValue(1));
-    nav2_util::declare_parameter_if_not_declared(node, "image_topic", rclcpp::ParameterValue("/intel_realsense_r200_depth/image_raw"));
-    nav2_util::declare_parameter_if_not_declared(node, "service_name", rclcpp::ParameterValue("/get_weather_condition"));
-    nav2_util::declare_parameter_if_not_declared(node, "base_frame_id", rclcpp::ParameterValue("base_link"));
-    nav2_util::declare_parameter_if_not_declared(node, "odom_frame_id", rclcpp::ParameterValue("world"));
-    nav2_util::declare_parameter_if_not_declared(node, "speed_limit_topic", rclcpp::ParameterValue("/speed_limit"));
-    nav2_util::declare_parameter_if_not_declared(node, "slowdown_ratio", rclcpp::ParameterValue(1.0));
-    nav2_util::declare_parameter_if_not_declared(node, "percentage", rclcpp::ParameterValue(true));
+    declare_parameter("rate", rclcpp::ParameterValue(1));
+    declare_parameter("image_topic", rclcpp::ParameterValue("/intel_realsense_r200_depth/image_raw"));
+    declare_parameter("service_name", rclcpp::ParameterValue("/get_weather_condition"));
+    declare_parameter("base_frame_id", rclcpp::ParameterValue("base_link"));
+    declare_parameter("odom_frame_id", rclcpp::ParameterValue("world"));
+    
+    declare_parameter("slowdown_ratio", rclcpp::ParameterValue(1.0));
+    declare_parameter("percentage", rclcpp::ParameterValue(true));
   
   
-    image_topic = node->get_parameter("image_topic").as_string();
-    service_name = node->get_parameter("service_name").as_string();
-    base_frame_id = node->get_parameter("base_frame_id").as_string();
-    odom_frame_id =  node->get_parameter("odom_frame_id").as_string();
-    speed_limit_topic = node->get_parameter("speed_limit_topic").as_string();
-    slowdown_ratio_ = node->get_parameter("slowdown_ratio").as_double();
-    percentage_ =node->get_parameter("percentage").as_bool();
+    image_topic = get_parameter("image_topic").as_string();
+    service_name = get_parameter("service_name").as_string();
+    base_frame_id = get_parameter("base_frame_id").as_string();
+    odom_frame_id =  get_parameter("odom_frame_id").as_string();
+    
+    slowdown_ratio_ = get_parameter("slowdown_ratio").as_double();
+    percentage_ =get_parameter("percentage").as_bool();
     
 
-    rate_ = node->get_parameter("rate").as_int();
+    rate_ = get_parameter("rate").as_int();
 
-    data_sub_ = node->create_subscription<sensor_msgs::msg::Image>(image_topic, scan_qos,std::bind(&WeatherDetector::dataCallback, this, std::placeholders::_1));
+    data_sub_ = create_subscription<sensor_msgs::msg::Image>(image_topic, scan_qos,std::bind(&WeatherDetector::dataCallback, this, std::placeholders::_1));
     RCLCPP_INFO(logger_, "[%s]: Camera subscribing to topic: %s", source_type.c_str(), image_topic.c_str() );
-    weather_condition_pub_ = this->create_publisher<navthon_msgs::msg::WeatherState>("/weather_condition", 1);
-    speed_limit_pub_ = this->create_publisher<nav2_msgs::msg::SpeedLimit>(speed_limit_topic, 1);
+
     tf2::Duration transform_tolerance = tf2::durationFromSec(0.5);
     rclcpp::Duration source_timeout = rclcpp::Duration::from_seconds(6.0);
     std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
@@ -80,21 +87,23 @@ WeatherDetector::on_configure(const rclcpp_lifecycle::State & /*state*/)
     
     //Configure Image source 
     RCLCPP_INFO(logger_,"Adding source of type %s.", source_type.c_str());
+    auto node = std::static_pointer_cast<nav2_util::LifecycleNode>( rclcpp_lifecycle::LifecycleNode::shared_from_this());
     std::shared_ptr<navthon_selector::Image> p = std::make_shared<navthon_selector::Image>(node, source_type, tf_buffer, base_frame_id, odom_frame_id, transform_tolerance, source_timeout);
     p->configure();
     source_.push_back(p);
 
     client_node_ = rclcpp::Node::make_shared("client_node");
+    
     weather_condition_client_ = client_node_->create_client<navthon_msgs::srv::GetWeatherCondition>(service_name,  rclcpp::ServicesQoS().get_rmw_qos_profile());
      RCLCPP_INFO(logger_, "[%s]: Creating client for service: %s", source_type.c_str(), service_name.c_str() );
 
 
 
-  return nav2_util::CallbackReturn::SUCCESS;
+  return CallbackReturn::SUCCESS;
 }
 
 
-nav2_util::CallbackReturn
+CallbackReturn
 WeatherDetector::on_activate(const rclcpp_lifecycle::State & /*state*/)
 {
   RCLCPP_INFO(logger_, "Activating weather detector");
@@ -102,18 +111,10 @@ WeatherDetector::on_activate(const rclcpp_lifecycle::State & /*state*/)
    // Activating lifecycle publisher
   weather_condition_pub_->on_activate();
   speed_limit_pub_->on_activate();
-
-
-  // Activating main worker
-  process_active_ = true;
-
-  // Creating bond connection
-  createBond();
-
-  return nav2_util::CallbackReturn::SUCCESS;
+return CallbackReturn::SUCCESS;
 }
 
-nav2_util::CallbackReturn
+CallbackReturn
 WeatherDetector::on_deactivate(const rclcpp_lifecycle::State & /*state*/)
 {
   RCLCPP_INFO(logger_, "Deactivating weather detector");
@@ -123,16 +124,12 @@ WeatherDetector::on_deactivate(const rclcpp_lifecycle::State & /*state*/)
   weather_condition_pub_->on_deactivate();
   speed_limit_pub_->on_deactivate();
 
-  // Deactivating main worker
-  process_active_ = false;
 
-  // Destroying bond connection
-  destroyBond();
 
-  return nav2_util::CallbackReturn::SUCCESS;
+  return CallbackReturn::SUCCESS;
 }
 
-nav2_util::CallbackReturn
+CallbackReturn
 WeatherDetector::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
 {
   RCLCPP_INFO(logger_, "Cleaning up weather detector");
@@ -147,15 +144,15 @@ WeatherDetector::on_cleanup(const rclcpp_lifecycle::State & /*state*/)
 
   source_.clear();
 
-  return nav2_util::CallbackReturn::SUCCESS;
+  return CallbackReturn::SUCCESS;
 }
 
-nav2_util::CallbackReturn
+CallbackReturn
 WeatherDetector::on_shutdown(const rclcpp_lifecycle::State & /*state*/)
 {
   RCLCPP_INFO(logger_, "Shutting down");
 
-  return nav2_util::CallbackReturn::SUCCESS;
+  return CallbackReturn::SUCCESS;
 }
 
 
@@ -165,15 +162,12 @@ void WeatherDetector::process()
   rclcpp::Time curr_time = this->now();
 
   // Do nothing if main worker in non-active state
-  if (!process_active_) {
-    return;
-  }
   // Creating the request for the service
   auto request = std::make_shared<navthon_msgs::srv::GetWeatherCondition::Request>();
   request->image = data_;
   auto result = weather_condition_client_->async_send_request(request);
   //auto future = callback_group_executor_->spin_until_future_complete(result, std::chrono::seconds(1));
-  auto future = rclcpp::spin_until_future_complete(client_node_, result, std::chrono::seconds(5));
+  auto future = rclcpp::spin_until_future_complete(client_node_, result);
   if (future != rclcpp::FutureReturnCode::SUCCESS)
   {
     RCLCPP_INFO(logger_, "Failed to call service %s", weather_condition_client_->get_service_name());
@@ -189,6 +183,7 @@ void WeatherDetector::process()
       break;
     case 1:
       state_str = "FOG";
+      limit_velocity= true;
       break;
     case 2:
       state_str = "RAIN";

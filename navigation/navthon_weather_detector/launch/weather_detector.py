@@ -118,17 +118,6 @@ def generate_launch_description():
                 arguments=['--ros-args', '--log-level', log_level],
                 remappings=remappings)
                 
-    start_lifecycle_manager_cmd = Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            namespace=namespace,
-            name='lifecycle_manager',
-            output='screen',
-            emulate_tty=True,  # https://github.com/ros2/launch/issues/188
-            parameters=[{'use_sim_time': use_sim_time},
-                        {'autostart': autostart},
-                        {'node_names': lifecycle_nodes}])
-
     
     # Create the launch description and populate
     ld = LaunchDescription()
@@ -141,7 +130,6 @@ def generate_launch_description():
     ld.add_action(declare_log_level_cmd)
     ld.add_action(launch_srv_cmd)
     ld.add_action(launch_cmd)
-    ld.add_action(start_lifecycle_manager_cmd)
 
 
 

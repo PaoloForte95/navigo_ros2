@@ -29,28 +29,28 @@ public:
   void start()
   {
       RCLCPP_INFO(get_logger(), "Starting weather test");
-      ASSERT_EQ(on_configure(get_current_state()), nav2_util::CallbackReturn::SUCCESS);
-      ASSERT_EQ(on_activate(get_current_state()), nav2_util::CallbackReturn::SUCCESS);
+      ASSERT_EQ(on_configure(get_current_state()), CallbackReturn::SUCCESS);
+      ASSERT_EQ(on_activate(get_current_state()), CallbackReturn::SUCCESS);
        
   }
 
   void stop()
   {
-    ASSERT_EQ(on_deactivate(get_current_state()), nav2_util::CallbackReturn::SUCCESS);
-    ASSERT_EQ(on_cleanup(get_current_state()), nav2_util::CallbackReturn::SUCCESS);
-    ASSERT_EQ(on_shutdown(get_current_state()), nav2_util::CallbackReturn::SUCCESS);
+    ASSERT_EQ(on_deactivate(get_current_state()), CallbackReturn::SUCCESS);
+    ASSERT_EQ(on_cleanup(get_current_state()), CallbackReturn::SUCCESS);
+    ASSERT_EQ(on_shutdown(get_current_state()), CallbackReturn::SUCCESS);
   }
 
 };
 
 
-class TestNode : public nav2_util::LifecycleNode
+class TestNode : public rclcpp_lifecycle::LifecycleNode
 {
 public:
   TestNode()
-  : nav2_util::LifecycleNode("test_node")
+  : rclcpp_lifecycle::LifecycleNode("test_node")
   {
-     wd_ = std::make_shared<WeatherDetectorTestNode>();
+     wd_ = std::make_shared<WeatherDetectorTestNode>("weather_detector_node");
   }
 
   ~TestNode()

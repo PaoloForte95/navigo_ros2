@@ -24,7 +24,7 @@ namespace navthon_selector
 {
 
 PointCloud::PointCloud(
-  const nav2_util::LifecycleNode::WeakPtr & node,
+  const rclcpp_lifecycle::LifecycleNode::WeakPtr & node,
   const std::string & source_name,
   const std::shared_ptr<tf2_ros::Buffer> tf_buffer,
   const std::string & base_frame_id,

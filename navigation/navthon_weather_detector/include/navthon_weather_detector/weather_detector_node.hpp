@@ -27,7 +27,7 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
-#include "nav2_util/lifecycle_node.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 #include "navthon_selector/sensors/image.hpp"
 
@@ -35,54 +35,53 @@
 #include "nav2_msgs/msg/speed_limit.hpp"
 #include "navthon_msgs/srv/get_weather_condition.hpp"
 #include "navthon_msgs/msg/weather_state.hpp"
-
+using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 namespace navthon_weather_detector
 {
-    class WeatherDetector : public nav2_util::LifecycleNode
+    class WeatherDetector : public rclcpp_lifecycle::LifecycleNode
 {
     public:
   /**
    * @brief Constructor for the navthon_weather_detector::WeatherDetector
    * @param options Additional options to control creation of the node.
    */
-  explicit WeatherDetector(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit WeatherDetector(const std::string & node_name,
+        const std::string & ns = "",
+        const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
   /**
    * @brief Destructor for the navthon_weather_detector::WeatherDetector
    */
   ~WeatherDetector();
-
-
-  protected:
   /**
    * @brief: Initializes and obtains ROS-parameters, creates main subscribers and publishers
    * @param state Lifecycle Node's state
    * @return Success or Failure
    */
-  nav2_util::CallbackReturn on_configure(const rclcpp_lifecycle::State & state) override;
+  CallbackReturn on_configure(const rclcpp_lifecycle::State & state) override;
   /**
    * @brief: Activates LifecyclePublishers and main processor, creates bond connection
    * @param state Lifecycle Node's state
    * @return Success or Failure
    */
-  nav2_util::CallbackReturn on_activate(const rclcpp_lifecycle::State & state) override;
+  CallbackReturn on_activate(const rclcpp_lifecycle::State & state) override;
   /**
    * @brief: Deactivates LifecyclePublishers and main processor, destroys bond connection
    * @param state Lifecycle Node's state
    * @return Success or Failure
    */
-  nav2_util::CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state) override;
+  CallbackReturn on_deactivate(const rclcpp_lifecycle::State & state) override;
   /**
    * @brief: Resets all subscribers/publishers
    * @param state Lifecycle Node's state
    * @return Success or Failure
    */
-  nav2_util::CallbackReturn on_cleanup(const rclcpp_lifecycle::State & state) override;
+  CallbackReturn on_cleanup(const rclcpp_lifecycle::State & state) override;
   /**
    * @brief Called in shutdown state
    * @param state Lifecycle Node's state
    * @return Success or Failure
    */
-  nav2_util::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
+  CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
 
   /**
    * @brief Main processing routine
@@ -124,9 +123,6 @@ rclcpp_lifecycle::LifecyclePublisher<navthon_msgs::msg::WeatherState>::SharedPtr
 rclcpp_lifecycle::LifecyclePublisher<nav2_msgs::msg::SpeedLimit>::SharedPtr speed_limit_pub_;
 
 std::vector<std::shared_ptr<navthon_selector::Image>> source_;
-
-/// @brief Whether main routine is active
-bool process_active_;
 
 
 /// @brief Latest data obtained from camera

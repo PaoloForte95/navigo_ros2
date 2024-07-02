@@ -21,7 +21,10 @@
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<navthon_weather_detector::WeatherDetector>();
+  auto node = std::make_shared<navthon_weather_detector::WeatherDetector>("weather_detector_node");
+  rclcpp_lifecycle::State state;
+  node->on_activate(state);
+  node->on_configure(state);
   rclcpp::spin(node->get_node_base_interface());
   rclcpp::shutdown();
 
