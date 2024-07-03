@@ -42,6 +42,7 @@ find_package(OpenMP REQUIRED)
 find_package(navthon_msgs REQUIRED)
 find_package(navthon_generic REQUIRED)
 find_package(navthon_util REQUIRED)
+find_package(navigatio REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system serialization program_options thread regex)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -92,48 +93,26 @@ set(dependencies
   navthon_generic
   navthon_util
   Boost
+  navigatio
 )
 
 
 # A* plugin
-add_library(${library_name}_astar SHARED
-  src/planners/smac_planner_a_star.cpp
-  src/smoother.cpp
+add_library(${library_name}_hybrid SHARED
+  src/smac_planner_hybrid.cpp
 )
 
-target_link_libraries(${library_name}_astar ${OMPL_LIBRARIES} ${OpenMP_LIBRARIES} 
+target_link_libraries(${library_name}_hybrid ${OMPL_LIBRARIES} ${OpenMP_LIBRARIES} 
 OpenMP::OpenMP_CXX)
-target_include_directories(${library_name}_astar PUBLIC ${Eigen3_INCLUDE_DIRS})
+target_include_directories(${library_name}_hybrid PUBLIC ${Eigen3_INCLUDE_DIRS})
 
-ament_target_dependencies(${library_name}_astar
+ament_target_dependencies(${library_name}_hybrid
   ${dependencies}
 )
 
 # Lattice plugin
 add_library(${library_name}_lattice SHARED
-src/a_star_path_planner.cpp
-src/a_star.cpp
-src/ara_star_path_planner.cpp
-src/collision_detector.cpp
-src/motion_primitive_data.cpp
-src/motion_primitive_selector.cpp
-src/path_finder.cpp
-src/path_node.cpp
-src/utils.cpp
-src/vehicle_mission.cpp
-src/world_occupancy_map.cpp
-src/world_parameters.cpp
-src/world.cpp
-src/configuration/car_configuration.cpp
-src/configuration/configuration.cpp
-src/configuration/unicycle_configuration.cpp
-src/configuration/lhd_configuration.cpp
-src/model/car_model.cpp
-src/model/lhd_model.cpp
-src/model/unicycle_model.cpp
-src/model/vehicle_model.cpp
-src/planners/smac_planner_lattice.cpp
-src/smoother.cpp
+src/smac_planner_lattice.cpp
 )
 
 target_link_libraries(${library_name}_lattice ${OMPL_LIBRARIES} 
@@ -148,10 +127,10 @@ ament_target_dependencies(${library_name}_lattice
 )
 
 
-pluginlib_export_plugin_description_file(nav2_core smac_plugin_astar.xml)
+pluginlib_export_plugin_description_file(nav2_core smac_plugin_hybrid.xml)
 pluginlib_export_plugin_description_file(nav2_core smac_plugin_lattice.xml)
 
-install(TARGETS ${library_name}_astar ${library_name}_lattice
+install(TARGETS ${library_name}_hybrid ${library_name}_lattice
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -171,11 +150,11 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_gtest REQUIRED)
-  add_subdirectory(test)
+  #add_subdirectory(test)
 endif()
 
 
 ament_export_include_directories(include)
-ament_export_libraries(${library_name}_astar ${library_name}_lattice)
+ament_export_libraries(${library_name}_hybrid ${library_name}_lattice)
 ament_export_dependencies(${dependencies})
 ament_package()

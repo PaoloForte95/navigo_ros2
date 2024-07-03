@@ -33,6 +33,7 @@
   <depend>navthon_msgs</depend>
   <depend>navthon_generic</depend>
   <depend>navthon_util</depend>
+  <depend>navigatio</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -26,7 +26,7 @@
 #include "nav2_smac_planner/node_hybrid.hpp"
 #include "nav2_smac_planner/a_star.hpp"
 #include "nav2_smac_planner/collision_checker.hpp"
-#include "navthon_smac_planner/planners/smac_planner_astar.hpp"
+#include "navthon_smac_planner/smac_planner_astar.hpp"
 
 class RclCppFixture
 {

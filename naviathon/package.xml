@@ -26,7 +26,7 @@
   <exec_depend>navthon_rviz_plugins</exec_depend>
   <exec_depend>navthon_pcl</exec_depend>
   <exec_depend>navthon_simulation</exec_depend>
-  <exec_depend>navthon_simple_navigation</exec_depend>
+  <exec_depend>navigatio</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
