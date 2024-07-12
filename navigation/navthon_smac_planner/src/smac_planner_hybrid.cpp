@@ -16,6 +16,19 @@ using namespace std::chrono;  // NOLINT
 using namespace navigatio;
 using rcl_interfaces::msg::ParameterType;
 
+MotionModel fromString(const std::string & n)
+{
+  if (n == "2D") {
+    return MotionModel::TWOD;
+  } else if (n == "DUBIN") {
+    return MotionModel::DUBIN;
+  } else if (n == "REEDS_SHEPP") {
+    return MotionModel::REEDS_SHEPP;
+  } else {
+    return MotionModel::UNKNOWN;
+  }
+}
+
   geometry_msgs::msg::Quaternion createQuaternionMsgFromYaw(double yaw)
   {
   	tf2::Quaternion q;
@@ -57,7 +70,7 @@ void SmacPlannerHybrid::configure(
 {
   double max_planning_time = 10, minimum_turning_radius;
   bool allow_unknown;
-  std::string primitives, primitives_directory;
+  std::string primitives, primitives_directory, model;
 
   node_ = parent;
   auto node = parent.lock();
@@ -80,8 +93,8 @@ void SmacPlannerHybrid::configure(
     node, name + ".minimum_turning_radius", rclcpp::ParameterValue(1.0));
   node->get_parameter(name + ".minimum_turning_radius", minimum_turning_radius);
   nav2_util::declare_parameter_if_not_declared(
-    node, name + ".minimum_turning_radius", rclcpp::ParameterValue(1.0));
-  node->get_parameter(name + ".minimum_turning_radius", minimum_turning_radius);
+    node, name + ".model", rclcpp::ParameterValue("2D"));
+  node->get_parameter(name + ".model", model);
 
 
   //Create the planner
@@ -92,7 +105,7 @@ void SmacPlannerHybrid::configure(
   //Set Planning Parameters
   planner_params.max_planning_time = max_planning_time;
   planner_params.allow_unknown = allow_unknown;
-  planner_ = new CarPlanner("CarPlanner", MotionModel::REEDS_SHEPP, search_params, planner_params, PlanningAlgorithm::RRTstar);
+  planner_ = new CarPlanner("CarPlanner", fromString(model), search_params, planner_params, PlanningAlgorithm::RRTstar);
   
   
 
