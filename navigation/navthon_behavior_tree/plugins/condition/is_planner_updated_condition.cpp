@@ -34,13 +34,16 @@ BT::NodeStatus PlannerUpdatedCondition::tick()
 
   std::string current_planner;
   getInput("planner", current_planner);
+  if(previous_planner_.empty()){
+    config().blackboard->get<std::string>("planner", previous_planner_);
+    return BT::NodeStatus::FAILURE;
+  }
   
   if (previous_planner_ != current_planner ) {
     RCLCPP_INFO(node_->get_logger(), "Changed planner from %s to %s", previous_planner_.c_str(), current_planner.c_str());
     previous_planner_ = current_planner;
     return BT::NodeStatus::SUCCESS;
   }
-  
 
   return BT::NodeStatus::FAILURE;
 }

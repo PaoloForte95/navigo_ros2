@@ -32,9 +32,14 @@ IsPathComputedCondition::IsPathComputedCondition(
 
 BT::NodeStatus IsPathComputedCondition::tick()
 {
-  if(!first_iteration_){
-    config().blackboard->get<nav_msgs::msg::Path>("path", path_);
+  
+  if(first_iteration_){
+    first_iteration_ = false;
+    return BT::NodeStatus::SUCCESS;
   }
+  
+  config().blackboard->get<nav_msgs::msg::Path>("path", path_);
+
   if (!path_.poses.empty() )
   {
     

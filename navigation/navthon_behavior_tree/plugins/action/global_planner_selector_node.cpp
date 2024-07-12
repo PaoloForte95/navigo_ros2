@@ -26,6 +26,7 @@ SelectGlobalPlannerAction::SelectGlobalPlannerAction(
   const BT::NodeConfiguration & conf)
 : BtActionNode<navthon_msgs::action::GlobalPlannerSelector>(xml_tag_name, action_name, conf)
 {
+  config().blackboard->set<std::string>("planner", "NotComputed");
 }
 
 void SelectGlobalPlannerAction::on_tick()

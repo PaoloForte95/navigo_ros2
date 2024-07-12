@@ -28,20 +28,17 @@ IsPlannerEqualCondition::IsPlannerEqualCondition(
   node_ = config().blackboard->get<rclcpp::Node::SharedPtr>("node");
 
   getInput<std::string>("planner_to_check", planner_id_);
-  first_iteration_ = true;
  
 }
 
 BT::NodeStatus IsPlannerEqualCondition::tick()
 {
-  if(!first_iteration_){
-    config().blackboard->get<std::string>("planner", actual_planner_);
-  }
-  if (planner_id_ != actual_planner_ )
-  {
-    first_iteration_ = false;
+  config().blackboard->get<std::string>("planner", actual_planner_);
+  RCLCPP_INFO(node_->get_logger(), "Planner to check: %s and actual planner: %s", planner_id_.c_str(), actual_planner_.c_str());
+  if(actual_planner_ == "" || actual_planner_ == "NotComputed" || planner_id_ != actual_planner_){
     return BT::NodeStatus::FAILURE;
   }
+
   return BT::NodeStatus::SUCCESS;
   
 }

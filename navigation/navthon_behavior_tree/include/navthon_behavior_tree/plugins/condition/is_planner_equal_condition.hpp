@@ -65,7 +65,6 @@ private:
   rclcpp::Node::SharedPtr node_;
   std::string planner_id_;
   std::string actual_planner_;
-  bool first_iteration_;
 };
 
 }
