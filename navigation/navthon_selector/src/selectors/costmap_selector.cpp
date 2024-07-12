@@ -87,8 +87,18 @@ void CostmapSelector::configure(
     node, name + ".base_frame_id", rclcpp::ParameterValue("base_link"));
   _base_frame_id = node->get_parameter(name + ".base_frame_id").as_string();
   nav2_util::declare_parameter_if_not_declared(
-    node, name + ".odom_frame_id", rclcpp::ParameterValue("world"));
+    node, name + ".odom_frame_id", rclcpp::ParameterValue("odom"));
   _odom_frame_id = node->get_parameter(name + ".odom_frame_id").as_string();
+
+  nav2_util::declare_parameter_if_not_declared(node, name + ".open_space_approach", rclcpp::ParameterValue("GridBased"));
+  nav2_util::declare_parameter_if_not_declared(node, name + ".corridor_approach", rclcpp::ParameterValue("GridBased"));
+  nav2_util::declare_parameter_if_not_declared(node, name + ".obstacle_right_approach", rclcpp::ParameterValue("GridBased"));
+  nav2_util::declare_parameter_if_not_declared(node, name + ".obstacle_left_approach", rclcpp::ParameterValue("GridBased"));
+  
+  open_space_approach_ = node->get_parameter(name + ".open_space_approach").as_string();
+  corridor_approach_ = node->get_parameter(name + ".corridor_approach").as_string();
+  obstacle_right_approach_ = node->get_parameter(name + ".obstacle_right_approach").as_string();
+  obstacle_left_approach_ = node->get_parameter(name + ".obstacle_left_approach").as_string();
 
   nav2_costmap_2d::makeFootprintFromString(_points,_poly_points);
   // Check for points format correctness
@@ -247,20 +257,20 @@ std::string CostmapSelector::selectGlobalPlanner(
   RCLCPP_INFO(_logger, "Point inside left polygon: %d and right polygon: %d", insidePoints[0], insidePoints[1]);
   if (insidePoints[0] >= _max_points && insidePoints[1] >= _max_points ){
     RCLCPP_INFO(_logger, "Obstacles on both sides! Entering a corridor!");
-    selected_planner = "GridBased";
+    selected_planner = corridor_approach_;
   }
   else if (insidePoints[0] > _max_points){
     RCLCPP_INFO(_logger, "Obstacles on left side!");
-    selected_planner = "LatticeBased";
+    selected_planner = obstacle_left_approach_;
   
   }
   else if(insidePoints[1] > _max_points){
     RCLCPP_INFO(_logger, "Obstacles on right side!");
-    selected_planner = "LatticeBased";
+    selected_planner = obstacle_right_approach_;
   }
   else {
     RCLCPP_INFO(_logger, " No obstacles detected in the polygons. Open space ");
-    selected_planner = "LatticeBased";
+    selected_planner = open_space_approach_;
   }
 
   //After selected the planner let's check if it failed before to compute the path

@@ -133,6 +133,7 @@ protected:
   rclcpp::Clock::SharedPtr _clock;
   rclcpp::Logger _logger{rclcpp::get_logger("CostmapSelector")};
   std::string _global_frame, _name, _odom_frame_id, _base_frame_id;
+  std::string open_space_approach_,corridor_approach_, obstacle_right_approach_, obstacle_left_approach_;
   std::mutex _mutex;
   rclcpp_lifecycle::LifecycleNode::WeakPtr _node;
   std::vector<std::shared_ptr<navthon_selector::Source>> _sources;
