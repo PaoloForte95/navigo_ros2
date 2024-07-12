@@ -116,7 +116,7 @@ class WeahterDetectionService(Node):
         self.get_logger().info("Predictions: %s" % preds)
         cond = WD.get_weather_condition(preds)
 
-        print(cond)
+        #print(cond)
         response.condition = cond
         return response
 
