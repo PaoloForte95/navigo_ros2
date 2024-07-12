@@ -7,12 +7,12 @@
 <root main_tree_to_execute="NavigationTree">
   <BehaviorTree ID="NavigationTree">
   <Sequence>
-   <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
+   <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,CarPlanner"/>
     <RecoveryNode number_of_retries="6" name="NavigateRecovery">
       <PipelineSequence name="NavigateWithReplanning">
       <!--<DistanceToWaypointsController  waypoints="[[4.05, 18.5],[-22.0, 30.5], [-21.6, 97.7], [73.5, 77.2], [156.0, 47.8]]" distance='3.0'>  -->
       <SegmentedAreaController>
-       <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,LatticeBased"/>
+       <AddPlanners name="AddPlannersAction" output_planners="{planner_ids}"  input_planners="GridBased,CarPlanner"/>
       <!--</DistanceToWaypointsController> -->
       </SegmentedAreaController>
        <RateController hz="3.0">
@@ -20,14 +20,14 @@
       </RateController>
       <RateController hz="1.0">
       <Fallback name="Fallback">
-        <Sequence name="CheckLatticePlanner">
+        <Sequence name="CheckCarPlanner">
         <Inverter>
           <GlobalUpdatedGoal/>
         </Inverter>
         <Inverter>
         <IsPlannerUpdated planner = "{planner}"/>
         </Inverter>
-        <IsPlannerEqual planner_to_check="LatticeBased" />
+        <IsPlannerEqual planner_to_check="CarPlanner" />
          <IsPathValid path="{path}"/>
          </Sequence>
           <RecoveryNode number_of_retries="3" name="ComputePathToPose">
@@ -65,3 +65,4 @@
   </Sequence> 
   </BehaviorTree>
 </root>
+
