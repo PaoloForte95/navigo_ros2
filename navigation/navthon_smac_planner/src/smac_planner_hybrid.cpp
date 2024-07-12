@@ -257,7 +257,7 @@ SmacPlannerHybrid::dynamicParametersCallback(std::vector<rclcpp::Parameter> para
 
   // Re-init the lattice planner
   if (reinit_lattice_planner) {
-      LatticeSearchParams search_params;
+      LatticeMetadata search_params;
       PlannerParams planner_params;
       search_params.minimum_turning_radius = minimum_turning_radius;
 

@@ -92,7 +92,7 @@ void LatticePlanner::configure(
   RCLCPP_INFO(logger_, "Setting primitives dir: %s", primitives_directory.c_str());
   RCLCPP_INFO(logger_, "Primitives file: %s", primitives.c_str());
   //Create the planner
-  LatticeSearchParams search_params;
+  LatticeMetadata search_params;
   PlannerParams planner_params;
   search_params.minimum_turning_radius = minimum_turning_radius;
 
@@ -254,7 +254,7 @@ LatticePlanner::dynamicParametersCallback(std::vector<rclcpp::Parameter> paramet
 
   // Re-init the lattice planner
   if (reinit_lattice_planner) {
-      LatticeSearchParams search_params;
+      LatticeMetadata search_params;
       PlannerParams planner_params;
       search_params.minimum_turning_radius = minimum_turning_radius;
 
