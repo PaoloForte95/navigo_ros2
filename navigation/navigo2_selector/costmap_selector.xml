@@ -1,0 +1,7 @@
+<class_libraries>
+<library path="costmap_selector">
+	<class name="navigo2_selector::CostmapSelector" type="navigo2_selector::CostmapSelector" base_class_type="navigo2_core::GlobalPlannerSelector">
+	  <description>A global planner selector based on costmap</description>
+	</class>
+</library>
+</class_libraries>

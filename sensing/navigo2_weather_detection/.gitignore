@@ -1,0 +1,7 @@
+# onnx files
+*.onnx
+
+#.pyc files
+*.pyc
+
+

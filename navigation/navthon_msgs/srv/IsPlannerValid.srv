@@ -1,5 +1,0 @@
-#Determine if the current planner is valid
-
-string planner
----
-bool is_valid

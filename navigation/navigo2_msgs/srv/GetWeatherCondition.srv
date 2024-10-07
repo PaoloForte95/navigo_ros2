@@ -1,0 +1,8 @@
+#Get the weather condition
+
+#Current image
+sensor_msgs/Image image
+---
+#The current weather condition
+WeatherState condition
+

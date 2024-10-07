@@ -1,7 +1,0 @@
-<class_libraries>
-<library path="costmap_selector">
-	<class name="navthon_selector::CostmapSelector" type="navthon_selector::CostmapSelector" base_class_type="navthon_core::GlobalPlannerSelector">
-	  <description>A global planner selector based on costmap</description>
-	</class>
-</library>
-</class_libraries>

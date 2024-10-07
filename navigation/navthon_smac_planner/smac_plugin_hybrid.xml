@@ -1,5 +1,0 @@
-<library path="navthon_smac_planner_hybrid">
-	<class name="navthon_smac_planner/SmacPlannerHybrid" type="navthon_smac_planner::SmacPlannerHybrid" base_class_type="nav2_core::GlobalPlanner">
-	  <description>Hybrid SMAC Planner</description>
-	</class>
-</library>

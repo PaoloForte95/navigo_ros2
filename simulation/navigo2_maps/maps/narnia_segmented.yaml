@@ -1,0 +1,7 @@
+image: narnia_segmented.pgm
+resolution: 0.2
+origin: [-115.0, -21.0, 0.0]
+negate: 0
+mode: scale
+occupied_thresh: 1.0
+free_thresh: 0.0

@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="warehouse_ground">
+    <link name="link">
+      <inertial>
+        <mass>1000</mass>
+		<inertia>
+          <ixx>1200083.33</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8333416.66</iyy>
+          <iyz>0</iyz>
+          <izz>2033333.33</izz>
+        </inertia>
+      </inertial>
+      <visual name="visual">
+	    <geometry>
+          <mesh>
+            <uri>model://warehouse_ground/meshes/warehouse_ground_visual.DAE</uri>
+            <scale>0.1 0.1 0.1</scale>
+          </mesh>
+        </geometry>
+      <meta> <layer> 1 </layer></meta>
+</visual>
+    </link>
+<static>1</static>
+  </model>
+</sdf>

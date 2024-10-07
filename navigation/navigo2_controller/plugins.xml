@@ -1,0 +1,7 @@
+<class_libraries>
+  <library path="simple_goal_checker">
+    <class type="navigo2::controller::SimpleGoalChecker" base_class_type="nav2_core::GoalChecker">
+      <description>Checks if current pose is within goal window for x,y and yaw</description>
+    </class>
+  </library>
+</class_libraries>

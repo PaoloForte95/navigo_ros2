@@ -1,7 +1,0 @@
-image: empty_segmented.pgm
-resolution: 0.10000
-origin: [-20.000000, -20.000000, 0.000000]
-negate: 0
-mode: scale
-occupied_thresh: 1.0
-free_thresh: 0.0

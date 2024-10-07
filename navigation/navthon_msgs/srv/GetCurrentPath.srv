@@ -1,7 +1,0 @@
-#Get the current path for the specific robot
-
-#ID of the robot
-uint8 id
----
-#The current path traversed by the robot
-nav_msgs/Path path

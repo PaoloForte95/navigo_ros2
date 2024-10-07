@@ -1,8 +1,0 @@
-<class_libraries>
-<library path="navthon_costmap_2d">
-    <class name="navthon::costmap_2d::AreaFilter" type="navthon::costmap_2d::AreaFilter"  base_class_type="nav2_costmap_2d::Layer">
-      <description>Area filter.</description>
-    </class>
-</library>
-</class_libraries>
-

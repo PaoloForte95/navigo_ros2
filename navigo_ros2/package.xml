@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>navigo_ros2</name>
+  <version>0.0.1</version>
+  <description>ROS2 Navigation</description>
+  <maintainer email="paolo.forte@oru.se">pofe</maintainer>
+  <license>GPL-3.0-only</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>navigo2_behavior_tree</exec_depend>
+  <exec_depend>navigo2_controller</exec_depend>
+  <exec_depend>navigo2_core</exec_depend>
+  <exec_depend>navigo2_costmap_2d</exec_depend>
+  <exec_depend>navigo2_generic</exec_depend>
+  <exec_depend>navigo2_launch</exec_depend>
+  <exec_depend>navigo2_maps</exec_depend>
+  <exec_depend>navigo2_msgs</exec_depend>
+  <exec_depend>navigo2_planner</exec_depend>
+  <exec_depend>navigo2_selector</exec_depend>
+  <exec_depend>navigo2_smac_planner</exec_depend>
+  <exec_depend>navigo2_smoother</exec_depend>
+  <exec_depend>navigo2_util</exec_depend>
+  <exec_depend>navigo2_weather_detection</exec_depend>
+  <exec_depend>navigo2_rviz_plugins</exec_depend>
+  <exec_depend>navigo2_pcl</exec_depend>
+  <exec_depend>navigo2_simulation</exec_depend>
+  <exec_depend>navigo</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

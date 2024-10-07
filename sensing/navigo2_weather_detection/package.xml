@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>navigo2_weather_detection</name>
+  <version>0.0.1</version>
+  <description>The navigo2_weather_detection package</description>
+  <maintainer email="paolo.forte@oru.se">pofe</maintainer>
+ <license>GPL-3.0-only</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>rclcpp_action</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>navigo2_core</depend>
+  <depend>geometry_msgs</depend>
+  <depend>builtin_interfaces</depend>
+  <depend>tf2_ros</depend>
+  <depend>nav2_costmap_2d</depend>
+  <depend>pluginlib</depend>
+  <depend>nav2_smac_planner</depend>
+  <depend>nav2_util</depend>
+  <depend>nav2_collision_monitor</depend>
+  <depend>navigo2_selector</depend>
+  <depend>nav2_msgs</depend>
+
+
+  <exec_depend>ros2launch</exec_depend>	
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

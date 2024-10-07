@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="mine">
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <!-- A ground plane -->
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <!-- The lawn -->
+    <include>
+      <uri>model://narnia_mesh</uri>
+    </include>
+  </world>
+</sdf>

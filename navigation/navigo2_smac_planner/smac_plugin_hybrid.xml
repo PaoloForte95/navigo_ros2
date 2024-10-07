@@ -1,0 +1,5 @@
+<library path="navigo2_smac_planner_hybrid">
+	<class name="navigo2_smac_planner/SmacPlannerHybrid" type="navigo2_smac_planner::SmacPlannerHybrid" base_class_type="nav2_core::GlobalPlanner">
+	  <description>Hybrid SMAC Planner</description>
+	</class>
+</library>
