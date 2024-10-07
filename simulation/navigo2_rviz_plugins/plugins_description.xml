@@ -1,6 +1,6 @@
 <library path="navigo2_rviz_plugins">
-    <class name="navigo2_rviz_plugins/Navthon"  type="navigo2_rviz_plugins::NavthonPanel"  base_class_type="rviz_common::Panel">
-    <description>The Navthon rviz panel.</description>
+    <class name="navigo2_rviz_plugins/Navigo2Panel"  type="navigo2_rviz_plugins::Navigo2Panel"  base_class_type="rviz_common::Panel">
+    <description>The Navigo2 rviz panel.</description>
   </class>
 
 </library>

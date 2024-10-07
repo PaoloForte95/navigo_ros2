@@ -32,7 +32,7 @@ using namespace std::chrono_literals;
 namespace navigo2_rviz_plugins
 {
 
-NavthonPanel::NavthonPanel(QWidget * parent)
+Navigo2Panel::Navigo2Panel(QWidget * parent)
 : Panel(parent)
 {
     selected_planner_indicator_ = new QLabel;
@@ -63,12 +63,12 @@ NavthonPanel::NavthonPanel(QWidget * parent)
 
 }
 
-NavthonPanel::~NavthonPanel()
+Navigo2Panel::~Navigo2Panel()
 {
 }
 
 void
-NavthonPanel::onInitialize()
+Navigo2Panel::onInitialize()
 {  
 
     
@@ -79,18 +79,18 @@ NavthonPanel::onInitialize()
         node->create_subscription<std_msgs::msg::String>(
         "selected_planner",
         rclcpp::SystemDefaultsQoS(),
-        std::bind(&NavthonPanel::getSelectedPlannerLabel, this, std::placeholders::_1));
+        std::bind(&Navigo2Panel::getSelectedPlannerLabel, this, std::placeholders::_1));
     
     detected_weather_sub_ =
         node->create_subscription<navigo2_msgs::msg::WeatherState>(
         "/weather_condition",
         rclcpp::SystemDefaultsQoS(),
-        std::bind(&NavthonPanel::getWeatherDetected, this, std::placeholders::_1));
+        std::bind(&Navigo2Panel::getWeatherDetected, this, std::placeholders::_1));
 
 
 }
 
-void NavthonPanel::getSelectedPlannerLabel(const std_msgs::msg::String::SharedPtr msg)
+void Navigo2Panel::getSelectedPlannerLabel(const std_msgs::msg::String::SharedPtr msg)
 {
     if(msg->data.empty()){
         msg->data = "unknown";
@@ -102,7 +102,7 @@ void NavthonPanel::getSelectedPlannerLabel(const std_msgs::msg::String::SharedPt
     "<td><font color=green>Spline Controller</color></td></tr></table>").c_str()));
 }
 
-void NavthonPanel::getWeatherDetected(const navigo2_msgs::msg::WeatherState::SharedPtr msg){
+void Navigo2Panel::getWeatherDetected(const navigo2_msgs::msg::WeatherState::SharedPtr msg){
     std::string weather = "unknown";
     if(msg->condition == navigo2_msgs::msg::WeatherState::CLEAR){
         weather = "Clear";
@@ -123,4 +123,4 @@ void NavthonPanel::getWeatherDetected(const navigo2_msgs::msg::WeatherState::Sha
 }  // namespace nav2_rviz_plugins
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
-PLUGINLIB_EXPORT_CLASS(navigo2_rviz_plugins::NavthonPanel, rviz_common::Panel)
+PLUGINLIB_EXPORT_CLASS(navigo2_rviz_plugins::Navigo2Panel, rviz_common::Panel)

@@ -36,13 +36,13 @@ namespace navigo2_rviz_plugins
 {
 
 /// Panel to interface to the navigo2 stack
-class NavthonPanel : public rviz_common::Panel
+class Navigo2Panel : public rviz_common::Panel
 {
   Q_OBJECT
 
 public:
-  explicit NavthonPanel(QWidget * parent = 0);
-  virtual ~NavthonPanel();
+  explicit Navigo2Panel(QWidget * parent = 0);
+  virtual ~Navigo2Panel();
   void onInitialize() override;
 
 private:
