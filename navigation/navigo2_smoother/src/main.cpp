@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#include "navigo2_smoother/nav2_smoother.hpp"
+#include "navigo2_smoother/smoother_server.hpp"
 #include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char ** argv)

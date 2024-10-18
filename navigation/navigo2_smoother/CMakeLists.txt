@@ -32,7 +32,7 @@ include_directories(
   include
 )
 
-set(executable_name ecl_smoother_server)
+set(executable_name smoother_server)
 set(library_name ${executable_name}_core)
 
 set(dependencies
@@ -54,7 +54,7 @@ set(dependencies
 
 # Main library
 add_library(${library_name} SHARED
-  src/nav2_smoother.cpp
+  src/smoother_server.cpp
 )
 ament_target_dependencies(${library_name}
   ${dependencies}

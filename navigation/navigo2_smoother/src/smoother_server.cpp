@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "nav2_core/exceptions.hpp"
-#include "navigo2_smoother/nav2_smoother.hpp"
+#include "navigo2_smoother/smoother_server.hpp"
 #include "nav2_util/geometry_utils.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav_2d_utils/conversions.hpp"
@@ -34,9 +34,9 @@ namespace navigo2_smoother
 
 SmootherServer::SmootherServer(const rclcpp::NodeOptions & options)
 : LifecycleNode("smoother_server", "", options),
-  lp_loader_("navigo2_core", "navigo2_core::Smoother"),
-  default_ids_{"simple_smoother"},
-  default_types_{"navigo2_smoother::SimpleSmoother"}
+  lp_loader_("nav2_core", "nav2_core::Smoother"),
+  default_ids_{"SimpleSmoother"},
+  default_types_{"nav2_smoother::SimpleSmoother"}
 {
   RCLCPP_INFO(get_logger(), "Creating smoother server");
 
@@ -126,7 +126,7 @@ bool SmootherServer::loadSmootherPlugins()
     try {
       smoother_types_[i] =
         nav2_util::get_plugin_type_param(node, smoother_ids_[i]);
-      navigo2_core::Smoother::Ptr smoother =
+      nav2_core::Smoother::Ptr smoother =
         lp_loader_.createUniqueInstance(smoother_types_[i]);
       RCLCPP_INFO(
         get_logger(), "Created smoother : %s of type %s",
@@ -136,6 +136,9 @@ bool SmootherServer::loadSmootherPlugins()
         footprint_sub_);
       smoothers_.insert({smoother_ids_[i], smoother});
     } catch (const pluginlib::PluginlibException & ex) {
+      RCLCPP_FATAL(
+        get_logger(), "Test: %s",
+       smoother_ids_[i].c_str());
       RCLCPP_FATAL(
         get_logger(), "Failed to create smoother. Exception: %s",
         ex.what());
@@ -252,13 +255,18 @@ bool SmootherServer::findSmootherId(
 
 void SmootherServer::smoothPlan()
 {
-  auto start_time = steady_clock_.now();
+    auto start_time = this->now();
 
   RCLCPP_INFO(get_logger(), "Received a path to smooth.");
 
   auto result = std::make_shared<Action::Result>();
   try {
-    std::string c_name = action_server_->get_current_goal()->smoother_id;
+    auto goal = action_server_->get_current_goal();
+    if (!goal) {
+      return;  //  if action_server_ is inactivate, goal would be a nullptr
+    }
+
+    std::string c_name = goal->smoother_id;
     std::string current_smoother;
     if (findSmootherId(c_name, current_smoother)) {
       current_smoother_ = current_smoother;
@@ -267,12 +275,12 @@ void SmootherServer::smoothPlan()
       return;
     }
 
+
     // Perform smoothing
-    auto goal = action_server_->get_current_goal();
-    result->smoothed_path = goal->path;
+    result->path = goal->path;
     result->was_completed = smoothers_[current_smoother_]->smooth(
-      result->smoothed_path, goal->max_smoothing_duration);
-    result->smoothing_duration = steady_clock_.now() - start_time;
+      result->path, goal->max_smoothing_duration);
+    result->smoothing_duration = this->now() - start_time;
 
     if (!result->was_completed) {
       RCLCPP_INFO(
@@ -283,13 +291,13 @@ void SmootherServer::smoothPlan()
         rclcpp::Duration(goal->max_smoothing_duration).seconds(),
         rclcpp::Duration(result->smoothing_duration).seconds());
     }
-    plan_publisher_->publish(result->smoothed_path);
+    plan_publisher_->publish(result->path);
 
     // Check for collisions
     if (goal->check_for_collisions) {
       geometry_msgs::msg::Pose2D pose2d;
       bool fetch_data = true;
-      for (const auto & pose : result->smoothed_path.poses) {
+      for (const auto & pose : result->path.poses) {
         pose2d.x = pose.pose.position.x;
         pose2d.y = pose.pose.position.y;
         pose2d.theta = tf2::getYaw(pose.pose.orientation);

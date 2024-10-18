@@ -21,12 +21,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "navigo2_core/smoother.hpp"
+#include "nav2_core/smoother.hpp"
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
 #include "nav2_costmap_2d/costmap_subscriber.hpp"
 #include "nav2_costmap_2d/costmap_topic_collision_checker.hpp"
 #include "nav2_costmap_2d/footprint_subscriber.hpp"
-#include "navigo2_msgs/action/smooth_path.hpp"
+#include "nav2_msgs/action/smooth_path.hpp"
 #include "nav2_msgs/action/smooth_path.hpp"
 #include "nav2_util/lifecycle_node.hpp"
 #include "nav2_util/robot_utils.hpp"
@@ -45,7 +45,7 @@ namespace navigo2_smoother
 class SmootherServer : public nav2_util::LifecycleNode
 {
 public:
-  using SmootherMap = std::unordered_map<std::string, navigo2_core::Smoother::Ptr>;
+  using SmootherMap = std::unordered_map<std::string, nav2_core::Smoother::Ptr>;
 
   /**
    * @brief A constructor for navigo2_smoother::SmootherServer
@@ -113,7 +113,7 @@ protected:
    */
   nav2_util::CallbackReturn on_shutdown(const rclcpp_lifecycle::State & state) override;
 
-  using Action = navigo2_msgs::action::SmoothPath;
+  using Action = nav2_msgs::action::SmoothPath;
   using ActionServer = nav2_util::SimpleActionServer<Action>;
 
   /**
@@ -146,7 +146,7 @@ protected:
   rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr plan_publisher_;
 
   // Smoother Plugins
-  pluginlib::ClassLoader<navigo2_core::Smoother> lp_loader_;
+  pluginlib::ClassLoader<nav2_core::Smoother> lp_loader_;
   SmootherMap smoothers_;
   std::vector<std::string> default_ids_;
   std::vector<std::string> default_types_;
