@@ -59,6 +59,9 @@ BtActionServer<ActionT>::BtActionServer(
   if (!node->has_parameter("default_server_timeout")) {
     node->declare_parameter("default_server_timeout", 20);
   }
+  if (!node->has_parameter("groot_port")) {
+    node->declare_parameter("groot_port", 1667);
+  }
 }
 
 template<class ActionT>
@@ -99,6 +102,8 @@ bool BtActionServer<ActionT>::on_configure()
   node->get_parameter("bt_loop_duration", timeout);
   bt_loop_duration_ = std::chrono::milliseconds(timeout);
   node->get_parameter("default_server_timeout", timeout);
+  node->get_parameter("groot_port", port_);
+  RCLCPP_INFO(logger_, "Port for Groot2 %d", port_);
   default_server_timeout_ = std::chrono::milliseconds(timeout);
 
   // Create the class that registers our custom nodes and executes the BT
@@ -174,6 +179,7 @@ bool BtActionServer<ActionT>::loadBehaviorTree(const std::string & bt_xml_filena
   // Create the Behavior Tree from the XML input
   try {
     tree_ = bt_->createTreeFromText(xml_string, blackboard_);
+    groot_publisher_ = std::make_unique<BT::Groot2Publisher>(tree_, port_);
   } catch (const std::exception & e) {
     RCLCPP_ERROR(logger_, "Exception when loading BT: %s", e.what());
     return false;
