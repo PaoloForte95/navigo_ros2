@@ -143,7 +143,10 @@ protected:
   std::shared_ptr<tf2_ros::TransformListener> transform_listener_;
 
   // Publishers and subscribers
+  std::string output_topic_;
   rclcpp_lifecycle::LifecyclePublisher<nav_msgs::msg::Path>::SharedPtr plan_publisher_;
+  std::shared_ptr<nav2_costmap_2d::CostmapSubscriber> costmap_sub_;
+  std::shared_ptr<nav2_costmap_2d::FootprintSubscriber> footprint_sub_;
 
   // Smoother Plugins
   pluginlib::ClassLoader<nav2_core::Smoother> lp_loader_;
@@ -155,8 +158,6 @@ protected:
   std::string smoother_ids_concat_, current_smoother_;
 
   // Utilities
-  std::shared_ptr<nav2_costmap_2d::CostmapSubscriber> costmap_sub_;
-  std::shared_ptr<nav2_costmap_2d::FootprintSubscriber> footprint_sub_;
   std::shared_ptr<nav2_costmap_2d::CostmapTopicCollisionChecker> collision_checker_;
 
   rclcpp::Clock steady_clock_;

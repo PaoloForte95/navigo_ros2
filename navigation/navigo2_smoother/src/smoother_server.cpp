@@ -53,6 +53,7 @@ SmootherServer::SmootherServer(const rclcpp::NodeOptions & options)
     rclcpp::ParameterValue(std::string("base_link")));
   declare_parameter("transform_tolerance", rclcpp::ParameterValue(0.1));
   declare_parameter("smoother_plugins", default_ids_);
+  declare_parameter("output_topic", "/smoothed_path");
 }
 
 SmootherServer::~SmootherServer()
@@ -88,6 +89,8 @@ SmootherServer::on_configure(const rclcpp_lifecycle::State &)
   this->get_parameter("footprint_topic", footprint_topic);
   this->get_parameter("transform_tolerance", transform_tolerance);
   this->get_parameter("robot_base_frame", robot_base_frame);
+  this->get_parameter("output_topic", output_topic_);
+
   costmap_sub_ = std::make_shared<nav2_costmap_2d::CostmapSubscriber>(
     shared_from_this(), costmap_topic);
   footprint_sub_ = std::make_shared<nav2_costmap_2d::FootprintSubscriber>(
@@ -102,7 +105,7 @@ SmootherServer::on_configure(const rclcpp_lifecycle::State &)
   }
 
   // Initialize pubs & subs
-  plan_publisher_ = create_publisher<nav_msgs::msg::Path>("plan_smoothed", 1);
+  plan_publisher_ = create_publisher<nav_msgs::msg::Path>(output_topic_, 1);
 
   // Create the action server that we implement with our smoothPath method
   action_server_ = std::make_unique<ActionServer>(
