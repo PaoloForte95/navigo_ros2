@@ -1,0 +1,9 @@
+
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="Sequence">
+      <ComputePathToPose goal="{goal}" start="{start}" path="{path}" planner_id="PlannerHybrid"/>
+       <SmoothPath unsmoothed_path="{path}" smoothed_path="{path}" smoother_id="SplineSmoother"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

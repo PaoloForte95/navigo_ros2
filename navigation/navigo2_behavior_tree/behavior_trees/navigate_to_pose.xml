@@ -1,0 +1,16 @@
+
+<root BTCPP_format="4" main_tree_to_execute="NavigationTree">
+
+  <BehaviorTree ID="NavigationTree">
+      <PipelineSequence name="Navigation">
+        <RateController hz="1.0">
+           <Sequence name="Sequence">
+            <ComputePathToPose goal="{goal}" start="{start}" path="{path}" planner_id="PlannerLattice"/>
+            <SmoothPath unsmoothed_path="{path}" smoothed_path="{smoothed_path}" smoother_id="SplineSmoother"/>
+            </Sequence>
+        </RateController>
+          <FollowPath path="{smoothed_path}" controller_id="FollowSpline"/>
+      </PipelineSequence>
+  </BehaviorTree>
+
+</root>
