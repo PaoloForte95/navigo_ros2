@@ -98,7 +98,7 @@ class WeahterDetectionService(Node):
         self.namespace = self.get_parameter("namespace").get_parameter_value().string_value
         self.service_name = self.get_parameter("service_name").get_parameter_value().string_value
         self.srv = self.create_service(GetWeatherCondition, self.namespace+'/'+ self.service_name, self.get_weather_condition_callback)
-        self.module_path = os.getcwd() + "/src/navigo_ros2/navigation/navigo2_weather_detection"
+        self.module_path = os.getcwd() + "/src/navigo_ros2/sensing/navigo2_weather_detection"
         self.bridge = CvBridge()
 
     def get_weather_condition_callback(self, request, response):

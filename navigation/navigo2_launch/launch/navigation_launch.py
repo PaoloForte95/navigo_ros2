@@ -117,7 +117,7 @@ def generate_launch_description():
     
     declare_default_nav_through_poses_bt_xml_cmd = DeclareLaunchArgument(
             'default_nav_through_poses_bt_xml', 
-            default_value= os.path.join(bt_dir, 'behavior_trees', 'plan_to_pose.xml'),
+            default_value= os.path.join(bt_dir, 'behavior_trees', 'navigate_to_pose_w_replanning_and_recovery.xml'),
             description='Full path to the behavior tree xml file to use')
 
 
