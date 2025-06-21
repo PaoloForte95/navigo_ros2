@@ -21,7 +21,7 @@
 #include "std_msgs/msg/int32.hpp"
 #include "tf2_ros/buffer.h"
 
-#include "behaviortree_cpp_v3/decorator_node.h"
+#include "behaviortree_cpp/decorator_node.h"
 
 
 namespace navigo2{

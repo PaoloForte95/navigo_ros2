@@ -24,9 +24,9 @@
 #include "tf2_ros/buffer.h"
 
 
-#include "behaviortree_cpp_v3/decorator_node.h"
+#include "behaviortree_cpp/decorator_node.h"
 
-#include <nav2_costmap_2d/array_parser.hpp>
+#include <nav2_util/array_parser.hpp>
 
 #include "navigo2_behavior_tree/plugins/decorator/distance_to_waypoints_controller.hpp"
 
@@ -56,7 +56,7 @@ DistanceToWaypointsController::DistanceToWaypointsController(
 
 
 std::string error = "The waypoint (parameter %s) must be specified as list of lists eg: ""[[x1, y1], [x2, y2], ..., [xn, yn]], but this spec is not of that form.";
-auto vertices_front = nav2_costmap_2d::parseVVF(waypoints_string_,error);
+auto vertices_front = nav2_util::parseVVF(waypoints_string_,error);
 for (int i = 0; i < vertices_front.size(); ++i)
     {
        // Make sure each element of the list is an array of size 2. (x and y coordinates)
@@ -187,7 +187,7 @@ inline BT::NodeStatus DistanceToWaypointsController::tick()
 }
 }  
 
-#include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
   factory.registerNodeType<navigo2::behavior_tree::DistanceToWaypointsController>("DistanceToWaypointsController");

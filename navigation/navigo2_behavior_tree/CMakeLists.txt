@@ -30,7 +30,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(nav2_util REQUIRED)
-find_package(behaviortree_cpp_v3 REQUIRED)
+find_package(behaviortree_cpp REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(navigo2_msgs REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
@@ -49,7 +49,7 @@ set(dependencies
   geometry_msgs
   nav2_msgs
   navigo2_msgs
-  behaviortree_cpp_v3
+  behaviortree_cpp
   tf2
   tf2_ros
   tf2_geometry_msgs

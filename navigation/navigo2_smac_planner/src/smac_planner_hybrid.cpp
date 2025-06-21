@@ -154,7 +154,7 @@ void SmacPlannerHybrid::cleanup()
 
 nav_msgs::msg::Path SmacPlannerHybrid::createPlan(
   const geometry_msgs::msg::PoseStamped & start,
-  const geometry_msgs::msg::PoseStamped & goal)
+  const geometry_msgs::msg::PoseStamped & goal, std::function<bool()> cancel_checker)
 {
   RCLCPP_INFO(logger_, "Computing Global Plan with Lattice-Based Algorithm");
   std::lock_guard<std::mutex> lock_reinit(mutex_);

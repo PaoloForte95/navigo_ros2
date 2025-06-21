@@ -20,7 +20,7 @@
 #include <mutex>
 
 #include "rclcpp/rclcpp.hpp"
-#include "behaviortree_cpp_v3/condition_node.h"
+#include "behaviortree_cpp/condition_node.h"
 
 namespace navigo2{
 namespace behavior_tree{

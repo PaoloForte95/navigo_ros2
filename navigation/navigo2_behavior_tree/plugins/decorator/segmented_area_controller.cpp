@@ -23,10 +23,9 @@
 #include "tf2_ros/buffer.h"
 
 
-#include "behaviortree_cpp_v3/decorator_node.h"
+#include "behaviortree_cpp/decorator_node.h"
 
-#include <nav2_costmap_2d/array_parser.hpp>
-
+#include <nav2_util/array_parser.hpp>
 #include "navigo2_behavior_tree/plugins/decorator/segmented_area_controller.hpp"
 
 namespace navigo2{
@@ -122,7 +121,7 @@ void SegmentedAreaController::AreaStateCallback(std_msgs::msg::Int32::SharedPtr 
 }
 }  
 
-#include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
   factory.registerNodeType<navigo2::behavior_tree::SegmentedAreaController>("SegmentedAreaController");
